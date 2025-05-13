@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, MapPin, Star, Clock, Users, CalendarDays } from 'lucide-react';
+import { Search, Filter, MapPin, Star, Clock, Users, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Mock data for soccer fields
 const mockFields = [
   {
     id: 1,
@@ -78,6 +77,8 @@ const mockFields = [
   }
 ];
 
+const ITEMS_PER_PAGE = 6;
+
 const Fields: React.FC = () => {
   const [filters, setFilters] = useState({
     location: '',
@@ -88,7 +89,52 @@ const Fields: React.FC = () => {
   });
   
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
+  const filteredFields = useMemo(() => {
+    let result = [...mockFields];
+    
+    if (filters.location) {
+      result = result.filter(field => 
+        field.location.toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+    
+    if (filters.fieldType) {
+      result = result.filter(field => field.type === filters.fieldType);
+    }
+    
+    if (filters.priceRange) {
+      switch (filters.priceRange) {
+        case 'low':
+          result = result.filter(field => field.price < 9000);
+          break;
+        case 'medium':
+          result = result.filter(field => field.price >= 9000 && field.price <= 15000);
+          break;
+        case 'high':
+          result = result.filter(field => field.price > 15000);
+          break;
+      }
+    }
+    
+    if (filters.amenities.length > 0) {
+      result = result.filter(field =>
+        filters.amenities.every(amenity =>
+          field.amenities.includes(amenity)
+        )
+      );
+    }
+    
+    return result;
+  }, [filters]);
+
+  const totalPages = Math.ceil(filteredFields.length / ITEMS_PER_PAGE);
+  const paginatedFields = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredFields.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredFields, currentPage]);
+
   const toggleAmenity = (amenity: string) => {
     setFilters(prev => {
       const amenities = [...prev.amenities];
@@ -104,8 +150,94 @@ const Fields: React.FC = () => {
         };
       }
     });
+    setCurrentPage(1);
   };
-  
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPaginationButton = (page: number) => (
+    <button
+      key={page}
+      onClick={() => handlePageChange(page)}
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+        currentPage === page
+          ? 'bg-emerald-600 text-white'
+          : 'text-gray-700 hover:bg-gray-100'
+      }`}
+    >
+      {page}
+    </button>
+  );
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(renderPaginationButton(i));
+      }
+    } else {
+      pages.push(renderPaginationButton(1));
+
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+
+      if (currentPage <= 2) {
+        end = 4;
+      } else if (currentPage >= totalPages - 1) {
+        start = totalPages - 3;
+      }
+
+      if (start > 2) {
+        pages.push(
+          <span key="ellipsis-1" className="px-3 py-2 text-gray-500">
+            ...
+          </span>
+        );
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(renderPaginationButton(i));
+      }
+
+      if (end < totalPages - 1) {
+        pages.push(
+          <span key="ellipsis-2" className="px-3 py-2 text-gray-500">
+            ...
+          </span>
+        );
+      }
+
+      if (totalPages > 1) {
+        pages.push(renderPaginationButton(totalPages));
+      }
+    }
+
+    return (
+      <div className="flex items-center justify-center space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        {pages}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-6 pb-12">
       <div className="container mx-auto px-4">
@@ -114,7 +246,6 @@ const Fields: React.FC = () => {
           <p className="text-gray-600">Encuentra y reserva la cancha perfecta para tu partido</p>
         </div>
         
-        {/* Search and Filter Bar */}
         <div className="bg-white rounded-xl shadow-md p-4 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
@@ -166,7 +297,6 @@ const Fields: React.FC = () => {
             </div>
           </div>
           
-          {/* Mobile Filters */}
           {showFiltersMobile && (
             <div className="mt-4 md:hidden border-t border-gray-200 pt-4">
               <div className="grid grid-cols-2 gap-4">
@@ -221,7 +351,6 @@ const Fields: React.FC = () => {
         </div>
         
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Desktop Filters */}
           <div className="hidden md:block w-64 bg-white rounded-xl shadow-md p-4 self-start sticky top-20">
             <h2 className="font-semibold text-lg text-gray-900 mb-4">Filtros</h2>
             
@@ -295,109 +424,97 @@ const Fields: React.FC = () => {
             </div>
           </div>
           
-          {/* Field Listings */}
           <div className="flex-grow">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockFields.map((field) => (
-                <div key={field.id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="relative h-48">
-                    <img 
-                      src={field.image} 
-                      alt={field.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      {field.type}
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-xl font-semibold text-gray-800">{field.name}</h3>
-                      <div className="flex items-center">
-                        <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                        <span className="text-gray-700 font-medium ml-1">{field.rating}</span>
+            {paginatedFields.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedFields.map((field) => (
+                    <div key={field.id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                      <div className="relative h-48">
+                        <img 
+                          src={field.image} 
+                          alt={field.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                        <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          {field.type}
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-xl font-semibold text-gray-800">{field.name}</h3>
+                          <div className="flex items-center">
+                            <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                            <span className="text-gray-700 font-medium ml-1">{field.rating}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-gray-600 mb-4">
+                          <MapPin className="h-5 w-5 mr-2 text-gray-500" />
+                          <span>{field.location}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {field.amenities.slice(0, 3).map((amenity, index) => (
+                            <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                              {amenity}
+                            </span>
+                          ))}
+                          {field.amenities.length > 3 && (
+                            <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                              +{field.amenities.length - 3}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center text-gray-600">
+                            <Clock className="h-5 w-5 mr-2 text-gray-500" />
+                            <span>{field.duration} min</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <Users className="h-5 w-5 mr-2 text-gray-500" />
+                            <span>{field.players}</span>
+                          </div>
+                          <span className="text-emerald-600 font-bold text-xl">${field.price.toLocaleString()}</span>
+                        </div>
+                        <Link
+                          to={`/fields/${field.id}`}
+                          className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-center font-semibold py-3 rounded-lg transition-colors"
+                        >
+                          Ver Disponibilidad
+                        </Link>
                       </div>
                     </div>
-                    <div className="flex items-center text-gray-600 mb-4">
-                      <MapPin className="h-5 w-5 mr-2 text-gray-500" />
-                      <span>{field.location}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {field.amenities.slice(0, 3).map((amenity, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                          {amenity}
-                        </span>
-                      ))}
-                      {field.amenities.length > 3 && (
-                        <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                          +{field.amenities.length - 3}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center text-gray-600">
-                        <Clock className="h-5 w-5 mr-2 text-gray-500" />
-                        <span>{field.duration} min</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <Users className="h-5 w-5 mr-2 text-gray-500" />
-                        <span>{field.players}</span>
-                      </div>
-                      <span className="text-emerald-600 font-bold text-xl">${field.price.toLocaleString()}</span>
-                    </div>
-                    <Link
-                      to={`/fields/${field.id}`}
-                      className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-center font-semibold py-3 rounded-lg transition-colors"
-                    >
-                      Ver Disponibilidad
-                    </Link>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            
-            {/* Pagination */}
-            <div className="mt-8 flex justify-center">
-              <nav className="flex items-center">
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                
+                <div className="mt-8 space-y-6">
+                  <p className="text-center text-gray-600">
+                    Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} a{' '}
+                    {Math.min(currentPage * ITEMS_PER_PAGE, filteredFields.length)} de{' '}
+                    {filteredFields.length} canchas
+                  </p>
+                  {totalPages > 1 && renderPagination()}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg">No se encontraron canchas que coincidan con los filtros seleccionados.</p>
+                <button
+                  onClick={() => {
+                    setFilters({
+                      location: '',
+                      date: '',
+                      fieldType: '',
+                      priceRange: '',
+                      amenities: []
+                    });
+                    setCurrentPage(1);
+                  }}
+                  className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
                 >
-                  Anterior
-                </a>
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md bg-emerald-600 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  1
-                </a>
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  2
-                </a>
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  3
-                </a>
-                <span className="px-3 py-1 text-gray-500">...</span>
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  8
-                </a>
-                <a
-                  href="#"
-                  className="px-3 py-1 rounded-md text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  Siguiente
-                </a>
-              </nav>
-            </div>
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

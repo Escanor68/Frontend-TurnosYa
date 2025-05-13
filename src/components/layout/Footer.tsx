@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           <div className="col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <Soccer className="w-8 h-8 text-emerald-500" />
-              <span className="text-xl font-bold">FútbolYa</span>
+              <span className="text-xl font-bold">TurnosYa</span>
             </div>
             <p className="text-gray-400 mb-4">
               La forma más fácil de encontrar y reservar canchas de fútbol en tu ciudad.
@@ -94,7 +94,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500">
-          <p>&copy; {new Date().getFullYear()} FútbolYa. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} TurnosYa. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

@@ -1,42 +1,44 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Users, Calendar, DollarSign, Settings, AlertTriangle } from 'lucide-react';
+"use client"
+
+import React from "react"
+import { useAuth } from "../context/AuthContext"
+import { useNavigate } from "react-router-dom"
+import { Users, Calendar, DollarSign, Settings, AlertTriangle } from "lucide-react"
 
 const AdminDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   // Redirect if not admin
   React.useEffect(() => {
     if (!user?.isAdmin) {
-      navigate('/');
+      navigate("/")
     }
-  }, [user, navigate]);
+  }, [user, navigate])
 
   if (!user?.isAdmin) {
-    return null;
+    return null
   }
 
   const stats = [
-    { name: 'Reservas Totales', value: '156', icon: Calendar, change: '+12.5%', changeType: 'increase' },
-    { name: 'Usuarios Activos', value: '2,345', icon: Users, change: '+5.2%', changeType: 'increase' },
-    { name: 'Ingresos Mensuales', value: '$45,678', icon: DollarSign, change: '+8.1%', changeType: 'increase' },
-    { name: 'Canchas Activas', value: '24', icon: Settings, change: '0', changeType: 'neutral' },
-  ];
+    { name: "Reservas Totales", value: "156", icon: Calendar, change: "+12.5%", changeType: "increase" },
+    { name: "Usuarios Activos", value: "2,345", icon: Users, change: "+5.2%", changeType: "increase" },
+    { name: "Ingresos Mensuales", value: "$45,678", icon: DollarSign, change: "+8.1%", changeType: "increase" },
+    { name: "Canchas Activas", value: "24", icon: Settings, change: "0", changeType: "neutral" },
+  ]
 
   const recentBookings = [
-    { id: 1, user: 'Juan Pérez', field: 'Cancha 1', date: '2025-03-15', time: '18:00', status: 'confirmed' },
-    { id: 2, user: 'María García', field: 'Cancha 3', date: '2025-03-15', time: '19:00', status: 'pending' },
-    { id: 3, user: 'Carlos López', field: 'Cancha 2', date: '2025-03-16', time: '20:00', status: 'confirmed' },
-    { id: 4, user: 'Ana Martínez', field: 'Cancha 1', date: '2025-03-16', time: '21:00', status: 'cancelled' },
-  ];
+    { id: 1, user: "Juan Pérez", field: "Cancha 1", date: "2025-03-15", time: "18:00", status: "confirmed" },
+    { id: 2, user: "María García", field: "Cancha 3", date: "2025-03-15", time: "19:00", status: "pending" },
+    { id: 3, user: "Carlos López", field: "Cancha 2", date: "2025-03-16", time: "20:00", status: "confirmed" },
+    { id: 4, user: "Ana Martínez", field: "Cancha 1", date: "2025-03-16", time: "21:00", status: "cancelled" },
+  ]
 
   const alerts = [
-    { id: 1, message: 'Mantenimiento programado para Cancha 2 el 20/03', severity: 'warning' },
-    { id: 2, message: 'Alta demanda de reservas para el fin de semana', severity: 'info' },
-    { id: 3, message: 'Actualización de precios pendiente', severity: 'warning' },
-  ];
+    { id: 1, message: "Mantenimiento programado para Cancha 2 el 20/03", severity: "warning" },
+    { id: 2, message: "Alta demanda de reservas para el fin de semana", severity: "info" },
+    { id: 3, message: "Actualización de precios pendiente", severity: "warning" },
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -49,25 +51,29 @@ const AdminDashboard: React.FC = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => {
-            const Icon = stat.icon;
+            const Icon = stat.icon
             return (
               <div key={stat.name} className="bg-white rounded-xl shadow-md p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-2 bg-emerald-100 rounded-lg">
                     <Icon className="h-6 w-6 text-emerald-600" />
                   </div>
-                  <span className={`text-sm font-medium ${
-                    stat.changeType === 'increase' ? 'text-green-600' : 
-                    stat.changeType === 'decrease' ? 'text-red-600' : 
-                    'text-gray-600'
-                  }`}>
+                  <span
+                    className={`text-sm font-medium ${
+                      stat.changeType === "increase"
+                        ? "text-green-600"
+                        : stat.changeType === "decrease"
+                          ? "text-red-600"
+                          : "text-gray-600"
+                    }`}
+                  >
                     {stat.change}
                   </span>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
                 <p className="text-gray-600">{stat.name}</p>
               </div>
-            );
+            )
           })}
         </div>
 
@@ -95,11 +101,15 @@ const AdminDashboard: React.FC = () => {
                         <td className="py-3 px-4">{booking.date}</td>
                         <td className="py-3 px-4">{booking.time}</td>
                         <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              booking.status === "confirmed"
+                                ? "bg-green-100 text-green-800"
+                                : booking.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
+                          >
                             {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                           </span>
                         </td>
@@ -109,9 +119,7 @@ const AdminDashboard: React.FC = () => {
                 </table>
               </div>
               <div className="mt-4 text-right">
-                <button className="text-emerald-600 hover:text-emerald-700 font-medium">
-                  Ver todas las reservas
-                </button>
+                <button className="text-emerald-600 hover:text-emerald-700 font-medium">Ver todas las reservas</button>
               </div>
             </div>
           </div>
@@ -125,31 +133,29 @@ const AdminDashboard: React.FC = () => {
                   <div
                     key={alert.id}
                     className={`p-4 rounded-lg flex items-start ${
-                      alert.severity === 'warning' ? 'bg-yellow-50' : 'bg-blue-50'
+                      alert.severity === "warning" ? "bg-yellow-50" : "bg-blue-50"
                     }`}
                   >
-                    <AlertTriangle className={`h-5 w-5 ${
-                      alert.severity === 'warning' ? 'text-yellow-400' : 'text-blue-400'
-                    } mr-3 flex-shrink-0 mt-0.5`} />
-                    <p className={`text-sm ${
-                      alert.severity === 'warning' ? 'text-yellow-700' : 'text-blue-700'
-                    }`}>
+                    <AlertTriangle
+                      className={`h-5 w-5 ${
+                        alert.severity === "warning" ? "text-yellow-400" : "text-blue-400"
+                      } mr-3 flex-shrink-0 mt-0.5`}
+                    />
+                    <p className={`text-sm ${alert.severity === "warning" ? "text-yellow-700" : "text-blue-700"}`}>
                       {alert.message}
                     </p>
                   </div>
                 ))}
               </div>
               <div className="mt-4 text-right">
-                <button className="text-emerald-600 hover:text-emerald-700 font-medium">
-                  Ver todas las alertas
-                </button>
+                <button className="text-emerald-600 hover:text-emerald-700 font-medium">Ver todas las alertas</button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminDashboard;
+export default AdminDashboard

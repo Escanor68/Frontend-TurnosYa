@@ -213,7 +213,7 @@ const Home: React.FC = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Lo que dicen nuestros usuarios</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Miles de jugadores ya están usando FútbolYa para sus partidos semanales.
+              Miles de jugadores ya están usando TurnosYa para sus partidos semanales.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
