@@ -109,7 +109,6 @@ const getFieldData = (id: string) => {
 const paymentMethods = [
   { id: "mercadopago", name: "Mercado Pago", icon: "💳" },
   { id: "transfer", name: "Transferencia Bancaria", icon: "🏦" },
-  { id: "cash", name: "Efectivo en el lugar", icon: "💵" },
 ]
 
 const Booking: React.FC = () => {
@@ -578,6 +577,9 @@ const Booking: React.FC = () => {
                       </span>
                     </label>
                   </div>
+                  <p className="text-center text-sm text-gray-600 mb-4">
+                    Se realizará un cargo del 10% del valor total a través de Mercado Pago o Transferencia Bancaria
+                  </p>
                 </div>
               )}
 

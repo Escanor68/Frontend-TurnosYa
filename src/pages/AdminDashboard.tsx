@@ -1,6 +1,6 @@
 import React from "react"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { Users, Calendar, DollarSign, Settings, AlertTriangle } from "lucide-react"
 
 const AdminDashboard: React.FC = () => {
@@ -117,7 +117,9 @@ const AdminDashboard: React.FC = () => {
                 </table>
               </div>
               <div className="mt-4 text-right">
-                <button className="text-emerald-600 hover:text-emerald-700 font-medium">Ver todas las reservas</button>
+                <Link to="/manage-fields" className="text-emerald-600 hover:text-emerald-700 font-medium">
+                  Gestionar Canchas
+                </Link>
               </div>
             </div>
           </div>

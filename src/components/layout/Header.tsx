@@ -66,6 +66,15 @@ const Header: React.FC = () => {
                       Panel de Admin
                     </Link>
                   )}
+                  {user?.hasFields && (
+                    <Link
+                      to="/manage-fields"
+                      className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Administrar Canchas
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
@@ -130,6 +139,15 @@ const Header: React.FC = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Panel de Admin
+                  </Link>
+                )}
+                {user?.hasFields && (
+                  <Link
+                    to="/manage-fields"
+                    className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Administrar Canchas
                   </Link>
                 )}
                 <button

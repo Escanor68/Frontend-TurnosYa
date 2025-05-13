@@ -7,6 +7,7 @@ interface User {
   name: string
   email: string
   isAdmin: boolean
+  hasFields: boolean
 }
 
 interface AuthContextType {
@@ -56,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: "Administrador",
           email: "admin@example.com",
           isAdmin: true,
+          hasFields: false,
         }
 
         setUser(adminUser)
@@ -70,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: "Demo User",
           email: "demo@example.com",
           isAdmin: false,
+          hasFields: true,
         }
 
         setUser(userData)
@@ -94,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name,
         email,
         isAdmin: false,
+        hasFields: false,
       }
 
       setUser(userData)
