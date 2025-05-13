@@ -1,18 +1,22 @@
 import type React from "react"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { Mail, Lock, User, ClubIcon as Soccer } from "lucide-react"
+import { Mail, Lock, User, Building2, ClubIcon as Soccer, CreditCard, Phone } from "lucide-react"
 import { toast } from "react-toastify"
 import { useAuth } from "../context/AuthContext"
 
 const Register: React.FC = () => {
   const navigate = useNavigate()
   const { register } = useAuth()
+  const [userType, setUserType] = useState<'player' | 'owner'>('player')
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
+    businessName: "",
+    taxId: "",
   })
   const [loading, setLoading] = useState(false)
 
@@ -27,6 +31,11 @@ const Register: React.FC = () => {
     e.preventDefault()
     if (formData.password !== formData.confirmPassword) {
       toast.error("Las contraseñas no coinciden")
+      return
+    }
+
+    if (userType === 'owner' && (!formData.businessName || !formData.taxId)) {
+      toast.error("Por favor completa todos los campos requeridos")
       return
     }
 
@@ -64,6 +73,38 @@ const Register: React.FC = () => {
         </div>
 
         <div className="bg-white py-8 px-6 shadow rounded-lg">
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de cuenta</label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setUserType('player')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  userType === 'player'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-300 hover:border-emerald-600'
+                }`}
+              >
+                <User className="h-6 w-6 mx-auto mb-2" />
+                <span className="block font-medium">Jugador</span>
+                <span className="text-sm text-gray-500">Quiero reservar canchas</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserType('owner')}
+                className={`p-4 border rounded-lg text-center transition-colors ${
+                  userType === 'owner'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-300 hover:border-emerald-600'
+                }`}
+              >
+                <Building2 className="h-6 w-6 mx-auto mb-2" />
+                <span className="block font-medium">Propietario</span>
+                <span className="text-sm text-gray-500">Tengo canchas para alquilar</span>
+              </button>
+            </div>
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -109,6 +150,71 @@ const Register: React.FC = () => {
             </div>
 
             <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Teléfono
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="11-1234-5678"
+                />
+              </div>
+            </div>
+
+            {userType === 'owner' && (
+              <>
+                <div>
+                  <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
+                    Nombre del complejo o empresa
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Building2 className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="businessName"
+                      name="businessName"
+                      type="text"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Nombre de tu complejo deportivo"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="taxId" className="block text-sm font-medium text-gray-700">
+                    CUIT/RUT
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <CreditCard className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="taxId"
+                      name="taxId"
+                      type="text"
+                      value={formData.taxId}
+                      onChange={handleChange}
+                      className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="XX-XXXXXXXX-X"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Contraseña
               </label>
@@ -150,6 +256,26 @@ const Register: React.FC = () => {
                   placeholder="********"
                 />
               </div>
+            </div>
+
+            <div className="flex items-start">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                required
+                className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+                Acepto los{" "}
+                <a href="#" className="text-emerald-600 hover:text-emerald-500">
+                  términos y condiciones
+                </a>{" "}
+                y la{" "}
+                <a href="#" className="text-emerald-600 hover:text-emerald-500">
+                  política de privacidad
+                </a>
+              </label>
             </div>
 
             <div>
