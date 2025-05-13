@@ -1,5 +1,3 @@
-"use client"
-
 import Fields from "../src/pages/Fields"
 import { useState } from "react"
 
