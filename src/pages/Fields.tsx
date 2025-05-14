@@ -54,3 +54,5 @@ const filteredFields = useMemo(() => {
   <option value="Fútbol 7">Fútbol 7</option>
   <option value="Fútbol 11">Fútbol 11</option>
 </select>
+
+export default filteredFields
