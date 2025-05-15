@@ -4,18 +4,18 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
-import { Plus, Edit2, Trash2, X, MapPin, DollarSign, Users, Clock, AlertTriangle, Search, Check } from "lucide-react"
+import { Plus, Edit2, Trash2, X, MapPin, DollarSign, Users, Clock, AlertTriangle, Search, Check } from 'lucide-react'
 import { toast } from "react-toastify"
 
-// Types
+// Modificar la interfaz Field para eliminar neighborhood
 interface Field {
   id: number
   name: string
   type: string
   location: {
     address: string
-    neighborhood: string
     city: string
+    province: string
   }
   price: number
   duration: number
@@ -29,7 +29,7 @@ const AdminFieldManagement: React.FC = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  // Mock data for fields
+  // Actualizar los datos mock para quitar neighborhood y añadir province
   const [fields, setFields] = useState<Field[]>([
     {
       id: 1,
@@ -37,8 +37,8 @@ const AdminFieldManagement: React.FC = () => {
       type: "Fútbol 5",
       location: {
         address: "Av. Siempreviva 742",
-        neighborhood: "Palermo",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 8000,
       duration: 60,
@@ -54,8 +54,8 @@ const AdminFieldManagement: React.FC = () => {
       type: "Tenis",
       location: {
         address: "Calle Falsa 123",
-        neighborhood: "Belgrano",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 12000,
       duration: 90,
@@ -71,8 +71,8 @@ const AdminFieldManagement: React.FC = () => {
       type: "Padel",
       location: {
         address: "Avenida Siempre Viva 742",
-        neighborhood: "Recoleta",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 10000,
       duration: 60,
@@ -87,13 +87,14 @@ const AdminFieldManagement: React.FC = () => {
   const [editingField, setEditingField] = useState<Field | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  // Actualizar el estado inicial de newField
   const [newField, setNewField] = useState<Omit<Field, "id">>({
     name: "",
     type: "Fútbol 5",
     location: {
       address: "",
-      neighborhood: "",
       city: "",
+      province: "",
     },
     price: 0,
     duration: 60,
@@ -147,8 +148,8 @@ const AdminFieldManagement: React.FC = () => {
       type: "Fútbol 5",
       location: {
         address: "",
-        neighborhood: "",
         city: "",
+        province: "",
       },
       price: 0,
       duration: 60,
@@ -165,7 +166,6 @@ const AdminFieldManagement: React.FC = () => {
     (field) =>
       field.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       field.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      field.location.neighborhood.toLowerCase().includes(searchTerm.toLowerCase()) ||
       field.location.city.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
@@ -181,6 +181,9 @@ const AdminFieldManagement: React.FC = () => {
     const [formData, setFormData] = useState(field)
     const [newAmenity, setNewAmenity] = useState("")
 
+    // Modificar la parte donde se autocompletan los datos del usuario
+    // Actualizar para usar province en lugar de neighborhood
+
     // Autocompletar campos con datos del usuario cuando se crea un nuevo campo
     useEffect(() => {
       if (isNew && !userDataLoaded && user) {
@@ -188,8 +191,8 @@ const AdminFieldManagement: React.FC = () => {
         // Por ahora usamos datos de ejemplo
         const userData = {
           address: "Av. Principal 123",
-          neighborhood: "Centro",
           city: "Buenos Aires",
+          province: "CABA",
         }
 
         setFormData((prev) => ({
@@ -197,8 +200,8 @@ const AdminFieldManagement: React.FC = () => {
           location: {
             ...prev.location,
             address: userData.address,
-            neighborhood: userData.neighborhood,
             city: userData.city,
+            province: userData.province,
           },
         }))
 
@@ -215,6 +218,10 @@ const AdminFieldManagement: React.FC = () => {
         if (value === "Fútbol 5") players = "5 vs 5"
         else if (value === "Fútbol 7") players = "7 vs 7"
         else if (value === "Fútbol 11") players = "11 vs 11"
+        else if (value === "Tenis") players = "2 vs 2"
+        else if (value === "Padel") players = "2 vs 2"
+        else if (value === "Basquet") players = "5 vs 5"
+        else if (value === "Voley") players = "6 vs 6"
 
         setFormData({
           ...formData,
@@ -284,6 +291,10 @@ const AdminFieldManagement: React.FC = () => {
               <option value="Fútbol 5">Fútbol 5</option>
               <option value="Fútbol 7">Fútbol 7</option>
               <option value="Fútbol 11">Fútbol 11</option>
+              <option value="Tenis">Tenis</option>
+              <option value="Padel">Padel</option>
+              <option value="Basquet">Basquet</option>
+              <option value="Voley">Voley</option>
             </select>
           </div>
 
@@ -300,10 +311,11 @@ const AdminFieldManagement: React.FC = () => {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
             <input
               type="text"
-              name="location.neighborhood"
-              value={formData.location.neighborhood}
+              name="location.city"
+              value={formData.location.city}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
               required
@@ -311,11 +323,11 @@ const AdminFieldManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
             <input
               type="text"
-              name="location.city"
-              value={formData.location.city}
+              name="location.province"
+              value={formData.location.province}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
               required
@@ -541,11 +553,13 @@ const AdminFieldManagement: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{field.name}</h3>
+                    {/* Modificar la visualización de las tarjetas de canchas
+                    // Cambiar la forma en que se muestra la ubicación */}
                     <div className="space-y-2 text-gray-600">
                       <div className="flex items-center">
                         <MapPin className="h-5 w-5 mr-2 text-gray-400" />
                         <span>
-                          {field.location.address}, {field.location.neighborhood}
+                          {field.location.address}, {field.location.city}, {field.location.province}
                         </span>
                       </div>
                       <div className="flex items-center">
