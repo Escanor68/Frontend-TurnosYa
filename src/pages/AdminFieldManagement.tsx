@@ -4,20 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  X,
-  MapPin,
-  DollarSign,
-  Users,
-  Clock,
-  ImageIcon,
-  Check,
-  AlertTriangle,
-  Search,
-} from "lucide-react"
+import { Plus, Edit2, Trash2, X, MapPin, DollarSign, Users, Clock, AlertTriangle, Search, Check } from "lucide-react"
 import { toast } from "react-toastify"
 
 // Types
@@ -461,7 +448,7 @@ const AdminFieldManagement: React.FC = () => {
                   className={`bg-white rounded-lg shadow-md overflow-hidden ${!field.active ? "opacity-70" : ""}`}
                 >
                   <div className="relative h-48">
-                    <ImageIcon
+                    <img
                       src={field.image || "/placeholder.svg"}
                       alt={field.name}
                       className="w-full h-full object-cover"
