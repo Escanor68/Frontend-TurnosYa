@@ -215,10 +215,6 @@ const AdminFieldManagement: React.FC = () => {
         if (value === "Fútbol 5") players = "5 vs 5"
         else if (value === "Fútbol 7") players = "7 vs 7"
         else if (value === "Fútbol 11") players = "11 vs 11"
-        else if (value === "Tenis") players = "2 vs 2"
-        else if (value === "Padel") players = "2 vs 2"
-        else if (value === "Basquet") players = "5 vs 5"
-        else if (value === "Voley") players = "6 vs 6"
 
         setFormData({
           ...formData,
