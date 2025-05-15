@@ -4,6 +4,7 @@ import React from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate, Link } from "react-router-dom"
 import { Users, Calendar, DollarSign, Settings, AlertTriangle } from "lucide-react"
+import toast from "react-hot-toast"
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth()
@@ -150,7 +151,12 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </div>
               <div className="mt-4 text-right">
-                <button className="text-emerald-600 hover:text-emerald-700 font-medium">Ver todas las alertas</button>
+                <button
+                  onClick={() => toast.info("Función de alertas en desarrollo")}
+                  className="text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  Ver todas las alertas
+                </button>
               </div>
             </div>
           </div>
