@@ -1,9 +1,11 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { toast } from "react-toastify"
-import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react"
+import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, ChevronLeft } from 'lucide-react'
 
 // Mock data para campos específicos - en una app real, esto vendría de una API
 const getFieldData = (id: string) => {
@@ -14,8 +16,8 @@ const getFieldData = (id: string) => {
       name: "Complejo Deportivo Goleador",
       location: {
         address: "Av. del Libertador 4567",
-        neighborhood: "Palermo",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 8500,
       type: "Fútbol 5",
@@ -29,8 +31,8 @@ const getFieldData = (id: string) => {
       name: "Complejo Messi",
       location: {
         address: "Av. Cabildo 1234",
-        neighborhood: "Belgrano",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 12000,
       type: "Fútbol 7",
@@ -44,8 +46,8 @@ const getFieldData = (id: string) => {
       name: "La Bombonerita",
       location: {
         address: "Brandsen 805",
-        neighborhood: "La Boca",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 18000,
       type: "Fútbol 11",
@@ -59,8 +61,8 @@ const getFieldData = (id: string) => {
       name: "Complejo River",
       location: {
         address: "Av. Figueroa Alcorta 7597",
-        neighborhood: "Núñez",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 9000,
       type: "Fútbol 5",
@@ -74,8 +76,8 @@ const getFieldData = (id: string) => {
       name: "Cancha El Monumental",
       location: {
         address: "Av. Rivadavia 5000",
-        neighborhood: "Caballito",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 11500,
       type: "Fútbol 7",
@@ -89,8 +91,8 @@ const getFieldData = (id: string) => {
       name: "Complejo Maradona",
       location: {
         address: "Av. Corrientes 3200",
-        neighborhood: "Villa Crespo",
         city: "Buenos Aires",
+        province: "CABA",
       },
       price: 8200,
       type: "Fútbol 5",
@@ -332,7 +334,7 @@ const Booking: React.FC = () => {
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 mr-2 text-emerald-600" />
                             <span>
-                              {field.location.address}, {field.location.neighborhood}
+                              {field.location.address}, {field.location.city}, {field.location.province}
                             </span>
                           </div>
                           <div className="flex items-center">
