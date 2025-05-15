@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -58,13 +60,22 @@ const Header: React.FC = () => {
                     Mi Perfil
                   </Link>
                   {user?.isAdmin && (
-                    <Link
-                      to="/admin"
-                      className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Panel de Admin
-                    </Link>
+                    <>
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Panel de Admin
+                      </Link>
+                      <Link
+                        to="/admin/fields"
+                        className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Gestionar Canchas
+                      </Link>
+                    </>
                   )}
                   {user?.hasFields && (
                     <Link
@@ -133,13 +144,22 @@ const Header: React.FC = () => {
                   Mi Perfil
                 </Link>
                 {user?.isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Panel de Admin
-                  </Link>
+                  <>
+                    <Link
+                      to="/admin"
+                      className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Panel de Admin
+                    </Link>
+                    <Link
+                      to="/admin/fields"
+                      className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Gestionar Canchas
+                    </Link>
+                  </>
                 )}
                 {user?.hasFields && (
                   <Link

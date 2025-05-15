@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate, Link } from "react-router-dom"
@@ -117,7 +119,7 @@ const AdminDashboard: React.FC = () => {
                 </table>
               </div>
               <div className="mt-4 text-right">
-                <Link to="/manage-fields" className="text-emerald-600 hover:text-emerald-700 font-medium">
+                <Link to="/admin/fields" className="text-emerald-600 hover:text-emerald-700 font-medium">
                   Gestionar Canchas
                 </Link>
               </div>
@@ -152,6 +154,15 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Link
+            to="/admin/fields"
+            className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center"
+          >
+            <Settings className="h-5 w-5 mr-2" />
+            Administrar Canchas
+          </Link>
         </div>
       </div>
     </div>

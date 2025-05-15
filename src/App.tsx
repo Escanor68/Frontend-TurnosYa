@@ -1,25 +1,26 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 // Layout components
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+import Header from "./components/layout/Header"
+import Footer from "./components/layout/Footer"
 
 // Pages
-import Home from './pages/Home';
-import Fields from './pages/Fields';
-import FieldDetails from './pages/FieldDetails';
-import Booking from './pages/Booking';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import UserProfile from './pages/UserProfile';
-import AdminDashboard from './pages/AdminDashboard';
-import NotFound from './pages/NotFound';
+import Home from "./pages/Home"
+import Fields from "./pages/Fields"
+import FieldDetails from "./pages/FieldDetails"
+import Booking from "./pages/Booking"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import UserProfile from "./pages/UserProfile"
+import AdminDashboard from "./pages/AdminDashboard"
+import AdminFieldManagement from "./pages/AdminFieldManagement"
+import ManageFields from "./pages/ManageFields"
+import NotFound from "./pages/NotFound"
 
 // Context
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from "./context/AuthContext"
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/fields" element={<AdminFieldManagement />} />
+              <Route path="/manage-fields" element={<ManageFields />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
@@ -45,7 +48,7 @@ function App() {
       </Router>
       <ToastContainer position="bottom-right" />
     </AuthProvider>
-  );
+  )
 }
 
-export default App;
+export default App
