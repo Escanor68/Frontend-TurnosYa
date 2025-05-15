@@ -1,75 +1,74 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { AuthProvider } from "./context/AuthContext"
+import Header from "./components/layout/Header"
+import Footer from "./components/layout/Footer"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-// Layout components
-import Header from "./components/layout/Header"
-import Footer from "./components/layout/Footer"
-
-// Common pages
+// Páginas comunes
 import Home from "./pages/common/Home"
 import NotFound from "./pages/common/NotFound"
 
-// Auth pages
+// Páginas de autenticación
 import Login from "./pages/auth/Login"
 import Register from "./pages/auth/Register"
 
-// User pages
-import UserProfile from "./pages/user/Profile"
+// Páginas de administrador
+import Dashboard from "./pages/admin/Dashboard"
+import FieldManagement from "./pages/admin/FieldManagement"
 
-// Admin pages
-import AdminDashboard from "./pages/admin/Dashboard"
-import AdminFieldManagement from "./pages/admin/FieldManagement"
+// Páginas de propietario de campo
+import ManageFields from "./pages/field-owner/ManageFields"
 
-// Sports pages - Football
+// Páginas de usuario
+import Profile from "./pages/user/Profile"
+
+// Páginas de deportes - Fútbol
 import FootballFields from "./pages/sports/football/Fields"
 import FootballFieldDetails from "./pages/sports/football/FieldDetails"
 import FootballBooking from "./pages/sports/football/Booking"
-
-// Field owner pages
-import ManageFields from "./pages/field-owner/ManageFields"
-
-// Context
-import { AuthProvider } from "./context/AuthContext"
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="flex flex-col min-h-screen bg-gray-50">
+        <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-grow">
             <Routes>
-              {/* Common routes */}
+              {/* Rutas comunes */}
               <Route path="/" element={<Home />} />
 
-              {/* Auth routes */}
+              {/* Rutas de autenticación */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* User routes */}
-              <Route path="/profile" element={<UserProfile />} />
+              {/* Rutas de administrador */}
+              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/fields" element={<FieldManagement />} />
 
-              {/* Admin routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/fields" element={<AdminFieldManagement />} />
+              {/* Rutas de propietario de campo */}
+              <Route path="/field-owner/fields" element={<ManageFields />} />
 
-              {/* Field owner routes */}
-              <Route path="/manage-fields" element={<ManageFields />} />
+              {/* Rutas de usuario */}
+              <Route path="/profile" element={<Profile />} />
 
-              {/* Sports routes - Football */}
-              <Route path="/fields" element={<FootballFields />} />
-              <Route path="/fields/:id" element={<FootballFieldDetails />} />
-              <Route path="/booking/:fieldId" element={<FootballBooking />} />
+              {/* Rutas de deportes - Fútbol */}
+              <Route path="/football/fields" element={<FootballFields />} />
+              <Route path="/football/fields/:id" element={<FootballFieldDetails />} />
+              <Route path="/football/booking/:id" element={<FootballBooking />} />
 
-              {/* 404 route */}
+              {/* Ruta de redirección para campos */}
+              <Route path="/fields" element={<Navigate to="/football/fields" replace />} />
+
+              {/* Ruta 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />
+          <ToastContainer position="bottom-right" autoClose={3000} />
         </div>
       </Router>
-      <ToastContainer position="bottom-right" />
     </AuthProvider>
   )
 }
