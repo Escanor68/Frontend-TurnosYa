@@ -4,7 +4,7 @@ import React from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate, Link } from "react-router-dom"
 import { Users, Calendar, DollarSign, Settings, AlertTriangle } from "lucide-react"
-import toast from "react-hot-toast"
+import { toast } from "react-toastify"
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth()
@@ -40,6 +40,10 @@ const AdminDashboard: React.FC = () => {
     { id: 2, message: "Alta demanda de reservas para el fin de semana", severity: "info" },
     { id: 3, message: "Actualización de precios pendiente", severity: "warning" },
   ]
+
+  const handleViewAllAlerts = () => {
+    toast.info("Función de alertas en desarrollo")
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -151,10 +155,7 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </div>
               <div className="mt-4 text-right">
-                <button
-                  onClick={() => toast.info("Función de alertas en desarrollo")}
-                  className="text-emerald-600 hover:text-emerald-700 font-medium"
-                >
+                <button onClick={handleViewAllAlerts} className="text-emerald-600 hover:text-emerald-700 font-medium">
                   Ver todas las alertas
                 </button>
               </div>
