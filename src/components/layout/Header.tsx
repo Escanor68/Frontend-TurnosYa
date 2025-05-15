@@ -1,22 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
-import { Menu, X, User, LogOut, ClubIcon as Soccer } from "lucide-react"
+import { Menu, X, User, LogOut, ClubIcon as Soccer, Settings } from "lucide-react"
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (user?.isAdmin && location.pathname !== "/admin") {
-      navigate("/admin")
-    }
-  }, [user, navigate])
+  const location = useLocation()
 
   const handleLogout = () => {
     logout()
@@ -73,11 +68,14 @@ const Header: React.FC = () => {
                         className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        Gestionar Canchas
+                        <div className="flex items-center">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Gestionar Canchas
+                        </div>
                       </Link>
                     </>
                   )}
-                  {user?.hasFields && (
+                  {user?.hasFields && !user?.isAdmin && (
                     <Link
                       to="/manage-fields"
                       className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
@@ -161,7 +159,7 @@ const Header: React.FC = () => {
                     </Link>
                   </>
                 )}
-                {user?.hasFields && (
+                {user?.hasFields && !user?.isAdmin && (
                   <Link
                     to="/manage-fields"
                     className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"
