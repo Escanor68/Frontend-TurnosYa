@@ -174,11 +174,59 @@ const AdminFieldManagement: React.FC = () => {
     onSave,
     isNew = false,
   }: { field: any; onSave: (field: any) => void; isNew?: boolean }) => {
+    // Obtener datos del usuario para autocompletar
+    const { user } = useAuth()
+    const [userDataLoaded, setUserDataLoaded] = useState(false)
+
     const [formData, setFormData] = useState(field)
     const [newAmenity, setNewAmenity] = useState("")
 
+    // Autocompletar campos con datos del usuario cuando se crea un nuevo campo
+    useEffect(() => {
+      if (isNew && !userDataLoaded && user) {
+        // Aquí normalmente obtendrías los datos del usuario desde la API
+        // Por ahora usamos datos de ejemplo
+        const userData = {
+          address: "Av. Principal 123",
+          neighborhood: "Centro",
+          city: "Buenos Aires",
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          location: {
+            ...prev.location,
+            address: userData.address,
+            neighborhood: userData.neighborhood,
+            city: userData.city,
+          },
+        }))
+
+        setUserDataLoaded(true)
+      }
+    }, [isNew, user, userDataLoaded])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const { name, value, type } = e.target as HTMLInputElement
+
+      // Actualizar automáticamente el número de jugadores según el tipo de cancha
+      if (name === "type") {
+        let players = formData.players
+        if (value === "Fútbol 5") players = "5 vs 5"
+        else if (value === "Fútbol 7") players = "7 vs 7"
+        else if (value === "Fútbol 11") players = "11 vs 11"
+        else if (value === "Tenis") players = "2 vs 2"
+        else if (value === "Padel") players = "2 vs 2"
+        else if (value === "Basquet") players = "5 vs 5"
+        else if (value === "Voley") players = "6 vs 6"
+
+        setFormData({
+          ...formData,
+          [name]: value,
+          players: players,
+        })
+        return
+      }
 
       if (name.includes(".")) {
         const [parent, child] = name.split(".")
@@ -320,15 +368,51 @@ const AdminFieldManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">URL de la imagen</label>
-            <input
-              type="text"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
-              required
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Imagen de la cancha</label>
+            <div className="mt-1 flex items-center">
+              <input
+                type="text"
+                name="image"
+                value={formData.image}
+                onChange={handleChange}
+                className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="URL de la imagen"
+              />
+              <span className="mx-2 text-gray-500">o</span>
+              <label className="cursor-pointer px-3 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors">
+                <span className="text-sm text-gray-700">Subir imagen</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      // En una implementación real, aquí subirías el archivo a un servidor
+                      // Por ahora, creamos una URL temporal
+                      const imageUrl = URL.createObjectURL(file)
+                      setFormData({
+                        ...formData,
+                        image: imageUrl,
+                      })
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {formData.image && (
+              <div className="mt-2">
+                <img
+                  src={formData.image || "/placeholder.svg"}
+                  alt="Vista previa"
+                  className="h-32 w-auto object-cover rounded-md"
+                  onError={(e) => {
+                    // Si la imagen no carga, mostrar un placeholder
+                    ;(e.target as HTMLImageElement).src = "/placeholder.svg?height=128&width=256"
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="md:col-span-2">
