@@ -189,9 +189,6 @@ const ManageFields: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Barrio
-            </label>
             <input
               type="text"
               name="location.neighborhood"
