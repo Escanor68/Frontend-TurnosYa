@@ -13,25 +13,37 @@ interface FieldsProps {
   setFilters: (filters: Filters) => void;
 }
 
-// Mock data with complete field information including location
+// Updated mock data with properly structured location objects
 const mockFields = [
   {
     id: 1,
-    location: "Buenos Aires",
+    location: {
+      city: "Buenos Aires",
+      address: "Av. Rivadavia 1234",
+      neighborhood: "Caballito"
+    },
     type: "Fútbol 5",
     price: 8000,
     amenities: ["parking", "lights"]
   },
   {
     id: 2,
-    location: "Córdoba",
+    location: {
+      city: "Córdoba",
+      address: "Av. Colón 567",
+      neighborhood: "Nueva Córdoba"
+    },
     type: "Fútbol 7",
     price: 12000,
     amenities: ["parking", "lights", "locker_room"]
   },
   {
     id: 3,
-    location: "Rosario",
+    location: {
+      city: "Rosario",
+      address: "Bv. Oroño 890",
+      neighborhood: "Centro"
+    },
     type: "Fútbol 11",
     price: 16000,
     amenities: ["parking", "lights", "locker_room", "cafeteria"]
@@ -44,7 +56,8 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
     
     if (filters.location) {
       result = result.filter(field => 
-        field.location.toLowerCase().includes(filters.location.toLowerCase())
+        field.location.city.toLowerCase().includes(filters.location.toLowerCase()) ||
+        field.location.neighborhood.toLowerCase().includes(filters.location.toLowerCase())
       );
     }
     
@@ -96,13 +109,14 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
         </select>
       </div>
       
-      {/* Display filtered fields */}
+      {/* Display filtered fields with updated location display */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredFields.map(field => (
           <div key={field.id} className="border p-4 rounded-lg shadow">
             <h3 className="text-lg font-semibold">{field.type}</h3>
-            <p>{field.location}</p>
-            <p>Precio: ${field.price}</p>
+            <p>{field.location.city} - {field.location.neighborhood}</p>
+            <p className="text-sm text-gray-600">{field.location.address}</p>
+            <p className="mt-2">Precio: ${field.price}</p>
           </div>
         ))}
       </div>
