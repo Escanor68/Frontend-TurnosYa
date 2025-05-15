@@ -13,7 +13,7 @@ interface FieldsProps {
   setFilters: (filters: Filters) => void;
 }
 
-// Mock data - you should replace this with your actual data source
+// Mock data with complete field information including location
 const mockFields = [
   {
     id: 1,
@@ -22,7 +22,20 @@ const mockFields = [
     price: 8000,
     amenities: ["parking", "lights"]
   },
-  // Add more mock fields as needed
+  {
+    id: 2,
+    location: "Córdoba",
+    type: "Fútbol 7",
+    price: 12000,
+    amenities: ["parking", "lights", "locker_room"]
+  },
+  {
+    id: 3,
+    location: "Rosario",
+    type: "Fútbol 11",
+    price: 16000,
+    amenities: ["parking", "lights", "locker_room", "cafeteria"]
+  }
 ];
 
 const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
