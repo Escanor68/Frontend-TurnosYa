@@ -54,38 +54,39 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
   const filteredFields = useMemo(() => {
     let result = [...mockFields];
     
-    if (filters.location) {
+    if (filters?.location) {
       result = result.filter(field => 
-        field.location.city.toLowerCase().includes(filters.location.toLowerCase()) ||
-        field.location.neighborhood.toLowerCase().includes(filters.location.toLowerCase())
+        field?.location?.city?.toLowerCase().includes(filters.location.toLowerCase()) ||
+        field?.location?.neighborhood?.toLowerCase().includes(filters.location.toLowerCase())
       );
     }
     
-    if (filters.fieldType) {
+    if (filters?.fieldType) {
       result = result.filter(field => {
+        if (!field?.type) return false;
         const normalizedFieldType = field.type.toLowerCase().replace(/\s+/g, '');
         const normalizedFilter = filters.fieldType.toLowerCase().replace(/\s+/g, '');
         return normalizedFieldType === normalizedFilter;
       });
     }
     
-    if (filters.priceRange) {
+    if (filters?.priceRange) {
       switch (filters.priceRange) {
         case 'low':
-          result = result.filter(field => field.price < 9000);
+          result = result.filter(field => field?.price && field.price < 9000);
           break;
         case 'medium':
-          result = result.filter(field => field.price >= 9000 && field.price <= 15000);
+          result = result.filter(field => field?.price && field.price >= 9000 && field.price <= 15000);
           break;
         case 'high':
-          result = result.filter(field => field.price > 15000);
+          result = result.filter(field => field?.price && field.price > 15000);
           break;
       }
     }
     
-    if (filters.amenities.length > 0) {
+    if (filters?.amenities?.length > 0) {
       result = result.filter(field =>
-        filters.amenities.every(amenity =>
+        field?.amenities && filters.amenities.every(amenity =>
           field.amenities.includes(amenity)
         )
       );
@@ -98,7 +99,7 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
     <div className="p-4">
       <div className="mb-4">
         <select
-          value={filters.fieldType}
+          value={filters?.fieldType || ''}
           onChange={(e) => setFilters({...filters, fieldType: e.target.value})}
           className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
         >
@@ -109,16 +110,23 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
         </select>
       </div>
       
-      {/* Display filtered fields with updated location display */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredFields.map(field => (
-          <div key={field.id} className="border p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold">{field.type}</h3>
-            <p>{field.location.city} - {field.location.neighborhood}</p>
-            <p className="text-sm text-gray-600">{field.location.address}</p>
-            <p className="mt-2">Precio: ${field.price}</p>
+        {filteredFields.length > 0 ? (
+          filteredFields.map(field => (
+            field && field.location && (
+              <div key={field.id} className="border p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold">{field.type}</h3>
+                <p>{field.location.city} - {field.location.neighborhood}</p>
+                <p className="text-sm text-gray-600">{field.location.address}</p>
+                <p className="mt-2">Precio: ${field.price}</p>
+              </div>
+            )
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No se encontraron campos que coincidan con los filtros seleccionados
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
