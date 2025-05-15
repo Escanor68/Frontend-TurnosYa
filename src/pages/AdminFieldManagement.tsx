@@ -284,10 +284,6 @@ const AdminFieldManagement: React.FC = () => {
               <option value="Fútbol 5">Fútbol 5</option>
               <option value="Fútbol 7">Fútbol 7</option>
               <option value="Fútbol 11">Fútbol 11</option>
-              <option value="Tenis">Tenis</option>
-              <option value="Padel">Padel</option>
-              <option value="Basquet">Basquet</option>
-              <option value="Voley">Voley</option>
             </select>
           </div>
 
