@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useCallback } from "react"
 import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api"
