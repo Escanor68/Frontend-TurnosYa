@@ -3,7 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { MapPin, Star, Clock, Users, DollarSign, Calendar, ChevronLeft } from "lucide-react"
+import { MapPin, Star, Clock, Users, DollarSign, Calendar, ChevronLeft, Map } from "lucide-react"
+import GoogleMapComponent from "../../../components/GoogleMap"
 
 // Mock data for fields
 const mockFields = {
@@ -14,6 +15,10 @@ const mockFields = {
       address: "Av. Siempreviva 742",
       city: "Buenos Aires",
       province: "CABA",
+      coordinates: {
+        lat: -34.603722,
+        lng: -58.381592,
+      },
     },
     type: "Fútbol 5",
     rating: 4.5,
@@ -59,6 +64,10 @@ const mockFields = {
       address: "Calle Falsa 123",
       city: "Buenos Aires",
       province: "CABA",
+      coordinates: {
+        lat: -34.615824,
+        lng: -58.373135,
+      },
     },
     type: "Fútbol 7",
     rating: 4.2,
@@ -88,6 +97,10 @@ const mockFields = {
       address: "Avenida Siempre Viva 742",
       city: "Buenos Aires",
       province: "CABA",
+      coordinates: {
+        lat: -34.585824,
+        lng: -58.393135,
+      },
     },
     type: "Fútbol 11",
     rating: 4.8,
@@ -135,7 +148,7 @@ const FieldDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [selectedDate, setSelectedDate] = useState<string>("")
-  const [activeTab, setActiveTab] = useState<"info" | "reviews">("info")
+  const [activeTab, setActiveTab] = useState<"info" | "reviews" | "location">("info")
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [field, setField] = useState<any>(null)
 
@@ -187,6 +200,9 @@ const FieldDetails: React.FC = () => {
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? field.images.length - 1 : prev - 1))
   }
+
+  // Dirección completa para el mapa
+  const fullAddress = `${field.location.address}, ${field.location.city}, ${field.location.province}`
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -298,6 +314,17 @@ const FieldDetails: React.FC = () => {
               >
                 Reseñas ({field.reviews.length})
               </button>
+              <button
+                onClick={() => setActiveTab("location")}
+                className={`py-4 px-6 text-sm font-medium flex items-center ${
+                  activeTab === "location"
+                    ? "border-b-2 border-emerald-500 text-emerald-600"
+                    : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Map className="h-4 w-4 mr-2" />
+                Ubicación
+              </button>
             </nav>
           </div>
 
@@ -319,7 +346,7 @@ const FieldDetails: React.FC = () => {
                 ))}
               </div>
             </div>
-          ) : (
+          ) : activeTab === "reviews" ? (
             <div>
               <div className="space-y-6">
                 {field.reviews.map((review: any) => (
@@ -345,6 +372,29 @@ const FieldDetails: React.FC = () => {
                     <p className="text-gray-600">{review.comment}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Ubicación</h2>
+              <p className="text-gray-600 mb-4">
+                {field.location.address}, {field.location.city}, {field.location.province}
+              </p>
+
+              {/* Google Maps Component */}
+              <GoogleMapComponent
+                address={fullAddress}
+                name={field.name}
+                lat={field.location.coordinates?.lat}
+                lng={field.location.coordinates?.lng}
+              />
+
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-semibold text-blue-800 mb-2">Cómo llegar</h3>
+                <p className="text-blue-700 text-sm">
+                  La cancha se encuentra a 10 minutos caminando desde la estación de subte más cercana. También hay
+                  estacionamiento disponible para quienes vienen en auto.
+                </p>
               </div>
             </div>
           )}
