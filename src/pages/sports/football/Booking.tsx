@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
@@ -123,13 +125,24 @@ const Booking: React.FC = () => {
     date: "",
     time: "",
     players: 10,
-    contactName: user?.name || "",
+    contactName: "",
     contactPhone: "",
-    contactEmail: user?.email || "",
+    contactEmail: "",
     paymentMethod: "mercadopago",
     termsAccepted: false,
   })
   const [timeSlots, setTimeSlots] = useState<string[]>([])
+
+  // Actualizar datos de contacto cuando el usuario está autenticado
+  useEffect(() => {
+    if (user) {
+      setBookingData((prev) => ({
+        ...prev,
+        contactName: user.name || prev.contactName,
+        contactEmail: user.email || prev.contactEmail,
+      }))
+    }
+  }, [user])
 
   // Analizar parámetros de consulta
   useEffect(() => {
@@ -177,7 +190,7 @@ const Booking: React.FC = () => {
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       toast.info("Debes iniciar sesión para realizar una reserva")
-      navigate(`/login?redirect=/booking/${fieldId}${location.search}`)
+      navigate(`/login?redirect=/football/booking/${fieldId}${location.search}`)
     }
   }, [loading, isAuthenticated, navigate, fieldId, location.search])
 
@@ -258,7 +271,7 @@ const Booking: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="mb-6">
           <button
-            onClick={() => navigate(`/fields/${fieldId}`)}
+            onClick={() => navigate(`/football/fields/${fieldId}`)}
             className="flex items-center text-emerald-600 hover:text-emerald-700 transition-colors"
           >
             <ChevronLeft className="h-5 w-5 mr-1" />
