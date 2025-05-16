@@ -1,53 +1,115 @@
+"use client"
+
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { MapPin, Star, Clock, Users, DollarSign, Calendar, ChevronLeft } from "lucide-react"
 
-// Mock data for a specific field
-const mockField = {
-  id: 1,
-  name: "Cancha de Fútbol 5 - El Campito",
-  location: {
-    address: "Av. Siempreviva 742",
-    city: "Buenos Aires",
-    province: "CABA",
+// Mock data for fields
+const mockFields = {
+  "1": {
+    id: 1,
+    name: "Cancha de Fútbol 5 - El Campito",
+    location: {
+      address: "Av. Siempreviva 742",
+      city: "Buenos Aires",
+      province: "CABA",
+    },
+    type: "Fútbol 5",
+    rating: 4.5,
+    description:
+      "Cancha de fútbol 5 con césped sintético de última generación. Cuenta con iluminación LED, vestuarios completos y estacionamiento gratuito. Ideal para partidos entre amigos o torneos.",
+    images: [
+      "https://images.unsplash.com/photo-1508035353492-2a2a97a04a31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80",
+    ],
+    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas", "Kiosco", "Wifi"],
+    duration: 60,
+    players: "5 vs 5",
+    price: 8000,
+    reviews: [
+      {
+        id: 1,
+        user: "Juan Pérez",
+        rating: 5,
+        date: "2025-02-15",
+        comment: "Excelente cancha, muy bien mantenida y el personal muy amable.",
+      },
+      {
+        id: 2,
+        user: "María García",
+        rating: 4,
+        date: "2025-02-10",
+        comment: "Buena cancha, pero los vestuarios podrían estar más limpios.",
+      },
+      {
+        id: 3,
+        user: "Carlos López",
+        rating: 5,
+        date: "2025-01-28",
+        comment: "La mejor cancha de la zona, volveremos pronto!",
+      },
+    ],
   },
-  type: "Fútbol 5",
-  rating: 4.5,
-  description:
-    "Cancha de fútbol 5 con césped sintético de última generación. Cuenta con iluminación LED, vestuarios completos y estacionamiento gratuito. Ideal para partidos entre amigos o torneos.",
-  images: [
-    "https://images.unsplash.com/photo-1508035353492-2a2a97a04a31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    "https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80",
-  ],
-  amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas", "Kiosco", "Wifi"],
-  duration: 60,
-  players: "5 vs 5",
-  price: 8000,
-  reviews: [
-    {
-      id: 1,
-      user: "Juan Pérez",
-      rating: 5,
-      date: "2025-02-15",
-      comment: "Excelente cancha, muy bien mantenida y el personal muy amable.",
+  "2": {
+    id: 2,
+    name: "Cancha de Fútbol 7 - Club Victoria",
+    location: {
+      address: "Calle Falsa 123",
+      city: "Buenos Aires",
+      province: "CABA",
     },
-    {
-      id: 2,
-      user: "María García",
-      rating: 4,
-      date: "2025-02-10",
-      comment: "Buena cancha, pero los vestuarios podrían estar más limpios.",
+    type: "Fútbol 7",
+    rating: 4.2,
+    description:
+      "Cancha de fútbol 7 con césped natural. Cuenta con iluminación, vestuarios y estacionamiento. Ideal para partidos entre amigos o torneos.",
+    images: [
+      "https://images.unsplash.com/photo-1560275774-c945485b9336?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    ],
+    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas"],
+    duration: 90,
+    players: "7 vs 7",
+    price: 12000,
+    reviews: [
+      {
+        id: 1,
+        user: "Pedro Gómez",
+        rating: 4,
+        date: "2025-02-20",
+        comment: "Buena cancha, bien mantenida.",
+      },
+    ],
+  },
+  "3": {
+    id: 3,
+    name: "Cancha de Fútbol 11 - Estadio Municipal",
+    location: {
+      address: "Avenida Siempre Viva 742",
+      city: "Buenos Aires",
+      province: "CABA",
     },
-    {
-      id: 3,
-      user: "Carlos López",
-      rating: 5,
-      date: "2025-01-28",
-      comment: "La mejor cancha de la zona, volveremos pronto!",
-    },
-  ],
+    type: "Fútbol 11",
+    rating: 4.8,
+    description:
+      "Cancha de fútbol 11 profesional con césped natural. Cuenta con iluminación, vestuarios, estacionamiento y tribunas.",
+    images: [
+      "https://images.unsplash.com/photo-1662299397095-c2b1549509a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    ],
+    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas", "Tribunas"],
+    duration: 60,
+    players: "11 vs 11",
+    price: 10000,
+    reviews: [
+      {
+        id: 1,
+        user: "Ana Martínez",
+        rating: 5,
+        date: "2025-02-18",
+        comment: "Excelente cancha, muy profesional.",
+      },
+    ],
+  },
 }
 
 // Mock data for available time slots
@@ -75,6 +137,30 @@ const FieldDetails: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [activeTab, setActiveTab] = useState<"info" | "reviews">("info")
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [field, setField] = useState<any>(null)
+
+  // Cargar datos del campo
+  useEffect(() => {
+    if (id) {
+      // Intentar obtener el campo por ID
+      const fieldData = mockFields[id as keyof typeof mockFields]
+      if (fieldData) {
+        setField(fieldData)
+      } else {
+        // Si no se encuentra, usar el primer campo como fallback
+        setField(mockFields["1"])
+      }
+    }
+  }, [id])
+
+  // Si el campo aún no se ha cargado, mostrar un indicador de carga
+  if (!field) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      </div>
+    )
+  }
 
   // Filtrar slots de tiempo por fecha seleccionada
   const filteredTimeSlots = mockTimeSlots.filter((slot) => slot.date === selectedDate)
@@ -90,23 +176,23 @@ const FieldDetails: React.FC = () => {
 
   // Manejar la reserva
   const handleBooking = (timeSlotId: string) => {
-    navigate(`/booking/${id}?date=${selectedDate}&time=${timeSlotId}`)
+    navigate(`/football/booking/${id}?date=${selectedDate}&time=${timeSlotId}`)
   }
 
   // Cambiar imagen
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === mockField.images.length - 1 ? 0 : prev + 1))
+    setCurrentImageIndex((prev) => (prev === field.images.length - 1 ? 0 : prev + 1))
   }
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? mockField.images.length - 1 : prev - 1))
+    setCurrentImageIndex((prev) => (prev === 0 ? field.images.length - 1 : prev - 1))
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <button
-          onClick={() => navigate("/fields")}
+          onClick={() => navigate("/football/fields")}
           className="flex items-center text-emerald-600 hover:text-emerald-700 transition-colors"
         >
           <ChevronLeft className="h-5 w-5 mr-1" />
@@ -118,11 +204,11 @@ const FieldDetails: React.FC = () => {
         {/* Image Gallery */}
         <div className="relative h-96">
           <img
-            src={mockField.images[currentImageIndex] || "/placeholder.svg"}
-            alt={mockField.name}
+            src={field.images[currentImageIndex] || "/placeholder.svg"}
+            alt={field.name}
             className="w-full h-full object-cover"
           />
-          {mockField.images.length > 1 && (
+          {field.images.length > 1 && (
             <>
               <button
                 onClick={handlePrevImage}
@@ -137,7 +223,7 @@ const FieldDetails: React.FC = () => {
                 <ChevronLeft className="h-6 w-6 transform rotate-180" />
               </button>
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {mockField.images.map((_, index) => (
+                {field.images.map((_: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -155,35 +241,35 @@ const FieldDetails: React.FC = () => {
         <div className="p-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{mockField.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{field.name}</h1>
               <div className="flex items-center mt-2">
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                  <span className="ml-1 text-gray-700">{mockField.rating}</span>
+                  <span className="ml-1 text-gray-700">{field.rating}</span>
                 </div>
                 <span className="mx-2 text-gray-400">•</span>
-                <span className="text-gray-600">{mockField.reviews.length} reseñas</span>
+                <span className="text-gray-600">{field.reviews.length} reseñas</span>
               </div>
               <div className="flex items-center mt-2 text-gray-600">
                 <MapPin className="h-5 w-5 mr-2 text-gray-500" />
                 <span>
-                  {mockField.location.address}, {mockField.location.city}, {mockField.location.province}
+                  {field.location.address}, {field.location.city}, {field.location.province}
                 </span>
               </div>
             </div>
             <div className="mt-4 md:mt-0 bg-emerald-50 p-4 rounded-lg">
               <div className="flex items-center text-emerald-600 font-bold text-xl mb-2">
                 <DollarSign className="h-6 w-6 mr-1" />
-                <span>${mockField.price.toLocaleString()}</span>
+                <span>${field.price.toLocaleString()}</span>
               </div>
               <div className="flex flex-col text-sm text-gray-600">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-2" />
-                  <span>Duración: {mockField.duration} minutos</span>
+                  <span>Duración: {field.duration} minutos</span>
                 </div>
                 <div className="flex items-center mt-1">
                   <Users className="h-4 w-4 mr-2" />
-                  <span>Jugadores: {mockField.players}</span>
+                  <span>Jugadores: {field.players}</span>
                 </div>
               </div>
             </div>
@@ -210,7 +296,7 @@ const FieldDetails: React.FC = () => {
                     : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                Reseñas ({mockField.reviews.length})
+                Reseñas ({field.reviews.length})
               </button>
             </nav>
           </div>
@@ -219,11 +305,11 @@ const FieldDetails: React.FC = () => {
           {activeTab === "info" ? (
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
-              <p className="text-gray-600 mb-6">{mockField.description}</p>
+              <p className="text-gray-600 mb-6">{field.description}</p>
 
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Comodidades</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                {mockField.amenities.map((amenity, index) => (
+                {field.amenities.map((amenity: string, index: number) => (
                   <div key={index} className="flex items-center">
                     <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
                       <span className="text-emerald-600">✓</span>
@@ -236,7 +322,7 @@ const FieldDetails: React.FC = () => {
           ) : (
             <div>
               <div className="space-y-6">
-                {mockField.reviews.map((review) => (
+                {field.reviews.map((review: any) => (
                   <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
                     <div className="flex justify-between items-start mb-2">
                       <div>
