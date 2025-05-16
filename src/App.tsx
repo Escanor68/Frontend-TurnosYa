@@ -44,11 +44,11 @@ function App() {
               <Route path="/register" element={<Register />} />
 
               {/* Rutas de administrador */}
-              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/fields" element={<FieldManagement />} />
 
               {/* Rutas de propietario de campo */}
-              <Route path="/field-owner/fields" element={<ManageFields />} />
+              <Route path="/manage-fields" element={<ManageFields />} />
 
               {/* Rutas de usuario */}
               <Route path="/profile" element={<Profile />} />
@@ -56,10 +56,12 @@ function App() {
               {/* Rutas de deportes - Fútbol */}
               <Route path="/football/fields" element={<FootballFields />} />
               <Route path="/football/fields/:id" element={<FootballFieldDetails />} />
-              <Route path="/football/booking/:id" element={<FootballBooking />} />
+              <Route path="/football/booking/:fieldId" element={<FootballBooking />} />
 
-              {/* Ruta de redirección para campos */}
+              {/* Rutas de compatibilidad para mantener URLs antiguas */}
               <Route path="/fields" element={<Navigate to="/football/fields" replace />} />
+              <Route path="/fields/:id" element={<FootballFieldDetails />} />
+              <Route path="/booking/:fieldId" element={<FootballBooking />} />
 
               {/* Ruta 404 */}
               <Route path="*" element={<NotFound />} />
