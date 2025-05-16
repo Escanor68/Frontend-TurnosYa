@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
@@ -107,11 +109,20 @@ interface Field {
 }
 
 interface FieldsProps {
-  filters: Filters
-  setFilters: React.Dispatch<React.SetStateAction<Filters>>
+  filters?: Filters
+  setFilters?: React.Dispatch<React.SetStateAction<Filters>>
 }
 
-const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
+const Fields: React.FC<FieldsProps> = ({
+  filters = {
+    location: "",
+    date: "",
+    fieldType: "",
+    priceRange: "",
+    amenities: [],
+  },
+  setFilters,
+}) => {
   // Estado para la búsqueda y paginación
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -126,22 +137,23 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
       field.location.toLowerCase().includes(searchTerm.toLowerCase())
 
     // Filtrar por ubicación
-    const matchesLocation =
-      filters.location === "" || field.location.toLowerCase().includes(filters.location.toLowerCase())
+    const matchesLocation = !filters.location || field.location.toLowerCase().includes(filters.location.toLowerCase())
 
     // Filtrar por tipo de cancha
-    const matchesType = filters.fieldType === "" || field.type === filters.fieldType
+    const matchesType = !filters.fieldType || field.type === filters.fieldType
 
     // Filtrar por rango de precio
     const matchesPrice =
-      filters.priceRange === "" ||
+      !filters.priceRange ||
       (filters.priceRange === "low" && field.price < 9000) ||
       (filters.priceRange === "medium" && field.price >= 9000 && field.price <= 15000) ||
       (filters.priceRange === "high" && field.price > 15000)
 
     // Filtrar por comodidades
     const matchesAmenities =
-      filters.amenities.length === 0 || filters.amenities.every((amenity) => field.amenities.includes(amenity))
+      !filters.amenities ||
+      filters.amenities.length === 0 ||
+      filters.amenities.every((amenity) => field.amenities.includes(amenity))
 
     return matchesSearch && matchesLocation && matchesType && matchesPrice && matchesAmenities
   })
@@ -157,6 +169,21 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
     setCurrentPage(pageNumber)
     // Scroll hacia arriba cuando cambia la página
     window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  // Función para limpiar filtros
+  const handleClearFilters = () => {
+    if (setFilters) {
+      setFilters({
+        location: "",
+        date: "",
+        fieldType: "",
+        priceRange: "",
+        amenities: [],
+      })
+    }
+    setSearchTerm("")
+    setCurrentPage(1)
   }
 
   return (
@@ -241,7 +268,7 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
                     <span className="text-emerald-600 font-bold text-xl">${field.price.toLocaleString()}</span>
                   </div>
                   <Link
-                    to={`/fields/${field.id}`}
+                    to={`/football/fields/${field.id}`}
                     className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-center font-semibold py-3 rounded-lg transition-colors"
                   >
                     Ver Disponibilidad
@@ -254,20 +281,7 @@ const Fields: React.FC<FieldsProps> = ({ filters, setFilters }) => {
               <div className="text-gray-500 mb-4">
                 No se encontraron canchas que coincidan con los filtros seleccionados
               </div>
-              <button
-                onClick={() => {
-                  setFilters({
-                    location: "",
-                    date: "",
-                    fieldType: "",
-                    priceRange: "",
-                    amenities: [],
-                  })
-                  setSearchTerm("")
-                  setCurrentPage(1)
-                }}
-                className="text-emerald-600 hover:text-emerald-700 font-medium"
-              >
+              <button onClick={handleClearFilters} className="text-emerald-600 hover:text-emerald-700 font-medium">
                 Limpiar filtros
               </button>
             </div>
