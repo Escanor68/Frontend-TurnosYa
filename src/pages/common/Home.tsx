@@ -1,5 +1,7 @@
+"use client"
+
 import { useState } from "react"
-import FootballFields from "../sports/football/Fields"
+import { Navigate } from "react-router-dom"
 
 interface Filters {
   location: string
@@ -18,9 +20,6 @@ export default function Home() {
     amenities: [],
   })
 
-  return (
-    <div>
-      <FootballFields filters={filters} setFilters={setFilters} />
-    </div>
-  )
+  // Redirigir a la página de campos de fútbol
+  return <Navigate to="/football/fields" replace />
 }
