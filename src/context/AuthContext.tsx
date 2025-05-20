@@ -1,65 +1,115 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
-import { User, authApi, LoginCredentials, RegisterData } from "../api/auth"
-import { toast } from "react-toastify"
+"use client"
+
+import type React from "react"
+import { createContext, useState, useContext, useEffect } from "react"
+
+// Types
+interface User {
+  id: string
+  name: string
+  email: string
+  isAdmin: boolean
+  hasFields: boolean
+}
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (credentials: LoginCredentials) => Promise<boolean>
-  register: (data: RegisterData) => Promise<boolean>
-  logout: () => Promise<void>
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
+  logout: () => void
 }
 
+// Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
   login: async () => false,
   register: async () => false,
-  logout: async () => {},
+  logout: () => {},
 })
 
 export const useAuth = () => useContext(AuthContext)
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const currentUser = await authApi.getCurrentUser()
-        if (currentUser) {
-          setUser(currentUser)
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    // Check if user is already logged in
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
     }
-
-    initAuth()
+    setIsLoading(false)
   }, [])
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const user = await authApi.login(credentials)
-      setUser(user)
-      localStorage.setItem("user", JSON.stringify(user))
-      return true
+      // This would be replaced with an actual API call
+      // Simulating API call for demo purposes
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      // Para propósitos de depuración
+      console.log("Intentando login con:", { email, password })
+
+      // Admin user credentials
+      if (email === "admin@example.com" && password === "admin123") {
+        const adminUser: User = {
+          id: "admin1",
+          name: "Administrador",
+          email: "admin@example.com",
+          isAdmin: true,
+          hasFields: true,
+        }
+
+        setUser(adminUser)
+        localStorage.setItem("user", JSON.stringify(adminUser))
+        return true
+      }
+
+      // Regular user credentials
+      if (email === "demo@example.com" && password === "password") {
+        const userData: User = {
+          id: "1",
+          name: "Demo User",
+          email: "demo@example.com",
+          isAdmin: false,
+          hasFields: false,
+        }
+
+        setUser(userData)
+        localStorage.setItem("user", JSON.stringify(userData))
+        return true
+      }
+
+      // Si llegamos aquí, las credenciales no coinciden
+      console.log("Credenciales inválidas")
+      return false
     } catch (error) {
       console.error("Login error:", error)
       return false
     }
   }
 
-  const register = async (data: RegisterData): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const user = await authApi.register(data)
-      setUser(user)
-      localStorage.setItem("user", JSON.stringify(user))
+      // This would be replaced with an actual API call
+      // Simulating API call for demo purposes
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      const userData: User = {
+        id: Date.now().toString(),
+        name,
+        email,
+        isAdmin: false,
+        hasFields: false,
+      }
+
+      setUser(userData)
+      localStorage.setItem("user", JSON.stringify(userData))
       return true
     } catch (error) {
       console.error("Registration error:", error)
@@ -67,15 +117,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  const logout = async (): Promise<void> => {
-    try {
-      await authApi.logout()
-      setUser(null)
-      localStorage.removeItem("user")
-    } catch (error) {
-      console.error("Logout error:", error)
-      toast.error("Error al cerrar sesión")
-    }
+  const logout = () => {
+    setUser(null)
+    localStorage.removeItem("user")
   }
 
   return (

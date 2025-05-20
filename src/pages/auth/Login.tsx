@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
@@ -26,7 +28,9 @@ const Login: React.FC = () => {
     setLoading(true)
 
     try {
+      console.log("Intentando login con:", formData)
       const success = await login(formData.email, formData.password)
+
       if (success) {
         toast.success("¡Inicio de sesión exitoso!")
 
@@ -37,6 +41,7 @@ const Login: React.FC = () => {
         navigate(redirectUrl)
       } else {
         toast.error("Credenciales inválidas. Por favor intenta nuevamente.")
+        console.error("Login fallido: Credenciales incorrectas")
       }
     } catch (error) {
       toast.error("Error al iniciar sesión. Por favor intenta nuevamente.")
