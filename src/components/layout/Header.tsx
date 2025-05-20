@@ -91,7 +91,6 @@ const Header: React.FC = () => {
                     Cerrar Sesión
                   </button>
                   <div>
-                    <p className="text-sm text-gray-500">Tipo de cuenta</p>
                     <p className="font-medium">
                       {user?.isAdmin ? "Super Administrador" : user?.isOwner ? "Propietario de Canchas" : "Jugador"}
                     </p>
