@@ -5,7 +5,25 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../../context/AuthContext"
 import { toast } from "react-toastify"
-import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react"
+import {
+  Calendar,
+  Clock,
+  Users,
+  MapPin,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  ChevronLeft,
+  Repeat,
+  Plus,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  Utensils,
+  BellIcon as Whistle,
+  Video,
+  Award,
+} from "lucide-react"
 
 // Mock data para campos específicos - en una app real, esto vendría de una API
 const getFieldData = (id: string) => {
@@ -25,6 +43,7 @@ const getFieldData = (id: string) => {
       players: "5 vs 5",
       image:
         "https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: true,
     },
     "2": {
       id: "2",
@@ -40,6 +59,7 @@ const getFieldData = (id: string) => {
       players: "7 vs 7",
       image:
         "https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: true,
     },
     "3": {
       id: "3",
@@ -55,6 +75,7 @@ const getFieldData = (id: string) => {
       players: "11 vs 11",
       image:
         "https://images.pexels.com/photos/46792/the-ball-stadion-football-the-pitch-46792.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: false,
     },
     "4": {
       id: "4",
@@ -70,6 +91,7 @@ const getFieldData = (id: string) => {
       players: "5 vs 5",
       image:
         "https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: true,
     },
     "5": {
       id: "5",
@@ -85,6 +107,7 @@ const getFieldData = (id: string) => {
       players: "7 vs 7",
       image:
         "https://images.pexels.com/photos/262524/pexels-photo-262524.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: true,
     },
     "6": {
       id: "6",
@@ -100,6 +123,7 @@ const getFieldData = (id: string) => {
       players: "5 vs 5",
       image:
         "https://images.pexels.com/photos/186230/pexels-photo-186230.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      hasAdditionalServices: false,
     },
   }
 
@@ -111,6 +135,46 @@ const getFieldData = (id: string) => {
 const paymentMethods = [
   { id: "mercadopago", name: "Mercado Pago", icon: "💳" },
   { id: "transfer", name: "Transferencia Bancaria", icon: "🏦" },
+]
+
+// Servicios adicionales disponibles
+const additionalServices = [
+  {
+    id: "equipment",
+    name: "Alquiler de Equipamiento",
+    description: "Pelotas, pecheras, conos",
+    price: 1500,
+    icon: <Award className="h-5 w-5" />,
+  },
+  {
+    id: "referee",
+    name: "Árbitro",
+    description: "Árbitro profesional para tu partido",
+    price: 3000,
+    icon: <Whistle className="h-5 w-5" />,
+  },
+  {
+    id: "recording",
+    name: "Grabación del Partido",
+    description: "Video HD del partido completo",
+    price: 2500,
+    icon: <Video className="h-5 w-5" />,
+  },
+  {
+    id: "grill",
+    name: "Parrilla",
+    description: "Acceso a zona de parrilla con equipamiento",
+    price: 2000,
+    icon: <Utensils className="h-5 w-5" />,
+  },
+]
+
+// Opciones de recurrencia
+const recurrenceOptions = [
+  { id: "none", name: "Sin recurrencia", discount: 0 },
+  { id: "weekly", name: "Semanal", discount: 5 },
+  { id: "biweekly", name: "Quincenal", discount: 3 },
+  { id: "monthly", name: "Mensual", discount: 2 },
 ]
 
 const Booking: React.FC = () => {
@@ -130,8 +194,16 @@ const Booking: React.FC = () => {
     contactEmail: "",
     paymentMethod: "mercadopago",
     termsAccepted: false,
+    // Nuevos campos para recurrencia
+    recurrence: "none",
+    recurrenceCount: 4,
+    recurrenceExceptions: [] as string[],
+    // Nuevos campos para servicios adicionales
+    additionalServices: [] as string[],
   })
   const [timeSlots, setTimeSlots] = useState<string[]>([])
+  const [showRecurrenceOptions, setShowRecurrenceOptions] = useState(false)
+  const [showAdditionalServices, setShowAdditionalServices] = useState(false)
 
   // Actualizar datos de contacto cuando el usuario está autenticado
   useEffect(() => {
@@ -207,6 +279,66 @@ const Booking: React.FC = () => {
     setBookingData((prev) => ({ ...prev, time }))
   }
 
+  // Manejar cambio de recurrencia
+  const handleRecurrenceChange = (recurrenceId: string) => {
+    setBookingData((prev) => ({
+      ...prev,
+      recurrence: recurrenceId,
+    }))
+  }
+
+  // Manejar cambio en el contador de recurrencia
+  const handleRecurrenceCountChange = (increment: boolean) => {
+    setBookingData((prev) => ({
+      ...prev,
+      recurrenceCount: increment ? Math.min(prev.recurrenceCount + 1, 12) : Math.max(prev.recurrenceCount - 1, 2),
+    }))
+  }
+
+  // Manejar selección de servicios adicionales
+  const handleServiceToggle = (serviceId: string) => {
+    setBookingData((prev) => {
+      if (prev.additionalServices.includes(serviceId)) {
+        return {
+          ...prev,
+          additionalServices: prev.additionalServices.filter((id) => id !== serviceId),
+        }
+      } else {
+        return {
+          ...prev,
+          additionalServices: [...prev.additionalServices, serviceId],
+        }
+      }
+    })
+  }
+
+  // Calcular precio total con descuentos y servicios adicionales
+  const calculateTotalPrice = () => {
+    if (!field) return 0
+
+    // Precio base
+    const basePrice = field.price
+
+    // Aplicar descuento por recurrencia si corresponde
+    const recurrenceOption = recurrenceOptions.find((option) => option.id === bookingData.recurrence)
+    const recurrenceDiscount = recurrenceOption ? recurrenceOption.discount / 100 : 0
+
+    // Calcular precio con descuento
+    const discountedPrice = basePrice * (1 - recurrenceDiscount)
+
+    // Multiplicar por la cantidad de recurrencias si no es "none"
+    const recurrenceMultiplier = bookingData.recurrence !== "none" ? bookingData.recurrenceCount : 1
+
+    // Calcular precio de servicios adicionales
+    const servicesPrice = bookingData.additionalServices.reduce((total, serviceId) => {
+      const service = additionalServices.find((s) => s.id === serviceId)
+      return total + (service ? service.price : 0)
+    }, 0)
+
+    // Precio total
+    return discountedPrice * recurrenceMultiplier + servicesPrice
+  }
+
   const handleNextStep = () => {
     // Validar paso actual
     if (currentStep === 1) {
@@ -264,6 +396,41 @@ const Booking: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
       </div>
     )
+  }
+
+  // Formatear fecha para mostrar
+  const formatDate = (dateString: string) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
+  }
+
+  // Obtener fechas recurrentes basadas en la configuración
+  const getRecurrenceDates = () => {
+    if (bookingData.recurrence === "none" || !bookingData.date) return []
+
+    const dates = []
+    const startDate = new Date(bookingData.date)
+
+    for (let i = 0; i < bookingData.recurrenceCount; i++) {
+      const currentDate = new Date(startDate)
+
+      if (bookingData.recurrence === "weekly") {
+        currentDate.setDate(currentDate.getDate() + i * 7)
+      } else if (bookingData.recurrence === "biweekly") {
+        currentDate.setDate(currentDate.getDate() + i * 14)
+      } else if (bookingData.recurrence === "monthly") {
+        currentDate.setMonth(currentDate.getMonth() + i)
+      }
+
+      // Verificar si la fecha está en excepciones
+      const dateString = currentDate.toISOString().split("T")[0]
+      if (!bookingData.recurrenceExceptions.includes(dateString)) {
+        dates.push(dateString)
+      }
+    }
+
+    return dates
   }
 
   return (
@@ -407,6 +574,111 @@ const Booking: React.FC = () => {
                         )}
                       </div>
 
+                      {/* Reservas Recurrentes */}
+                      <div className="border border-gray-200 rounded-lg p-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowRecurrenceOptions(!showRecurrenceOptions)}
+                          className="flex justify-between items-center w-full"
+                        >
+                          <div className="flex items-center">
+                            <Repeat className="h-5 w-5 mr-2 text-emerald-600" />
+                            <span className="font-medium">Reservas Recurrentes</span>
+                          </div>
+                          {showRecurrenceOptions ? (
+                            <ChevronUp className="h-5 w-5 text-gray-500" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-gray-500" />
+                          )}
+                        </button>
+
+                        {showRecurrenceOptions && (
+                          <div className="mt-4 space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Frecuencia de Reserva
+                              </label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {recurrenceOptions.map((option) => (
+                                  <button
+                                    key={option.id}
+                                    type="button"
+                                    onClick={() => handleRecurrenceChange(option.id)}
+                                    className={`py-2 px-3 rounded-lg text-center transition-colors ${
+                                      bookingData.recurrence === option.id
+                                        ? "bg-emerald-600 text-white"
+                                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                                    }`}
+                                  >
+                                    {option.name}
+                                    {option.discount > 0 && (
+                                      <span className="block text-xs mt-1">
+                                        {bookingData.recurrence === option.id ? "Descuento " : ""}
+                                        {option.discount}% {bookingData.recurrence !== option.id ? "descuento" : ""}
+                                      </span>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {bookingData.recurrence !== "none" && (
+                              <>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Número de Repeticiones
+                                  </label>
+                                  <div className="flex items-center">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRecurrenceCountChange(false)}
+                                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
+                                      disabled={bookingData.recurrenceCount <= 2}
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <div className="h-8 px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white">
+                                      {bookingData.recurrenceCount}
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRecurrenceCountChange(true)}
+                                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
+                                      disabled={bookingData.recurrenceCount >= 12}
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                    <span className="ml-3 text-sm text-gray-600">
+                                      {bookingData.recurrence === "weekly" && "semanas"}
+                                      {bookingData.recurrence === "biweekly" && "quincenas"}
+                                      {bookingData.recurrence === "monthly" && "meses"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Fechas Programadas
+                                  </label>
+                                  <div className="bg-gray-50 p-3 rounded-lg max-h-32 overflow-y-auto">
+                                    {getRecurrenceDates().map((date, index) => (
+                                      <div
+                                        key={date}
+                                        className="flex items-center justify-between py-1 border-b border-gray-100 last:border-0"
+                                      >
+                                        <span className="text-sm">
+                                          {index + 1}. {formatDate(date)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad de Jugadores</label>
                         <input
@@ -470,6 +742,72 @@ const Booking: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Servicios Adicionales */}
+                  {field.hasAdditionalServices && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowAdditionalServices(!showAdditionalServices)}
+                        className="flex justify-between items-center w-full"
+                      >
+                        <div className="flex items-center">
+                          <Plus className="h-5 w-5 mr-2 text-emerald-600" />
+                          <span className="font-medium">Servicios Adicionales</span>
+                        </div>
+                        {showAdditionalServices ? (
+                          <ChevronUp className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-gray-500" />
+                        )}
+                      </button>
+
+                      {showAdditionalServices && (
+                        <div className="mt-4 space-y-2">
+                          {additionalServices.map((service) => (
+                            <div
+                              key={service.id}
+                              className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                                bookingData.additionalServices.includes(service.id)
+                                  ? "border-emerald-500 bg-emerald-50"
+                                  : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50"
+                              }`}
+                              onClick={() => handleServiceToggle(service.id)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <div
+                                    className={`p-2 rounded-full mr-3 ${
+                                      bookingData.additionalServices.includes(service.id)
+                                        ? "bg-emerald-100 text-emerald-600"
+                                        : "bg-gray-100 text-gray-500"
+                                    }`}
+                                  >
+                                    {service.icon}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium">{service.name}</h4>
+                                    <p className="text-sm text-gray-600">{service.description}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className="font-semibold text-emerald-600">${service.price}</span>
+                                  <div className="mt-1">
+                                    <input
+                                      type="checkbox"
+                                      checked={bookingData.additionalServices.includes(service.id)}
+                                      onChange={() => {}} // Controlado por el onClick del div padre
+                                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
@@ -505,14 +843,42 @@ const Booking: React.FC = () => {
                         <p className="text-gray-600">Tipo:</p>
                         <p className="font-medium">{field.type}</p>
                       </div>
-                      <div>
-                        <p className="text-gray-600">Fecha:</p>
-                        <p className="font-medium">{new Date(bookingData.date).toLocaleDateString("es-AR")}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Hora:</p>
-                        <p className="font-medium">{bookingData.time}hs</p>
-                      </div>
+
+                      {bookingData.recurrence === "none" ? (
+                        <>
+                          <div>
+                            <p className="text-gray-600">Fecha:</p>
+                            <p className="font-medium">{formatDate(bookingData.date)}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Hora:</p>
+                            <p className="font-medium">{bookingData.time}hs</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="md:col-span-2">
+                          <p className="text-gray-600">Fechas:</p>
+                          <div className="font-medium">
+                            <p className="mb-1">
+                              {recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.name} -
+                              {bookingData.recurrenceCount}{" "}
+                              {bookingData.recurrence === "weekly"
+                                ? "semanas"
+                                : bookingData.recurrence === "biweekly"
+                                  ? "quincenas"
+                                  : "meses"}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                              {getRecurrenceDates().map((date, index) => (
+                                <p key={date}>
+                                  {index + 1}. {formatDate(date)} - {bookingData.time}hs
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <p className="text-gray-600">Duración:</p>
                         <p className="font-medium">{field.duration} minutos</p>
@@ -522,6 +888,29 @@ const Booking: React.FC = () => {
                         <p className="font-medium">{bookingData.players}</p>
                       </div>
                     </div>
+
+                    {/* Servicios adicionales seleccionados */}
+                    {bookingData.additionalServices.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <p className="text-gray-600 mb-2">Servicios adicionales:</p>
+                        <div className="space-y-2">
+                          {bookingData.additionalServices.map((serviceId) => {
+                            const service = additionalServices.find((s) => s.id === serviceId)
+                            return service ? (
+                              <div key={service.id} className="flex justify-between">
+                                <div className="flex items-center">
+                                  <div className="p-1 bg-emerald-100 rounded-full mr-2 text-emerald-600">
+                                    {service.icon}
+                                  </div>
+                                  <span>{service.name}</span>
+                                </div>
+                                <span className="font-medium">${service.price}</span>
+                              </div>
+                            ) : null
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -554,17 +943,66 @@ const Booking: React.FC = () => {
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-700">Subtotal</span>
-                      <span className="font-medium">${field.price}</span>
+                    {/* Desglose de precios */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Precio base</span>
+                        <span className="font-medium">${field.price}</span>
+                      </div>
+
+                      {bookingData.recurrence !== "none" && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">
+                            Descuento por reserva{" "}
+                            {recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.name.toLowerCase()}
+                          </span>
+                          <span className="font-medium text-green-600">
+                            -{recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.discount}%
+                          </span>
+                        </div>
+                      )}
+
+                      {bookingData.recurrence !== "none" && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">
+                            Subtotal por {bookingData.recurrenceCount}{" "}
+                            {bookingData.recurrence === "weekly"
+                              ? "semanas"
+                              : bookingData.recurrence === "biweekly"
+                                ? "quincenas"
+                                : "meses"}
+                          </span>
+                          <span className="font-medium">
+                            $
+                            {(
+                              field.price *
+                              (1 -
+                                (recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.discount || 0) / 100) *
+                              bookingData.recurrenceCount
+                            ).toFixed(0)}
+                          </span>
+                        </div>
+                      )}
+
+                      {bookingData.additionalServices.length > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-700">Servicios adicionales</span>
+                          <span className="font-medium">
+                            $
+                            {bookingData.additionalServices.reduce((total, serviceId) => {
+                              const service = additionalServices.find((s) => s.id === serviceId)
+                              return total + (service ? service.price : 0)
+                            }, 0)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="border-t border-gray-200 pt-2 mt-2"></div>
                     </div>
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>Impuestos</span>
-                      <span>Incluidos</span>
-                    </div>
+
                     <div className="flex justify-between font-semibold text-lg mt-4">
                       <span>Total</span>
-                      <span className="text-emerald-600">${field.price}</span>
+                      <span className="text-emerald-600">${calculateTotalPrice().toFixed(0)}</span>
                     </div>
                   </div>
 
