@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { MapPin, Star, Clock, Users, DollarSign, Calendar, ChevronLeft, Map } from "lucide-react"
-import GoogleMapComponent from "../../../components/GoogleMap"
+import GoogleMapComponent from "../../../components/fields/MapView"
 
 // Mock data for fields
 const mockFields = {
