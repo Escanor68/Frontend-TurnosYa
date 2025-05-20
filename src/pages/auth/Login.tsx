@@ -1,5 +1,7 @@
+"use client"
+
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { Mail, Lock, ClubIcon as Soccer } from "lucide-react"
 import { toast } from "react-toastify"
@@ -7,26 +9,39 @@ import { useAuth } from "../../context/AuthContext"
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/")
+    }
+  }, [isAuthenticated, navigate])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }))
+    // Limpiar mensaje de error cuando el usuario empieza a escribir
+    if (error) setError("")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError("")
 
     try {
+      // Para depuración
       console.log("Intentando login con:", formData)
+
       const success = await login(formData.email, formData.password)
 
       if (success) {
@@ -38,14 +53,35 @@ const Login: React.FC = () => {
 
         navigate(redirectUrl)
       } else {
+        setError("Credenciales inválidas. Por favor intenta nuevamente.")
         toast.error("Credenciales inválidas. Por favor intenta nuevamente.")
-        console.error("Login fallido: Credenciales incorrectas")
       }
     } catch (error) {
-      toast.error("Error al iniciar sesión. Por favor intenta nuevamente.")
       console.error("Error de inicio de sesión:", error)
+      setError("Error al iniciar sesión. Por favor intenta nuevamente.")
+      toast.error("Error al iniciar sesión. Por favor intenta nuevamente.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Para depuración - mostrar credenciales de prueba
+  const fillTestCredentials = (type: "admin" | "owner" | "user") => {
+    if (type === "admin") {
+      setFormData({
+        email: "admin@example.com",
+        password: "admin123",
+      })
+    } else if (type === "owner") {
+      setFormData({
+        email: "owner@example.com",
+        password: "owner123",
+      })
+    } else {
+      setFormData({
+        email: "demo@example.com",
+        password: "password",
+      })
     }
   }
 
@@ -66,6 +102,12 @@ const Login: React.FC = () => {
         </div>
 
         <div className="bg-white py-8 px-6 shadow rounded-lg">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -141,6 +183,34 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
+
+          {/* Botones de ayuda para desarrollo */}
+          <div className="mt-4 border-t pt-4">
+            <p className="text-sm text-gray-500 mb-2">Credenciales de prueba:</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => fillTestCredentials("admin")}
+                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
+              >
+                Super Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => fillTestCredentials("owner")}
+                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
+              >
+                Propietario
+              </button>
+              <button
+                type="button"
+                onClick={() => fillTestCredentials("user")}
+                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
+              >
+                Jugador
+              </button>
+            </div>
+          </div>
 
           <div className="mt-6">
             <div className="relative">

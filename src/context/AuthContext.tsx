@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 
@@ -6,8 +8,10 @@ interface User {
   id: string
   name: string
   email: string
-  isAdmin: boolean
-  hasFields: boolean
+  isAdmin: boolean // Para super administradores (solo 3 personas)
+  hasFields: boolean,
+  isOwner: boolean // Para propietarios de canchas (reemplaza hasFields)
+  phone?: string // Añadir teléfono opcional
 }
 
 interface AuthContextType {
@@ -15,9 +19,39 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string, userType: string, phone?: string) => Promise<boolean>
   logout: () => void
 }
+
+// Usuarios mockeados para desarrollo
+const MOCK_USERS = [
+  {
+    id: "admin1",
+    name: "Super Admin",
+    email: "admin@example.com",
+    password: "admin123",
+    hasFields: true,
+    isOwner: false,
+  },
+  {
+    id: "owner1",
+    name: "Propietario Demo",
+    email: "owner@example.com",
+    password: "owner123",
+    hasFields: false,
+    isOwner: true,
+    phone: "1155667788",
+  },
+  {
+    id: "user1",
+    name: "Demo Usuario",
+    email: "demo@example.com",
+    password: "password",
+    hasFields: false,
+    isOwner: false,
+    phone: "1198765432",
+  },
+]
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
@@ -39,51 +73,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user is already logged in
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (e) {
+        console.error("Error parsing stored user:", e)
+        localStorage.removeItem("user")
+      }
     }
     setIsLoading(false)
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // This would be replaced with an actual API call
       // Simulating API call for demo purposes
       await new Promise((resolve) => setTimeout(resolve, 800))
 
-      // Para propósitos de depuración
       console.log("Intentando login con:", { email, password })
 
-      // Admin user credentials
-      if (email === "admin@example.com" && password === "admin123") {
-        const adminUser: User = {
-          id: "admin1",
-          name: "Administrador",
-          email: "admin@example.com",
-          isAdmin: true,
-          hasFields: true,
-        }
+      // Buscar usuario en la lista de usuarios mockeados
+      const foundUser = MOCK_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password)
 
-        setUser(adminUser)
-        localStorage.setItem("user", JSON.stringify(adminUser))
-        return true
-      }
-
-      // Regular user credentials
-      if (email === "demo@example.com" && password === "password") {
+      if (foundUser) {
+        // Crear objeto de usuario sin incluir la contraseña
         const userData: User = {
-          id: "1",
-          name: "Demo User",
-          email: "demo@example.com",
-          isAdmin: false,
-          hasFields: false,
+          id: foundUser.id,
+          name: foundUser.name,
+          email: foundUser.email,
+          isAdmin: foundUser.isAdmin,
+          hasFields: foundUser.hasFields,
+          isOwner: foundUser.isOwner,
+          phone: foundUser.phone,
         }
 
         setUser(userData)
         localStorage.setItem("user", JSON.stringify(userData))
+        console.log("Login exitoso:", userData)
         return true
       }
 
-      // Si llegamos aquí, las credenciales no coinciden
       console.log("Credenciales inválidas")
       return false
     } catch (error) {
@@ -92,9 +119,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    userType: string,
+    phone?: string,
+  ): Promise<boolean> => {
     try {
-      // This would be replaced with an actual API call
       // Simulating API call for demo purposes
       await new Promise((resolve) => setTimeout(resolve, 800))
 
@@ -103,7 +135,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name,
         email,
         isAdmin: false,
-        hasFields: false,
+        isOwner: userType === "owner",
+        phone,
       }
 
       setUser(userData)

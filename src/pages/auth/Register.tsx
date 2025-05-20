@@ -1,7 +1,9 @@
+"use client"
+
 import type React from "react"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { Mail, Lock, User, ClubIcon as Soccer } from "lucide-react"
+import { Mail, Lock, User, Phone, ClubIcon as Soccer } from "lucide-react"
 import { toast } from "react-toastify"
 import { useAuth } from "../../context/AuthContext"
 
@@ -13,6 +15,8 @@ const Register: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    userType: "player", // Predeterminado como jugador
+    phone: "", // Añadir teléfono
   })
   const [loading, setLoading] = useState(false)
 
@@ -32,7 +36,13 @@ const Register: React.FC = () => {
 
     setLoading(true)
     try {
-      const success = await register(formData.name, formData.email, formData.password)
+      const success = await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.userType,
+        formData.phone,
+      )
       if (success) {
         toast.success("¡Registro exitoso!")
         navigate("/")
@@ -106,6 +116,57 @@ const Register: React.FC = () => {
                   placeholder="tu@email.com"
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Teléfono de contacto
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="11-1234-5678"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Usuario</label>
+              <div className="mt-1 flex space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="userType"
+                    value="player"
+                    checked={formData.userType === "player"}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-gray-700">Jugador</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="userType"
+                    value="owner"
+                    checked={formData.userType === "owner"}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-gray-700">Propietario de canchas</span>
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Los propietarios de canchas pueden publicar y administrar sus canchas en el sistema.
+              </p>
             </div>
 
             <div>

@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
@@ -73,7 +75,7 @@ const Header: React.FC = () => {
                       </Link>
                     </>
                   )}
-                  {user?.hasFields && !user?.isAdmin && (
+                  {user?.isOwner && (
                     <Link
                       to="/manage-fields"
                       className="block px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors"
@@ -88,6 +90,12 @@ const Header: React.FC = () => {
                   >
                     Cerrar Sesión
                   </button>
+                  <div>
+                    <p className="text-sm text-gray-500">Tipo de cuenta</p>
+                    <p className="font-medium">
+                      {user?.isAdmin ? "Super Administrador" : user?.isOwner ? "Propietario de Canchas" : "Jugador"}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -157,7 +165,7 @@ const Header: React.FC = () => {
                     </Link>
                   </>
                 )}
-                {user?.hasFields && !user?.isAdmin && (
+                {user?.isOwner && !user?.isAdmin && (
                   <Link
                     to="/manage-fields"
                     className="text-white py-2 hover:bg-emerald-600 px-3 rounded transition-colors"

@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
@@ -192,12 +194,11 @@ const Booking: React.FC = () => {
     contactEmail: "",
     paymentMethod: "mercadopago",
     termsAccepted: false,
-    // Nuevos campos para recurrencia
-    recurrence: "none",
+    // Nuevo campo para recurrencia por día
+    dayRecurrence: "none",
     recurrenceCount: 4,
-    recurrenceExceptions: [] as string[],
-    // Nuevos campos para servicios adicionales
-    additionalServices: [] as string[],
+    // Campo para notas de servicios adicionales
+    additionalServicesNotes: "",
   })
   const [timeSlots, setTimeSlots] = useState<string[]>([])
   const [showRecurrenceOptions, setShowRecurrenceOptions] = useState(false)
@@ -210,6 +211,7 @@ const Booking: React.FC = () => {
         ...prev,
         contactName: user.name || prev.contactName,
         contactEmail: user.email || prev.contactEmail,
+        contactPhone: user.phone || prev.contactPhone,
       }))
     }
   }, [user])
@@ -264,7 +266,7 @@ const Booking: React.FC = () => {
     }
   }, [loading, isAuthenticated, navigate, fieldId, location.search])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement
 
     setBookingData((prev) => ({
@@ -593,85 +595,52 @@ const Booking: React.FC = () => {
                         {showRecurrenceOptions && (
                           <div className="mt-4 space-y-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Frecuencia de Reserva
-                              </label>
-                              <div className="grid grid-cols-2 gap-2">
-                                {recurrenceOptions.map((option) => (
-                                  <button
-                                    key={option.id}
-                                    type="button"
-                                    onClick={() => handleRecurrenceChange(option.id)}
-                                    className={`py-2 px-3 rounded-lg text-center transition-colors ${
-                                      bookingData.recurrence === option.id
-                                        ? "bg-emerald-600 text-white"
-                                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                                    }`}
-                                  >
-                                    {option.name}
-                                    {option.discount > 0 && (
-                                      <span className="block text-xs mt-1">
-                                        {bookingData.recurrence === option.id ? "Descuento " : ""}
-                                        {option.discount}% {bookingData.recurrence !== option.id ? "descuento" : ""}
-                                      </span>
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Repetir reserva</label>
+                              <select
+                                name="dayRecurrence"
+                                value={bookingData.dayRecurrence || "none"}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                              >
+                                <option value="none">Sin repetición</option>
+                                <option value="monday">Todos los lunes</option>
+                                <option value="tuesday">Todos los martes</option>
+                                <option value="wednesday">Todos los miércoles</option>
+                                <option value="thursday">Todos los jueves</option>
+                                <option value="friday">Todos los viernes</option>
+                                <option value="saturday">Todos los sábados</option>
+                                <option value="sunday">Todos los domingos</option>
+                              </select>
                             </div>
 
-                            {bookingData.recurrence !== "none" && (
-                              <>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Número de Repeticiones
-                                  </label>
-                                  <div className="flex items-center">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRecurrenceCountChange(false)}
-                                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
-                                      disabled={bookingData.recurrenceCount <= 2}
-                                    >
-                                      <Minus className="h-4 w-4" />
-                                    </button>
-                                    <div className="h-8 px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white">
-                                      {bookingData.recurrenceCount}
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRecurrenceCountChange(true)}
-                                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
-                                      disabled={bookingData.recurrenceCount >= 12}
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </button>
-                                    <span className="ml-3 text-sm text-gray-600">
-                                      {bookingData.recurrence === "weekly" && "semanas"}
-                                      {bookingData.recurrence === "biweekly" && "quincenas"}
-                                      {bookingData.recurrence === "monthly" && "meses"}
-                                    </span>
+                            {bookingData.dayRecurrence && bookingData.dayRecurrence !== "none" && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  Número de semanas
+                                </label>
+                                <div className="flex items-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRecurrenceCountChange(false)}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
+                                    disabled={bookingData.recurrenceCount <= 2}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </button>
+                                  <div className="h-8 px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white">
+                                    {bookingData.recurrenceCount}
                                   </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRecurrenceCountChange(true)}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
+                                    disabled={bookingData.recurrenceCount >= 12}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </button>
+                                  <span className="ml-3 text-sm text-gray-600">semanas</span>
                                 </div>
-
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Fechas Programadas
-                                  </label>
-                                  <div className="bg-gray-50 p-3 rounded-lg max-h-32 overflow-y-auto">
-                                    {getRecurrenceDates().map((date, index) => (
-                                      <div
-                                        key={date}
-                                        className="flex items-center justify-between py-1 border-b border-gray-100 last:border-0"
-                                      >
-                                        <span className="text-sm">
-                                          {index + 1}. {formatDate(date)}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </>
+                              </div>
                             )}
                           </div>
                         )}
@@ -761,46 +730,20 @@ const Booking: React.FC = () => {
 
                       {showAdditionalServices && (
                         <div className="mt-4 space-y-2">
-                          {additionalServices.map((service) => (
-                            <div
-                              key={service.id}
-                              className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                                bookingData.additionalServices.includes(service.id)
-                                  ? "border-emerald-500 bg-emerald-50"
-                                  : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50"
-                              }`}
-                              onClick={() => handleServiceToggle(service.id)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                  <div
-                                    className={`p-2 rounded-full mr-3 ${
-                                      bookingData.additionalServices.includes(service.id)
-                                        ? "bg-emerald-100 text-emerald-600"
-                                        : "bg-gray-100 text-gray-500"
-                                    }`}
-                                  >
-                                    {service.icon}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium">{service.name}</h4>
-                                    <p className="text-sm text-gray-600">{service.description}</p>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <span className="font-semibold text-emerald-600">${service.price}</span>
-                                  <div className="mt-1">
-                                    <input
-                                      type="checkbox"
-                                      checked={bookingData.additionalServices.includes(service.id)}
-                                      onChange={() => {}} // Controlado por el onClick del div padre
-                                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            ¿Necesitas algún servicio adicional?
+                          </label>
+                          <textarea
+                            name="additionalServicesNotes"
+                            value={bookingData.additionalServicesNotes || ""}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                            rows={3}
+                            placeholder="Describe qué servicios adicionales necesitas (árbitro, pelotas, pecheras, etc.)"
+                          />
+                          <p className="text-sm text-gray-500">
+                            Los servicios adicionales serán coordinados directamente con el propietario de la cancha.
+                          </p>
                         </div>
                       )}
                     </div>
@@ -859,7 +802,6 @@ const Booking: React.FC = () => {
                           <div className="font-medium">
                             <p className="mb-1">
                               {recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.name} -
-                              {bookingData.recurrenceCount}{" "}
                               {bookingData.recurrence === "weekly"
                                 ? "semanas"
                                 : bookingData.recurrence === "biweekly"

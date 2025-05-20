@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState } from "react"
 import { useAuth } from "../../context/AuthContext"
@@ -95,17 +97,23 @@ const Profile: React.FC = () => {
                 <p className="text-sm text-gray-500">Email</p>
                 <p className="font-medium">{user.email}</p>
               </div>
+              {user.phone && (
+                <div>
+                  <p className="text-sm text-gray-500">Teléfono</p>
+                  <p className="font-medium">{user.phone}</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm text-gray-500">Tipo de cuenta</p>
                 <p className="font-medium">
-                  {user.isAdmin ? "Administrador" : user.hasFields ? "Propietario de Canchas" : "Usuario"}
+                  {user.isAdmin ? "Super Administrador" : user.isOwner ? "Propietario de Canchas" : "Jugador"}
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex justify-end">
-              <button className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-                Editar información
-              </button>
+            <div className="mt-4 bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm text-gray-500">
+                Para actualizar tu información personal, por favor contacta con atención al cliente.
+              </p>
             </div>
           </div>
         </div>
@@ -114,7 +122,7 @@ const Profile: React.FC = () => {
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <nav className="flex -mb-px">
-              {!user.hasFields && (
+              {!user.isOwner && (
                 <button
                   onClick={() => setActiveTab("reservations")}
                   className={`py-4 px-6 text-sm font-medium ${
@@ -134,9 +142,9 @@ const Profile: React.FC = () => {
                     : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                {user.hasFields ? "Comentarios Recibidos" : "Mis Comentarios"}
+                {user.isOwner ? "Comentarios Recibidos" : "Mis Comentarios"}
               </button>
-              {user.hasFields && (
+              {user.isOwner && (
                 <button
                   onClick={() => setActiveTab("fields")}
                   className={`py-4 px-6 text-sm font-medium ${
@@ -155,7 +163,7 @@ const Profile: React.FC = () => {
         {/* Tab Content */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           {/* Reservations Tab */}
-          {activeTab === "reservations" && !user.hasFields && (
+          {activeTab === "reservations" && !user.isOwner && (
             <div>
               <div className="px-6 py-4 bg-emerald-600">
                 <h2 className="text-xl font-semibold text-white">Mis Reservas</h2>
@@ -197,12 +205,10 @@ const Profile: React.FC = () => {
                           </div>
                         </div>
                         <div className="mt-3 flex justify-end space-x-2">
-                          <button className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-                            Ver detalles
-                          </button>
-                          {reservation.status !== "cancelled" && (
-                            <button className="text-sm text-red-600 hover:text-red-700 font-medium">Cancelar</button>
-                          )}
+                          {/* Botón de ver detalles eliminado */}
+                          <p className="text-sm text-gray-600">
+                            Si necesitas información adicional, contacta al propietario de la cancha.
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -224,11 +230,11 @@ const Profile: React.FC = () => {
             <div>
               <div className="px-6 py-4 bg-emerald-600">
                 <h2 className="text-xl font-semibold text-white">
-                  {user.hasFields ? "Comentarios Recibidos" : "Mis Comentarios"}
+                  {user.isOwner ? "Comentarios Recibidos" : "Mis Comentarios"}
                 </h2>
               </div>
               <div className="p-6">
-                {user.hasFields ? (
+                {user.isOwner ? (
                   // Mostrar comentarios recibidos para usuarios con campos
                   <div>
                     {mockReceivedComments.length > 0 ? (
@@ -322,7 +328,7 @@ const Profile: React.FC = () => {
           )}
 
           {/* Fields Tab (for field owners) */}
-          {activeTab === "fields" && user.hasFields && (
+          {activeTab === "fields" && user.isOwner && (
             <div>
               <div className="px-6 py-4 bg-emerald-600">
                 <h2 className="text-xl font-semibold text-white">Mis Canchas</h2>
