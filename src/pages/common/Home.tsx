@@ -43,12 +43,12 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 bg-gray-100 p-2 rounded text-gray-700">
                     <Filter className="w-4 h-4 text-gray-500" />
-                    <select className="w-full bg-transparent outline-none">
+                    /*<select className="w-full bg-transparent outline-none">
                       <option>Todos los deportes</option>
                       <option>Fútbol</option>
                       <option>Pádel</option>
                       <option>Tenis</option>
-                    </select>
+                    </select>*/
                   </div>
                 </div>
                 <Link
