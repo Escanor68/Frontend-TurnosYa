@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import { Repeat, Plus, Minus, Calendar } from "lucide-react"
 

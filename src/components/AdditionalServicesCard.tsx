@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import { Utensils, BellIcon as Whistle, Video, Award } from "lucide-react"
 
