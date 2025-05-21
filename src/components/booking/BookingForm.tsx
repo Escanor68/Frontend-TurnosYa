@@ -1,21 +1,7 @@
 "use client"
 
 import type React from "react"
-import {
-  Calendar,
-  Clock,
-  Users,
-  MapPin,
-  CreditCard,
-  CheckCircle,
-  AlertCircle,
-  ChevronLeft,
-  Repeat,
-  Plus,
-  Minus,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react"
+import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, ChevronLeft, Repeat, Plus, Minus, ChevronDown, ChevronUp } from 'lucide-react'
 import { useBooking } from "../../hooks/useBooking"
 import { useFormValidation, bookingValidationSchema } from "../../hooks/useFormValidation"
 import { additionalServices, recurrenceOptions, paymentMethods } from "../../services/mockData"
