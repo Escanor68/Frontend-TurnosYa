@@ -7,7 +7,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "../../../context/AuthContext"
 import type { BookingFormData, SportField } from "../../../types"
-import { getFieldById, additionalServices, recurrenceOptions } from "../../../services/mockData"
+import { getFieldById, recurrenceOptions } from "../../../services/mockData"
 import { LoadingSpinner } from "../../../components/common/LoadingSpinner"
 import { useFormValidation, bookingValidationSchema } from "../../../hooks/useFormValidation"
 
@@ -41,7 +41,7 @@ const DirectBookingForm: React.FC = () => {
     termsAccepted: false,
     recurrence: "none",
     recurrenceCount: 4,
-    additionalServices: [],
+    additionalServices: [], // Agregar esta propiedad que faltaba
     additionalServicesNotes: "",
     recurrenceExceptions: [],
   })
@@ -96,23 +96,6 @@ const DirectBookingForm: React.FC = () => {
       ...prev,
       recurrenceCount: increment ? Math.min(prev.recurrenceCount + 1, 12) : Math.max(prev.recurrenceCount - 1, 2),
     }))
-  }
-
-  // Manejar selección de servicios adicionales
-  const handleServiceToggle = (serviceId: string) => {
-    setBookingData((prev) => {
-      if (prev.additionalServices.includes(serviceId)) {
-        return {
-          ...prev,
-          additionalServices: prev.additionalServices.filter((id) => id !== serviceId),
-        }
-      } else {
-        return {
-          ...prev,
-          additionalServices: [...prev.additionalServices, serviceId],
-        }
-      }
-    })
   }
 
   // Calcular precio total con descuentos y servicios adicionales
@@ -170,7 +153,7 @@ const DirectBookingForm: React.FC = () => {
         paymentMethod: bookingData.paymentMethod,
         recurrence: bookingData.recurrence,
         recurrenceCount: bookingData.recurrenceCount,
-        additionalServices: bookingData.additionalServices,
+        additionalServices: bookingData.additionalServices, // Agregar esta propiedad
         additionalServicesNotes: bookingData.additionalServicesNotes,
         totalPrice: calculateTotalPrice(),
         // Datos de pago que se completarán con la integración real
@@ -464,60 +447,21 @@ const DirectBookingForm: React.FC = () => {
                     </button>
 
                     {showAdditionalServices && (
-                      <div className="mt-4 space-y-2">
-                        <div className="space-y-3">
-                          {additionalServices.map((service) => (
-                            <div
-                              key={service.id}
-                              className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                                bookingData.additionalServices.includes(service.id)
-                                  ? "border-emerald-500 bg-emerald-50"
-                                  : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50"
-                              }`}
-                              onClick={() => handleServiceToggle(service.id)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                  <div
-                                    className={`p-2 rounded-full mr-3 ${
-                                      bookingData.additionalServices.includes(service.id)
-                                        ? "bg-emerald-100 text-emerald-600"
-                                        : "bg-gray-100 text-gray-500"
-                                    }`}
-                                  >
-                                    {service.icon}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium">{service.name}</h4>
-                                    <p className="text-sm text-gray-600">{service.description}</p>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-xs text-emerald-600 font-medium">Sin cargo</span>
-                                  <div className="mt-1">
-                                    <input
-                                      type="checkbox"
-                                      checked={bookingData.additionalServices.includes(service.id)}
-                                      onChange={() => {}} // Controlado por el onClick del div padre
-                                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Notas adicionales sobre servicios
+                          Servicios adicionales requeridos
                         </label>
                         <textarea
                           name="additionalServicesNotes"
-                          value={bookingData.additionalServicesNotes || ""}
+                          value={bookingData.additionalServicesNotes}
                           onChange={handleInputChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                          rows={3}
-                          placeholder="Describe cualquier detalle adicional sobre los servicios seleccionados"
+                          className="w-full p-3 border border-gray-300 rounded-md"
+                          rows={4}
+                          placeholder="Describe aquí los servicios adicionales que necesitas (árbitro, pelotas, pecheras, grabación del partido, etc.)"
                         />
+                        <p className="text-xs text-gray-500 mt-2">
+                          Los servicios adicionales son sin cargo y están sujetos a disponibilidad.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -643,9 +587,9 @@ const DirectBookingForm: React.FC = () => {
                       </div>
                     )}
 
-                    {bookingData.additionalServices.length > 0 && (
+                    {bookingData.additionalServicesNotes && (
                       <div className="flex justify-between">
-                        <span className="text-gray-700">Servicios adicionales seleccionados</span>
+                        <span className="text-gray-700">Servicios adicionales</span>
                         <span className="font-medium text-emerald-600">Sin cargo</span>
                       </div>
                     )}
