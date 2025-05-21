@@ -194,11 +194,15 @@ const Booking: React.FC = () => {
     contactEmail: "",
     paymentMethod: "mercadopago",
     termsAccepted: false,
-    // Nuevo campo para recurrencia por día
+    // Campos para recurrencia
+    recurrence: "none", // Añadido para corregir errores
     dayRecurrence: "none",
     recurrenceCount: 4,
-    // Campo para notas de servicios adicionales
+    // Campos para servicios adicionales
+    additionalServices: [] as string[], // Añadido para corregir errores
     additionalServicesNotes: "",
+    // Campo para excepciones de recurrencia
+    recurrenceExceptions: [] as string[], // Añadido para corregir errores
   })
   const [timeSlots, setTimeSlots] = useState<string[]>([])
   const [showRecurrenceOptions, setShowRecurrenceOptions] = useState(false)
@@ -597,26 +601,22 @@ const Booking: React.FC = () => {
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Repetir reserva</label>
                               <select
-                                name="dayRecurrence"
-                                value={bookingData.dayRecurrence || "none"}
+                                name="recurrence" // Cambiado de dayRecurrence a recurrence
+                                value={bookingData.recurrence}
                                 onChange={handleInputChange}
                                 className="w-full p-2 border border-gray-300 rounded-md"
                               >
                                 <option value="none">Sin repetición</option>
-                                <option value="monday">Todos los lunes</option>
-                                <option value="tuesday">Todos los martes</option>
-                                <option value="wednesday">Todos los miércoles</option>
-                                <option value="thursday">Todos los jueves</option>
-                                <option value="friday">Todos los viernes</option>
-                                <option value="saturday">Todos los sábados</option>
-                                <option value="sunday">Todos los domingos</option>
+                                <option value="weekly">Semanal</option>
+                                <option value="biweekly">Quincenal</option>
+                                <option value="monthly">Mensual</option>
                               </select>
                             </div>
 
-                            {bookingData.dayRecurrence && bookingData.dayRecurrence !== "none" && (
+                            {bookingData.recurrence && bookingData.recurrence !== "none" && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Número de semanas
+                                  Número de repeticiones
                                 </label>
                                 <div className="flex items-center">
                                   <button
@@ -638,7 +638,11 @@ const Booking: React.FC = () => {
                                   >
                                     <Plus className="h-4 w-4" />
                                   </button>
-                                  <span className="ml-3 text-sm text-gray-600">semanas</span>
+                                  <span className="ml-3 text-sm text-gray-600">
+                                    {bookingData.recurrence === "weekly" && "semanas"}
+                                    {bookingData.recurrence === "biweekly" && "quincenas"}
+                                    {bookingData.recurrence === "monthly" && "meses"}
+                                  </span>
                                 </div>
                               </div>
                             )}
@@ -730,8 +734,50 @@ const Booking: React.FC = () => {
 
                       {showAdditionalServices && (
                         <div className="mt-4 space-y-2">
+                          <div className="space-y-3">
+                            {additionalServices.map((service) => (
+                              <div
+                                key={service.id}
+                                className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                                  bookingData.additionalServices.includes(service.id)
+                                    ? "border-emerald-500 bg-emerald-50"
+                                    : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50"
+                                }`}
+                                onClick={() => handleServiceToggle(service.id)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <div
+                                      className={`p-2 rounded-full mr-3 ${
+                                        bookingData.additionalServices.includes(service.id)
+                                          ? "bg-emerald-100 text-emerald-600"
+                                          : "bg-gray-100 text-gray-500"
+                                      }`}
+                                    >
+                                      {service.icon}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-medium">{service.name}</h4>
+                                      <p className="text-sm text-gray-600">{service.description}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="font-semibold text-emerald-600">${service.price}</span>
+                                    <div className="mt-1">
+                                      <input
+                                        type="checkbox"
+                                        checked={bookingData.additionalServices.includes(service.id)}
+                                        onChange={() => {}} // Controlado por el onClick del div padre
+                                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            ¿Necesitas algún servicio adicional?
+                            Notas adicionales sobre servicios
                           </label>
                           <textarea
                             name="additionalServicesNotes"
@@ -739,11 +785,8 @@ const Booking: React.FC = () => {
                             onChange={handleInputChange}
                             className="w-full p-2 border border-gray-300 rounded-md"
                             rows={3}
-                            placeholder="Describe qué servicios adicionales necesitas (árbitro, pelotas, pecheras, etc.)"
+                            placeholder="Describe cualquier detalle adicional sobre los servicios seleccionados"
                           />
-                          <p className="text-sm text-gray-500">
-                            Los servicios adicionales serán coordinados directamente con el propietario de la cancha.
-                          </p>
                         </div>
                       )}
                     </div>
