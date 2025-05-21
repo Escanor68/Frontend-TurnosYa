@@ -91,6 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (user) {
         // En una app real, verificaríamos la contraseña con el backend
+        // Para fines de desarrollo, aceptamos cualquier contraseña
         localStorage.setItem("user", JSON.stringify(user))
 
         setAuthState({
