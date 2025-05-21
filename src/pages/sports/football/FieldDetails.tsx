@@ -155,7 +155,7 @@ const FieldDetailPage: React.FC = () => {
   // Manejar clic en botón de reserva
   const handleBooking = () => {
     if (selectedDate && selectedTimeSlot) {
-      navigate(`/football/booking/${fieldId}?date=${selectedDate}&time=${selectedTimeSlot}`)
+      navigate(`/football/booking/${fieldId}?date=${selectedDate}&time=${selectedTimeSlot}&directPayment=true`)
     }
   }
 

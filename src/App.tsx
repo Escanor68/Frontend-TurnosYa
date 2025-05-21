@@ -18,6 +18,7 @@ import AboutPage from "../src/pages/About"
 import ContactPage from "../src/pages/Contact"
 import NotFoundPage from "../src/pages/common/NotFound"
 import ProtectedRoute from "../src/components/auth/ProtectedRoute"
+import DirectBookingForm from "../src/pages/sports/football/DirctBookingForm"
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Booking />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="football/direct-booking/:fieldId"
+                element={
+                  <ProtectedRoute>
+                    <DirectBookingForm />
                   </ProtectedRoute>
                 }
               />
