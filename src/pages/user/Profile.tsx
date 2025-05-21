@@ -1,13 +1,19 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { useAuth } from "../../context/AuthContext"
-import { Star, MessageCircle } from "lucide-react"
+import { Star, MessageCircle, Eye, Key } from "lucide-react"
+import { Link } from "react-router-dom"
+import { toast } from "react-toastify"
 
 const Profile: React.FC = () => {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("reservations")
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetPasswordData, setResetPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  })
 
   // Mock data for reservations
   const mockReservations = [
@@ -18,6 +24,12 @@ const Profile: React.FC = () => {
       duration: 60,
       price: 8000,
       status: "confirmed",
+      details: {
+        players: 10,
+        services: ["Arbitro", "Pelotas"],
+        paymentMethod: "MercadoPago",
+        transactionId: "MP123456789"
+      }
     },
     {
       id: "2",
@@ -26,6 +38,12 @@ const Profile: React.FC = () => {
       duration: 90,
       price: 12000,
       status: "pending",
+      details: {
+        players: 2,
+        services: ["Pelotas"],
+        paymentMethod: "Pending",
+        transactionId: null
+      }
     },
   ]
 
@@ -66,6 +84,39 @@ const Profile: React.FC = () => {
       text: "La mejor cancha de la ciudad!",
     },
   ]
+
+  const [selectedReservation, setSelectedReservation] = useState<any>(null)
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (resetPasswordData.newPassword !== resetPasswordData.confirmPassword) {
+      toast.error("Las contraseñas no coinciden")
+      return
+    }
+
+    try {
+      // Here you would make an API call to update the password
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulated API call
+      toast.success("Contraseña actualizada exitosamente")
+      setShowResetPassword(false)
+      setResetPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      })
+    } catch (error) {
+      toast.error("Error al actualizar la contraseña")
+    }
+  }
+
+  const handlePasswordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setResetPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
 
   if (!user) {
     return (
@@ -110,11 +161,76 @@ const Profile: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="mt-4 bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm text-gray-500">
-                Para actualizar tu información personal, por favor contacta con atención al cliente.
-              </p>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button 
+                onClick={() => setShowResetPassword(true)}
+                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center"
+              >
+                <Key className="h-4 w-4 mr-1" />
+                Cambiar contraseña
+              </button>
             </div>
+
+            {/* Reset Password Modal */}
+            {showResetPassword && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <h3 className="text-lg font-semibold mb-4">Cambiar Contraseña</h3>
+                  <form onSubmit={handleResetPassword}>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contraseña actual</label>
+                        <input
+                          type="password"
+                          name="currentPassword"
+                          value={resetPasswordData.currentPassword}
+                          onChange={handlePasswordInputChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Nueva contraseña</label>
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={resetPasswordData.newPassword}
+                          onChange={handlePasswordInputChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          value={resetPasswordData.confirmPassword}
+                          onChange={handlePasswordInputChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowResetPassword(false)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md"
+                      >
+                        Actualizar Contraseña
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -205,20 +321,114 @@ const Profile: React.FC = () => {
                           </div>
                         </div>
                         <div className="mt-3 flex justify-end space-x-2">
-                          {/* Botón de ver detalles eliminado */}
-                          <p className="text-sm text-gray-600">
-                            Si necesitas información adicional, contacta al propietario de la cancha.
-                          </p>
+                          <button 
+                            onClick={() => setSelectedReservation(reservation)}
+                            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver detalles
+                          </button>
+                          {reservation.status !== "cancelled" && (
+                            <button className="text-sm text-red-600 hover:text-red-700 font-medium">
+                              Cancelar
+                            </button>
+                          )}
                         </div>
+
+                        {/* Reservation Details Modal */}
+                        {selectedReservation?.id === reservation.id && (
+                          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                              <h3 className="text-lg font-semibold mb-4">Detalles de la Reserva</h3>
+                              <div className="space-y-4">
+                                <div>
+                                  <h4 className="font-medium text-gray-700">Información General</h4>
+                                  <div className="mt-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-gray-500">Cancha</p>
+                                      <p className="font-medium">{reservation.fieldName}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-gray-500">Fecha y Hora</p>
+                                      <p className="font-medium">
+                                        {reservation.date.toLocaleDateString()} -{" "}
+                                        {reservation.date.toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-gray-500">Duración</p>
+                                      <p className="font-medium">{reservation.duration} minutos</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-gray-500">Jugadores</p>
+                                      <p className="font-medium">{reservation.details.players}</p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-medium text-gray-700">Servicios Adicionales</h4>
+                                  <div className="mt-2">
+                                    {reservation.details.services.length > 0 ? (
+                                      <ul className="list-disc list-inside">
+                                        {reservation.details.services.map((service: string, index: number) => (
+                                          <li key={index} className="text-gray-600">{service}</li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <p className="text-gray-500">Sin servicios adicionales</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-medium text-gray-700">Información de Pago</h4>
+                                  <div className="mt-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-gray-500">Método de Pago</p>
+                                      <p className="font-medium">{reservation.details.paymentMethod}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-gray-500">Total</p>
+                                      <p className="font-medium text-emerald-600">
+                                        ${reservation.price.toLocaleString()}
+                                      </p>
+                                    </div>
+                                    {reservation.details.transactionId && (
+                                      <div className="col-span-2">
+                                        <p className="text-sm text-gray-500">ID de Transacción</p>
+                                        <p className="font-medium">{reservation.details.transactionId}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-6 flex justify-end">
+                                <button
+                                  onClick={() => setSelectedReservation(null)}
+                                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                                >
+                                  Cerrar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-gray-500">No tienes reservas activas.</p>
-                    <button className="mt-2 text-emerald-600 hover:text-emerald-700 font-medium">
+                    <Link
+                      to="/football/fields"
+                      className="mt-2 text-emerald-600 hover:text-emerald-700 font-medium inline-block"
+                    >
                       Explorar canchas disponibles
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -335,12 +545,14 @@ const Profile: React.FC = () => {
               </div>
               <div className="p-6">
                 <div className="flex justify-end mb-4">
-                  <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center">
+                  <Link
+                    to="/manage-fields"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center"
+                  >
                     Administrar Canchas
-                  </button>
+                  </Link>
                 </div>
                 <p className="text-gray-600">Aquí podrás ver y gestionar tus canchas.</p>
-                {/* Aquí iría el listado de canchas del propietario */}
               </div>
             </div>
           )}

@@ -1,9 +1,17 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Search, Calendar, MapPin, Filter, ArrowRight, Trophy } from "lucide-react"
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("")
+  const navigate = useNavigate()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/football/fields?search=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -16,7 +24,7 @@ export default function Home() {
               <p className="text-xl mb-8 text-white/90">
                 La forma más fácil de encontrar y reservar canchas deportivas cerca de ti
               </p>
-              <div className="bg-white p-4 rounded-lg shadow-lg">
+              <form onSubmit={handleSearch} className="bg-white p-4 rounded-lg shadow-lg">
                 <div className="flex items-center gap-2 mb-4 text-gray-700">
                   <Search className="w-5 h-5 text-gray-500" />
                   <input
@@ -43,26 +51,26 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 bg-gray-100 p-2 rounded text-gray-700">
                     <Filter className="w-4 h-4 text-gray-500" />
-                    /*<select className="w-full bg-transparent outline-none">
+                    <select className="w-full bg-transparent outline-none">
                       <option>Todos los deportes</option>
                       <option>Fútbol</option>
                       <option>Pádel</option>
                       <option>Tenis</option>
-                    </select>*/
+                    </select>
                   </div>
                 </div>
-                <Link
-                  to="/football/fields"
+                <button
+                  type="submit"
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
                 >
                   Buscar canchas
                   <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
+                </button>
+              </form>
             </div>
             <div className="hidden md:block">
               <img
-                src="/placeholder.svg?height=400&width=500"
+                src="https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg"
                 alt="Reserva de canchas"
                 className="rounded-lg shadow-xl"
               />
@@ -83,7 +91,7 @@ export default function Home() {
             >
               <div className="h-48 bg-green-100 relative overflow-hidden">
                 <img
-                  src="/placeholder.svg?height=300&width=500"
+                  src="https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg"
                   alt="Fútbol"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -103,7 +111,11 @@ export default function Home() {
             {/* Padel */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-blue-100 relative overflow-hidden">
-                <img src="/placeholder.svg?height=300&width=500" alt="Pádel" className="w-full h-full object-cover" />
+                <img
+                  src="https://images.pexels.com/photos/2352372/pexels-photo-2352372.jpeg"
+                  alt="Pádel"
+                  className="w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                   <h3 className="text-white text-2xl font-bold p-6">Pádel</h3>
                 </div>
@@ -122,7 +134,11 @@ export default function Home() {
             {/* Tennis */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-yellow-100 relative overflow-hidden">
-                <img src="/placeholder.svg?height=300&width=500" alt="Tenis" className="w-full h-full object-cover" />
+                <img
+                  src="https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg"
+                  alt="Tenis"
+                  className="w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                   <h3 className="text-white text-2xl font-bold p-6">Tenis</h3>
                 </div>

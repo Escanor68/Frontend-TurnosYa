@@ -1,6 +1,6 @@
 import type React from "react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useLocation, useSearchParams } from "react-router-dom"
 import { MapPin, Star, Clock, Users } from "lucide-react"
 
 // Mock data for fields
@@ -121,10 +121,18 @@ const Fields: React.FC<FieldsProps> = ({
   },
   setFilters,
 }) => {
-  // Estado para la búsqueda y paginación
+  const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const fieldsPerPage = 6
+
+  // Get search term from URL params
+  useEffect(() => {
+    const searchFromUrl = searchParams.get("search")
+    if (searchFromUrl) {
+      setSearchTerm(searchFromUrl)
+    }
+  }, [searchParams])
 
   // Filtrar campos basados en los filtros y término de búsqueda
   const filteredFields = mockFields.filter((field) => {
@@ -132,7 +140,8 @@ const Fields: React.FC<FieldsProps> = ({
     const matchesSearch =
       searchTerm === "" ||
       field.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      field.location.toLowerCase().includes(searchTerm.toLowerCase())
+      field.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      field.type.toLowerCase().includes(searchTerm.toLowerCase())
 
     // Filtrar por ubicación
     const matchesLocation = !filters.location || field.location.toLowerCase().includes(filters.location.toLowerCase())
