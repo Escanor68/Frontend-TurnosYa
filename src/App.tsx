@@ -1,77 +1,96 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { AuthProvider } from "./context/AuthContext"
-import Header from "./components/layout/Header"
-import Footer from "./components/layout/Footer"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-
-// Páginas comunes
-import Home from "./pages/common/Home"
-import NotFound from "./pages/common/NotFound"
-
-// Páginas de autenticación
-import Login from "./pages/auth/Login"
-import Register from "./pages/auth/Register"
-
-// Páginas de administrador
-import Dashboard from "./pages/admin/Dashboard"
-import FieldManagement from "./pages/admin/FieldManagement"
-
-// Páginas de propietario de campo
-import ManageFields from "./pages/field-owner/ManageFields"
-
-// Páginas de usuario
-import Profile from "./pages/user/Profile"
-
-// Páginas de deportes - Fútbol
-import FootballFields from "./pages/sports/football/Fields"
-import FootballFieldDetails from "./pages/sports/football/FieldDetails"
-import FootballBooking from "./pages/sports/football/Booking"
+import { AuthProvider } from "./context/AuthContext"
+import { ErrorBoundary } from "../src/components/common/ErrorBoundary"
+import Layout from "../src/components/layout/Layout"
+import HomePage from "../src/pages/common/Home"
+import LoginPage from "../src/pages/auth/Login"
+import RegisterPage from "../src/pages/auth/Register"
+import ProfilePage from "../src/pages/user/Profile"
+import BookingsPage from "../src/pages/user/Bookings"
+import FieldsPage from "../src/pages/sports/football/Fields"
+import FieldDetailPage from "../src/pages/sports/football/FieldDetails"
+import Booking from "../src/pages/sports/football/Booking"
+import AdminDashboard from "../src/pages/admin/Dashboard"
+import OwnerDashboard from "../src/pages/field-owner/ManageFields"
+import AboutPage from "../src/pages/About"
+import ContactPage from "../src/pages/Contact"
+import NotFoundPage from "../src/pages/common/NotFound"
+import ProtectedRoute from "../src/components/auth/ProtectedRoute"
 
 function App() {
   return (
-    <AuthProvider>
+    <ErrorBoundary>
       <Router>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            <Routes>
-              {/* Rutas comunes */}
-              <Route path="/" element={<Home />} />
+        <AuthProvider>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<HomePage />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="contact" element={<ContactPage />} />
 
-              {/* Rutas de autenticación */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              {/* Rutas protegidas para usuarios */}
+              <Route
+                path="profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="profile/bookings"
+                element={
+                  <ProtectedRoute>
+                    <BookingsPage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Rutas de administrador */}
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/fields" element={<FieldManagement />} />
+              {/* Rutas para canchas de fútbol */}
+              <Route path="football/fields" element={<FieldsPage />} />
+              <Route path="football/fields/:fieldId" element={<FieldDetailPage />} />
+              <Route
+                path="football/booking/:fieldId"
+                element={
+                  <ProtectedRoute>
+                    <Booking />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Rutas de propietario de campo */}
-              <Route path="/manage-fields" element={<ManageFields />} />
+              {/* Rutas protegidas para administradores */}
+              <Route
+                path="admin/dashboard"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Rutas de usuario */}
-              <Route path="/profile" element={<Profile />} />
+              {/* Rutas protegidas para propietarios de canchas */}
+              <Route
+                path="field-owner/dashboard"
+                element={
+                  <ProtectedRoute requiredRole="owner">
+                    <OwnerDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Rutas de deportes - Fútbol */}
-              <Route path="/football/fields" element={<FootballFields />} />
-              <Route path="/football/fields/:id" element={<FootballFieldDetails />} />
-              <Route path="/football/booking/:fieldId" element={<FootballBooking />} />
-
-              {/* Rutas de compatibilidad para mantener URLs antiguas */}
-              <Route path="/fields" element={<Navigate to="/football/fields" replace />} />
-              <Route path="/fields/:id" element={<FootballFieldDetails />} />
-              <Route path="/booking/:fieldId" element={<FootballBooking />} />
-
-              {/* Ruta 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-          <ToastContainer position="bottom-right" autoClose={3000} />
-        </div>
+              {/* Ruta para páginas no encontradas */}
+              <Route path="404" element={<NotFoundPage />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </Router>
-    </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

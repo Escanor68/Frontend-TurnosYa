@@ -43,13 +43,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem("user")
 
         if (storedUser) {
-          const user = JSON.parse(storedUser) as User
-          setAuthState({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          })
+          try {
+            const user = JSON.parse(storedUser) as User
+            setAuthState({
+              user,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            })
+          } catch (parseError) {
+            console.error("Error parsing user from localStorage:", parseError)
+            localStorage.removeItem("user") // Eliminar datos inválidos
+            setAuthState({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              error: "Error al procesar los datos de usuario",
+            })
+          }
         } else {
           setAuthState((prev) => ({ ...prev, isLoading: false }))
         }
@@ -122,15 +133,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Función para cerrar sesión
   const logout = (): void => {
-    localStorage.removeItem("user")
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    })
-    toast.info("Has cerrado sesión")
-    navigate("/")
+    try {
+      localStorage.removeItem("user")
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      })
+      toast.info("Has cerrado sesión")
+      navigate("/")
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast.error("Error al cerrar sesión")
+    }
   }
 
   // Función para registrar un nuevo usuario

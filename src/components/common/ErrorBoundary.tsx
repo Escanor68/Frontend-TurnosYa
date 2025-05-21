@@ -1,5 +1,6 @@
 "use client"
 import { Component, type ErrorInfo, type ReactNode } from "react"
+import { logErrorToService } from "../../utils/errorHanding"
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -31,6 +32,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error("Error caught by ErrorBoundary:", error, errorInfo)
+
+    // Registrar el error en el servicio de monitoreo
+    logErrorToService(error, "ErrorBoundary", {
+      componentStack: errorInfo.componentStack,
+    })
+
     if (this.props.onError) {
       this.props.onError(error, errorInfo)
     }

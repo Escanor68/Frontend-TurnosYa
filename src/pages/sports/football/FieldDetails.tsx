@@ -1,462 +1,599 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { MapPin, Star, Clock, Users, DollarSign, Calendar, ChevronLeft, Map } from "lucide-react"
-import GoogleMapComponent from "../../../components/fields/MapView"
+import { useParams, useNavigate, Link } from "react-router-dom"
+import {
+  MapPin,
+  Clock,
+  Users,
+  Star,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Check,
+  MessageCircle,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react"
+import { mockSportFields } from "../../../services/mockData"
+import type { SportField, Review } from "../../../types"
+import { LoadingSpinner } from "../../../components/common/LoadingSpinner"
 
-// Mock data for fields
-const mockFields = {
-  "1": {
-    id: 1,
-    name: "Cancha de Fútbol 5 - El Campito",
-    location: {
-      address: "Av. Siempreviva 742",
-      city: "Buenos Aires",
-      province: "CABA",
-      coordinates: {
-        lat: -34.603722,
-        lng: -58.381592,
-      },
-    },
-    type: "Fútbol 5",
-    rating: 4.5,
-    description:
-      "Cancha de fútbol 5 con césped sintético de última generación. Cuenta con iluminación LED, vestuarios completos y estacionamiento gratuito. Ideal para partidos entre amigos o torneos.",
-    images: [
-      "https://images.unsplash.com/photo-1508035353492-2a2a97a04a31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80",
-    ],
-    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas", "Kiosco", "Wifi"],
-    duration: 60,
-    players: "5 vs 5",
-    price: 8000,
-    reviews: [
-      {
-        id: 1,
-        user: "Juan Pérez",
-        rating: 5,
-        date: "2025-02-15",
-        comment: "Excelente cancha, muy bien mantenida y el personal muy amable.",
-      },
-      {
-        id: 2,
-        user: "María García",
-        rating: 4,
-        date: "2025-02-10",
-        comment: "Buena cancha, pero los vestuarios podrían estar más limpios.",
-      },
-      {
-        id: 3,
-        user: "Carlos López",
-        rating: 5,
-        date: "2025-01-28",
-        comment: "La mejor cancha de la zona, volveremos pronto!",
-      },
-    ],
-  },
-  "2": {
-    id: 2,
-    name: "Cancha de Fútbol 7 - Club Victoria",
-    location: {
-      address: "Calle Falsa 123",
-      city: "Buenos Aires",
-      province: "CABA",
-      coordinates: {
-        lat: -34.615824,
-        lng: -58.373135,
-      },
-    },
-    type: "Fútbol 7",
-    rating: 4.2,
-    description:
-      "Cancha de fútbol 7 con césped natural. Cuenta con iluminación, vestuarios y estacionamiento. Ideal para partidos entre amigos o torneos.",
-    images: [
-      "https://images.unsplash.com/photo-1560275774-c945485b9336?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    ],
-    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas"],
-    duration: 90,
-    players: "7 vs 7",
-    price: 12000,
-    reviews: [
-      {
-        id: 1,
-        user: "Pedro Gómez",
-        rating: 4,
-        date: "2025-02-20",
-        comment: "Buena cancha, bien mantenida.",
-      },
-    ],
-  },
-  "3": {
-    id: 3,
-    name: "Cancha de Fútbol 11 - Estadio Municipal",
-    location: {
-      address: "Avenida Siempre Viva 742",
-      city: "Buenos Aires",
-      province: "CABA",
-      coordinates: {
-        lat: -34.585824,
-        lng: -58.393135,
-      },
-    },
-    type: "Fútbol 11",
-    rating: 4.8,
-    description:
-      "Cancha de fútbol 11 profesional con césped natural. Cuenta con iluminación, vestuarios, estacionamiento y tribunas.",
-    images: [
-      "https://images.unsplash.com/photo-1662299397095-c2b1549509a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    ],
-    amenities: ["Vestuarios", "Iluminación", "Estacionamiento", "Duchas", "Tribunas"],
-    duration: 60,
-    players: "11 vs 11",
-    price: 10000,
-    reviews: [
-      {
-        id: 1,
-        user: "Ana Martínez",
-        rating: 5,
-        date: "2025-02-18",
-        comment: "Excelente cancha, muy profesional.",
-      },
-    ],
-  },
+// Componente para mostrar un mapa (simulado)
+interface MapViewProps {
+  location: {
+    lat: number
+    lng: number
+  }
+  name: string
 }
 
-// Mock data for available time slots
-const mockTimeSlots = [
-  { id: "1", date: "2025-03-20", time: "18:00", available: true },
-  { id: "2", date: "2025-03-20", time: "19:00", available: true },
-  { id: "3", date: "2025-03-20", time: "20:00", available: false },
-  { id: "4", date: "2025-03-20", time: "21:00", available: true },
-  { id: "5", date: "2025-03-20", time: "22:00", available: true },
-  { id: "6", date: "2025-03-21", time: "18:00", available: true },
-  { id: "7", date: "2025-03-21", time: "19:00", available: false },
-  { id: "8", date: "2025-03-21", time: "20:00", available: false },
-  { id: "9", date: "2025-03-21", time: "21:00", available: true },
-  { id: "10", date: "2025-03-21", time: "22:00", available: true },
-  { id: "11", date: "2025-03-22", time: "18:00", available: true },
-  { id: "12", date: "2025-03-22", time: "19:00", available: true },
-  { id: "13", date: "2025-03-22", time: "20:00", available: true },
-  { id: "14", date: "2025-03-22", time: "21:00", available: true },
-  { id: "15", date: "2025-03-22", time: "22:00", available: false },
-]
-
-const FieldDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const [selectedDate, setSelectedDate] = useState<string>("")
-  const [activeTab, setActiveTab] = useState<"info" | "reviews" | "location">("info")
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [field, setField] = useState<any>(null)
-
-  // Cargar datos del campo
-  useEffect(() => {
-    if (id) {
-      // Intentar obtener el campo por ID
-      const fieldData = mockFields[id as keyof typeof mockFields]
-      if (fieldData) {
-        setField(fieldData)
-      } else {
-        // Si no se encuentra, usar el primer campo como fallback
-        setField(mockFields["1"])
-      }
-    }
-  }, [id])
-
-  // Si el campo aún no se ha cargado, mostrar un indicador de carga
-  if (!field) {
-    return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
-      </div>
-    )
-  }
-
-  // Filtrar slots de tiempo por fecha seleccionada
-  const filteredTimeSlots = mockTimeSlots.filter((slot) => slot.date === selectedDate)
-
-  // Obtener fechas únicas para el selector
-  const uniqueDates = Array.from(new Set(mockTimeSlots.map((slot) => slot.date)))
-
-  // Formatear fecha para mostrar
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
-  }
-
-  // Manejar la reserva
-  const handleBooking = (timeSlotId: string) => {
-    navigate(`/football/booking/${id}?date=${selectedDate}&time=${timeSlotId}`)
-  }
-
-  // Cambiar imagen
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === field.images.length - 1 ? 0 : prev + 1))
-  }
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? field.images.length - 1 : prev - 1))
-  }
-
-  // Dirección completa para el mapa
-  const fullAddress = `${field.location.address}, ${field.location.city}, ${field.location.province}`
-
+const MapView: React.FC<MapViewProps> = ({ location, name }) => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <button
-          onClick={() => navigate("/football/fields")}
-          className="flex items-center text-emerald-600 hover:text-emerald-700 transition-colors"
-        >
-          <ChevronLeft className="h-5 w-5 mr-1" />
-          Volver a canchas
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        {/* Image Gallery */}
-        <div className="relative h-96">
-          <img
-            src={field.images[currentImageIndex] || "/placeholder.svg"}
-            alt={field.name}
-            className="w-full h-full object-cover"
-          />
-          {field.images.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
-              >
-                <ChevronLeft className="h-6 w-6 transform rotate-180" />
-              </button>
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {field.images.map((_: any, index: number) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`w-2 h-2 rounded-full ${
-                      index === currentImageIndex ? "bg-white" : "bg-white bg-opacity-50"
-                    }`}
-                  ></button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Field Info */}
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{field.name}</h1>
-              <div className="flex items-center mt-2">
-                <div className="flex items-center">
-                  <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                  <span className="ml-1 text-gray-700">{field.rating}</span>
-                </div>
-                <span className="mx-2 text-gray-400">•</span>
-                <span className="text-gray-600">{field.reviews.length} reseñas</span>
-              </div>
-              <div className="flex items-center mt-2 text-gray-600">
-                <MapPin className="h-5 w-5 mr-2 text-gray-500" />
-                <span>
-                  {field.location.address}, {field.location.city}, {field.location.province}
-                </span>
-              </div>
-            </div>
-            <div className="mt-4 md:mt-0 bg-emerald-50 p-4 rounded-lg">
-              <div className="flex items-center text-emerald-600 font-bold text-xl mb-2">
-                <DollarSign className="h-6 w-6 mr-1" />
-                <span>${field.price.toLocaleString()}</span>
-              </div>
-              <div className="flex flex-col text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>Duración: {field.duration} minutos</span>
-                </div>
-                <div className="flex items-center mt-1">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>Jugadores: {field.players}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="flex -mb-px">
-              <button
-                onClick={() => setActiveTab("info")}
-                className={`py-4 px-6 text-sm font-medium ${
-                  activeTab === "info"
-                    ? "border-b-2 border-emerald-500 text-emerald-600"
-                    : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Información
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`py-4 px-6 text-sm font-medium ${
-                  activeTab === "reviews"
-                    ? "border-b-2 border-emerald-500 text-emerald-600"
-                    : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Reseñas ({field.reviews.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("location")}
-                className={`py-4 px-6 text-sm font-medium flex items-center ${
-                  activeTab === "location"
-                    ? "border-b-2 border-emerald-500 text-emerald-600"
-                    : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <Map className="h-4 w-4 mr-2" />
-                Ubicación
-              </button>
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === "info" ? (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
-              <p className="text-gray-600 mb-6">{field.description}</p>
-
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Comodidades</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                {field.amenities.map((amenity: string, index: number) => (
-                  <div key={index} className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
-                      <span className="text-emerald-600">✓</span>
-                    </div>
-                    <span className="text-gray-700">{amenity}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : activeTab === "reviews" ? (
-            <div>
-              <div className="space-y-6">
-                {field.reviews.map((review: any) => (
-                  <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{review.user}</h3>
-                        <div className="flex items-center">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < review.rating ? "text-yellow-400 fill-current" : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-500 ml-2">{review.date}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Ubicación</h2>
-              <p className="text-gray-600 mb-4">
-                {field.location.address}, {field.location.city}, {field.location.province}
-              </p>
-
-              {/* Google Maps Component */}
-              <GoogleMapComponent
-                address={fullAddress}
-                name={field.name}
-                lat={field.location.coordinates?.lat}
-                lng={field.location.coordinates?.lng}
-              />
-
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-800 mb-2">Cómo llegar</h3>
-                <p className="text-blue-700 text-sm">
-                  La cancha se encuentra a 10 minutos caminando desde la estación de subte más cercana. También hay
-                  estacionamiento disponible para quienes vienen en auto.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Availability Section */}
-      <div className="mt-8 bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="bg-emerald-600 px-6 py-4">
-          <h2 className="text-xl font-semibold text-white">Disponibilidad</h2>
-        </div>
-        <div className="p-6">
-          <div className="mb-6">
-            <label htmlFor="date-select" className="block text-sm font-medium text-gray-700 mb-2">
-              Selecciona una fecha
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Calendar className="h-5 w-5 text-gray-400" />
-              </div>
-              <select
-                id="date-select"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-              >
-                <option value="">Selecciona una fecha</option>
-                {uniqueDates.map((date) => (
-                  <option key={date} value={date}>
-                    {formatDate(date)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {selectedDate ? (
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Horarios disponibles</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {filteredTimeSlots.map((slot) => (
-                  <button
-                    key={slot.id}
-                    onClick={() => slot.available && handleBooking(slot.id)}
-                    disabled={!slot.available}
-                    className={`py-3 px-4 rounded-lg text-center ${
-                      slot.available
-                        ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors"
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    }`}
-                  >
-                    {slot.time}
-                    {!slot.available && <div className="text-xs mt-1">(Ocupado)</div>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">Selecciona una fecha para ver los horarios disponibles</div>
-          )}
+    <div className="bg-gray-200 rounded-lg overflow-hidden h-64 relative">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <MapPin className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+          <p className="font-medium text-gray-800">{name}</p>
+          <p className="text-sm text-gray-600">
+            Lat: {location.lat.toFixed(4)}, Lng: {location.lng.toFixed(4)}
+          </p>
+          <p className="text-xs text-gray-500 mt-2">Mapa simulado - Integración real pendiente</p>
         </div>
       </div>
     </div>
   )
 }
 
-export default FieldDetails
+// Componente para mostrar los detalles de un campo deportivo
+const FieldDetailPage: React.FC = () => {
+  const { fieldId } = useParams<{ fieldId: string }>()
+  const navigate = useNavigate()
+
+  const [field, setField] = useState<SportField | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState<string>("")
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("")
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewFormData, setReviewFormData] = useState({
+    rating: 5,
+    comment: "",
+  })
+
+  // Fechas disponibles (próximos 14 días)
+  const availableDates = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date()
+    date.setDate(date.getDate() + i)
+    return date.toISOString().split("T")[0]
+  })
+
+  // Cargar datos del campo
+  useEffect(() => {
+    const loadFieldData = async () => {
+      try {
+        setLoading(true)
+        // Simular llamada a API
+        await new Promise((resolve) => setTimeout(resolve, 800))
+
+        if (fieldId) {
+          const fieldData = mockSportFields.find((f) => f.id === fieldId)
+          if (fieldData) {
+            setField(fieldData)
+            // Seleccionar la primera fecha disponible por defecto
+            if (availableDates.length > 0) {
+              handleDateSelect(availableDates[0])
+            }
+          } else {
+            // Campo no encontrado
+            navigate("/football/fields")
+          }
+        }
+      } catch (error) {
+        console.error("Error loading field data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFieldData()
+  }, [fieldId, navigate])
+
+  // Generar franjas horarias disponibles para la fecha seleccionada
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date)
+    setSelectedTimeSlot("")
+
+    // Simular disponibilidad de horarios
+    // En una app real, esto vendría de una API basada en la fecha seleccionada
+    const today = new Date().toISOString().split("T")[0]
+    const isToday = date === today
+
+    // Horarios base
+    let slots = [
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+      "19:00",
+      "20:00",
+      "21:00",
+    ]
+
+    // Si es hoy, filtrar horarios pasados
+    if (isToday) {
+      const currentHour = new Date().getHours()
+      slots = slots.filter((slot) => Number.parseInt(slot.split(":")[0], 10) > currentHour)
+    }
+
+    // Simular algunos horarios ya reservados
+    const reservedSlots: string[] = []
+    if (date.endsWith("5") || date.endsWith("0")) {
+      reservedSlots.push("18:00", "19:00")
+    }
+    if (date.endsWith("2") || date.endsWith("7")) {
+      reservedSlots.push("12:00", "20:00")
+    }
+
+    const availableSlots = slots.filter((slot) => !reservedSlots.includes(slot))
+    setAvailableTimeSlots(availableSlots)
+  }
+
+  // Manejar selección de horario
+  const handleTimeSlotSelect = (timeSlot: string) => {
+    setSelectedTimeSlot(timeSlot)
+  }
+
+  // Manejar clic en botón de reserva
+  const handleBooking = () => {
+    if (selectedDate && selectedTimeSlot) {
+      navigate(`/football/booking/${fieldId}?date=${selectedDate}&time=${selectedTimeSlot}`)
+    }
+  }
+
+  // Manejar navegación de imágenes
+  const handlePrevImage = () => {
+    if (!field) return
+    setCurrentImageIndex((prev) => (prev === 0 ? 0 : prev - 1))
+  }
+
+  const handleNextImage = () => {
+    if (!field) return
+    // Aquí asumo que hay más imágenes, en una app real tendrías un array de imágenes
+    setCurrentImageIndex((prev) => (prev === 2 ? 2 : prev + 1))
+  }
+
+  // Manejar cambios en el formulario de reseñas
+  const handleReviewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setReviewFormData((prev) => ({
+      ...prev,
+      [name]: name === "rating" ? Number.parseInt(value, 10) : value,
+    }))
+  }
+
+  // Enviar reseña
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Aquí irían las llamadas a la API para guardar la reseña
+    console.log("Review submitted:", reviewFormData)
+    setShowReviewForm(false)
+    // Simular actualización de reseñas
+    if (field && field.reviews) {
+      const newReview: Review = {
+        id: `review-${Date.now()}`,
+        userId: "current-user",
+        userName: "Usuario Actual",
+        rating: reviewFormData.rating,
+        comment: reviewFormData.comment,
+        date: new Date().toISOString(),
+      }
+      setField({
+        ...field,
+        reviews: [...field.reviews, newReview],
+        rating: calculateAverageRating([...field.reviews, newReview]),
+      })
+    }
+    // Resetear formulario
+    setReviewFormData({ rating: 5, comment: "" })
+  }
+
+  // Calcular rating promedio
+  const calculateAverageRating = (reviews: Review[]): number => {
+    if (!reviews || reviews.length === 0) return 0
+    const sum = reviews.reduce((total, review) => total + review.rating, 0)
+    return Number.parseFloat((sum / reviews.length).toFixed(1))
+  }
+
+  // Formatear fecha
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })
+  }
+
+  // Mostrar spinner mientras se carga
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  // Si no se encuentra el campo
+  if (!field) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Campo no encontrado</h2>
+          <Link to="/football/fields" className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+            Ver todos los campos
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Imágenes del campo (en una app real, esto vendría del backend)
+  const fieldImages = [
+    field.image,
+    "https://images.pexels.com/photos/114296/pexels-photo-114296.jpeg",
+    "https://images.pexels.com/photos/46792/the-ball-stadion-football-the-pitch-46792.jpeg",
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="mb-6">
+          <button
+            onClick={() => navigate("/football/fields")}
+            className="flex items-center text-emerald-600 hover:text-emerald-700 transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5 mr-1" />
+            Volver a la lista de canchas
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Columna izquierda: Detalles del campo */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              {/* Galería de imágenes */}
+              <div className="relative h-80">
+                <img
+                  src={fieldImages[currentImageIndex] || "/placeholder.svg"}
+                  alt={field.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h1 className="text-2xl font-bold text-white mb-1">{field.name}</h1>
+                  <div className="flex items-center text-white">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span className="text-sm">
+                      {field.location.address}, {field.location.city}
+                    </span>
+                  </div>
+                </div>
+                {/* Controles de navegación de imágenes */}
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+                  disabled={currentImageIndex === 0}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+                  disabled={currentImageIndex === fieldImages.length - 1}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                {/* Indicador de imágenes */}
+                <div className="absolute bottom-4 right-4 flex space-x-1">
+                  {fieldImages.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-white/50"}`}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Información del campo */}
+              <div className="p-6">
+                <div className="flex flex-wrap gap-4 mb-6">
+                  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
+                    <Users className="h-4 w-4 text-gray-600 mr-1" />
+                    <span className="text-sm font-medium">{field.type}</span>
+                  </div>
+                  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
+                    <Clock className="h-4 w-4 text-gray-600 mr-1" />
+                    <span className="text-sm font-medium">{field.duration} minutos</span>
+                  </div>
+                  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
+                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                    <span className="text-sm font-medium">{field.rating || "Sin calificaciones"}</span>
+                  </div>
+                  <div className="flex items-center bg-emerald-100 px-3 py-1 rounded-full">
+                    <span className="text-sm font-medium text-emerald-700">${field.price}</span>
+                  </div>
+                </div>
+
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Descripción</h2>
+                <p className="text-gray-600 mb-6">
+                  {field.description ||
+                    `Cancha de ${field.type} en excelente estado. Cuenta con césped sintético de alta calidad, iluminación LED y vestuarios equipados. Ideal para partidos amistosos o torneos.`}
+                </p>
+
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Comodidades</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                  {field.amenities && field.amenities.length > 0 ? (
+                    field.amenities.map((amenity) => (
+                      <div key={amenity} className="flex items-center">
+                        <Check className="h-5 w-5 text-emerald-500 mr-2" />
+                        <span className="text-gray-700">{amenity}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 col-span-3">No se especificaron comodidades</p>
+                  )}
+                </div>
+
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Ubicación</h2>
+                <MapView
+                  location={field.location.coordinates || { lat: -34.603722, lng: -58.381592 }}
+                  name={field.name}
+                />
+              </div>
+            </div>
+
+            {/* Reseñas */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mt-8 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Reseñas</h2>
+                <button
+                  onClick={() => setShowReviewForm(!showReviewForm)}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center"
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  Escribir reseña
+                </button>
+              </div>
+
+              {/* Formulario de reseña */}
+              {showReviewForm && (
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Tu opinión</h3>
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Calificación</label>
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setReviewFormData((prev) => ({ ...prev, rating: star }))}
+                            className="focus:outline-none"
+                          >
+                            <Star
+                              className={`h-6 w-6 ${
+                                star <= reviewFormData.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        <span className="ml-2 text-sm text-gray-600">{reviewFormData.rating} de 5</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
+                        Comentario
+                      </label>
+                      <textarea
+                        id="comment"
+                        name="comment"
+                        rows={4}
+                        value={reviewFormData.comment}
+                        onChange={handleReviewChange}
+                        className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        placeholder="Comparte tu experiencia en esta cancha..."
+                        required
+                      ></textarea>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowReviewForm(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                      >
+                        Publicar reseña
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Lista de reseñas */}
+              {field.reviews && field.reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {field.reviews.map((review) => (
+                    <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center">
+                            <h3 className="font-medium text-gray-900">{review.userName}</h3>
+                            <div className="flex ml-2">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">{formatDate(review.date)}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button className="text-gray-400 hover:text-gray-600">
+                            <ThumbsUp className="h-4 w-4" />
+                          </button>
+                          <button className="text-gray-400 hover:text-gray-600">
+                            <ThumbsDown className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 mt-2">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">Sin reseñas aún</h3>
+                  <p className="text-gray-500">Sé el primero en dejar una reseña para esta cancha.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Columna derecha: Reserva */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-8">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Reservar Cancha</h2>
+
+                {/* Selección de fecha */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                    {availableDates.slice(0, 8).map((date) => (
+                      <button
+                        key={date}
+                        onClick={() => handleDateSelect(date)}
+                        className={`py-2 px-1 rounded-lg text-center transition-colors ${
+                          selectedDate === date
+                            ? "bg-emerald-600 text-white"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        }`}
+                      >
+                        <div className="text-xs">{formatDate(date).split(" ")[0]}</div>
+                        <div className="font-medium">{formatDate(date).split(" ")[1]}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Selección de horario */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Horario</label>
+                  {selectedDate ? (
+                    availableTimeSlots.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        {availableTimeSlots.map((timeSlot) => (
+                          <button
+                            key={timeSlot}
+                            onClick={() => handleTimeSlotSelect(timeSlot)}
+                            className={`py-2 px-3 rounded-lg text-center transition-colors ${
+                              selectedTimeSlot === timeSlot
+                                ? "bg-emerald-600 text-white"
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            }`}
+                          >
+                            {timeSlot}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-yellow-700">
+                            No hay horarios disponibles para esta fecha. Por favor selecciona otra fecha.
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    <p className="text-sm text-gray-500">Selecciona una fecha para ver los horarios disponibles</p>
+                  )}
+                </div>
+
+                {/* Resumen de reserva */}
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Resumen</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Cancha:</span>
+                      <span className="font-medium">{field.type}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Fecha:</span>
+                      <span className="font-medium">{selectedDate ? formatDate(selectedDate) : "No seleccionada"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Hora:</span>
+                      <span className="font-medium">{selectedTimeSlot || "No seleccionada"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Duración:</span>
+                      <span className="font-medium">{field.duration} minutos</span>
+                    </div>
+                    <div className="pt-2 mt-2 border-t border-gray-200 flex justify-between">
+                      <span className="font-medium">Total:</span>
+                      <span className="font-semibold text-emerald-600">${field.price}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botón de reserva */}
+                <button
+                  onClick={handleBooking}
+                  disabled={!selectedDate || !selectedTimeSlot}
+                  className={`w-full py-3 rounded-lg flex items-center justify-center ${
+                    selectedDate && selectedTimeSlot
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Reservar Ahora
+                </button>
+
+                {/* Información adicional */}
+                <div className="mt-6">
+                  <div className="flex items-start">
+                    <Info className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-gray-600">
+                      Al reservar, se te solicitará un pago del 10% para confirmar tu turno. El resto se abona en el
+                      lugar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default FieldDetailPage

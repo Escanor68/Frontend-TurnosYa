@@ -10,12 +10,12 @@ const Dashboard: React.FC = () => {
 
   // Redirect if not admin
   React.useEffect(() => {
-    if (!user?.isAdmin) {
+    if (!user?.role) {
       navigate("/")
     }
   }, [user, navigate])
 
-  if (!user?.isAdmin) {
+  if (!user?.role) {
     return null
   }
 
