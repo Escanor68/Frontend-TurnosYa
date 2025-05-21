@@ -7,7 +7,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "../../../context/AuthContext"
 import type { BookingFormData, SportField } from "../../../types"
-import { getFieldById, additionalServices, recurrenceOptions, paymentMethods } from "../../../services/mockData"
+import { getFieldById, additionalServices, recurrenceOptions } from "../../../services/mockData"
 import { LoadingSpinner } from "../../../components/common/LoadingSpinner"
 import { useFormValidation, bookingValidationSchema } from "../../../hooks/useFormValidation"
 
@@ -132,14 +132,8 @@ const DirectBookingForm: React.FC = () => {
     // Multiplicar por la cantidad de recurrencias si no es "none"
     const recurrenceMultiplier = bookingData.recurrence !== "none" ? bookingData.recurrenceCount : 1
 
-    // Calcular precio de servicios adicionales
-    const servicesPrice = bookingData.additionalServices.reduce((total, serviceId) => {
-      const service = additionalServices.find((s) => s.id === serviceId)
-      return total + (service ? service.price : 0)
-    }, 0)
-
-    // Precio total
-    return discountedPrice * recurrenceMultiplier + servicesPrice
+    // Precio total (sin sumar servicios adicionales)
+    return discountedPrice * recurrenceMultiplier
   }
 
   // Enviar formulario
@@ -163,6 +157,37 @@ const DirectBookingForm: React.FC = () => {
     // Simular envío de reserva
     setIsSubmitting(true)
     try {
+      // Preparar datos para enviar al backend
+      const bookingPayload = {
+        fieldId,
+        userId: user?.id,
+        date: bookingData.date,
+        time: bookingData.time,
+        players: bookingData.players,
+        contactName: bookingData.contactName,
+        contactPhone: bookingData.contactPhone,
+        contactEmail: bookingData.contactEmail,
+        paymentMethod: bookingData.paymentMethod,
+        recurrence: bookingData.recurrence,
+        recurrenceCount: bookingData.recurrenceCount,
+        additionalServices: bookingData.additionalServices,
+        additionalServicesNotes: bookingData.additionalServicesNotes,
+        totalPrice: calculateTotalPrice(),
+        // Datos de pago que se completarán con la integración real
+        paymentDetails: {
+          // Estos campos se completarán con la integración de Mercado Pago
+        },
+      }
+
+      console.log("Datos de reserva a enviar:", bookingPayload)
+
+      // TODO: Implementar integración con backend
+      // const response = await fetch('/api/bookings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(bookingPayload)
+      // });
+
       // Simular llamada a API
       await new Promise((resolve) => setTimeout(resolve, 1500))
       toast.success("¡Reserva realizada con éxito!")
@@ -468,7 +493,7 @@ const DirectBookingForm: React.FC = () => {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <span className="font-semibold text-emerald-600">${service.price}</span>
+                                  <span className="text-xs text-emerald-600 font-medium">Sin cargo</span>
                                   <div className="mt-1">
                                     <input
                                       type="checkbox"
@@ -501,30 +526,78 @@ const DirectBookingForm: React.FC = () => {
                 {/* Método de Pago */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">Método de Pago</label>
-                  <div className="space-y-3">
-                    {paymentMethods.map((method) => (
-                      <label
-                        key={method.id}
-                        className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                          bookingData.paymentMethod === method.id
-                            ? "border-emerald-500 bg-emerald-50"
-                            : "border-gray-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method.id}
-                          checked={bookingData.paymentMethod === method.id}
-                          onChange={handleInputChange}
-                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
-                        />
-                        <div className="ml-3 flex items-center">
-                          <span className="text-xl mr-3">{method.icon}</span>
-                          <span className="font-medium">{method.name}</span>
+                  <div className="p-4 border rounded-lg border-emerald-500 bg-emerald-50">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="mercadopago"
+                        checked={true}
+                        readOnly
+                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                      />
+                      <div className="ml-3 flex items-center">
+                        <span className="text-xl mr-3">💳</span>
+                        <span className="font-medium">Mercado Pago</span>
+                      </div>
+                    </div>
+
+                    {/* Formulario para datos de pago (a completar con integración backend) */}
+                    <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
+                      <p className="text-sm text-gray-600 mb-3">Complete los siguientes datos para procesar el pago:</p>
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="cardNumber" className="block text-xs font-medium text-gray-700 mb-1">
+                            Número de tarjeta
+                          </label>
+                          <input
+                            type="text"
+                            id="cardNumber"
+                            placeholder="XXXX XXXX XXXX XXXX"
+                            className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                          />
                         </div>
-                      </label>
-                    ))}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label htmlFor="expiryDate" className="block text-xs font-medium text-gray-700 mb-1">
+                              Fecha de vencimiento
+                            </label>
+                            <input
+                              type="text"
+                              id="expiryDate"
+                              placeholder="MM/AA"
+                              className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="securityCode" className="block text-xs font-medium text-gray-700 mb-1">
+                              Código de seguridad
+                            </label>
+                            <input
+                              type="text"
+                              id="securityCode"
+                              placeholder="CVV"
+                              className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="cardholderName" className="block text-xs font-medium text-gray-700 mb-1">
+                            Nombre en la tarjeta
+                          </label>
+                          <input
+                            type="text"
+                            id="cardholderName"
+                            placeholder="Como aparece en la tarjeta"
+                            className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-3">
+                        <span className="text-emerald-600">Nota:</span> Este formulario es solo para visualización. La
+                        integración con Mercado Pago se implementará posteriormente.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -572,14 +645,8 @@ const DirectBookingForm: React.FC = () => {
 
                     {bookingData.additionalServices.length > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-700">Servicios adicionales</span>
-                        <span className="font-medium">
-                          $
-                          {bookingData.additionalServices.reduce((total, serviceId) => {
-                            const service = additionalServices.find((s) => s.id === serviceId)
-                            return total + (service ? service.price : 0)
-                          }, 0)}
-                        </span>
+                        <span className="text-gray-700">Servicios adicionales seleccionados</span>
+                        <span className="font-medium text-emerald-600">Sin cargo</span>
                       </div>
                     )}
 
