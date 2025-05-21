@@ -1,7 +1,17 @@
 "use client"
 
 import type React from "react"
-import { CheckCircle, AlertCircle, ChevronLeft, Repeat, Plus, Minus, ChevronDown, ChevronUp } from "lucide-react"
+import {
+  CheckCircle,
+  AlertCircle,
+  ChevronLeft,
+  Repeat,
+  Plus,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+} from "lucide-react"
 import { useState, useEffect } from "react"
 import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -41,9 +51,17 @@ const DirectBookingForm: React.FC = () => {
     termsAccepted: false,
     recurrence: "none",
     recurrenceCount: 4,
-    additionalServices: [], // Agregar esta propiedad que faltaba
+    additionalServices: [],
     additionalServicesNotes: "",
     recurrenceExceptions: [],
+  })
+
+  // Estado para los datos de pago
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    securityCode: "",
+    cardholderName: "",
   })
 
   const { validateForm, getFieldError, hasError } = useFormValidation(bookingValidationSchema)
@@ -88,6 +106,25 @@ const DirectBookingForm: React.FC = () => {
       ...prev,
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }))
+  }
+
+  // Manejar cambios en los campos de pago
+  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setPaymentData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  // Rellenar datos de prueba para Mercado Pago
+  const fillTestData = () => {
+    setPaymentData({
+      cardNumber: "4509 9535 6623 3704",
+      expiryDate: "12/25",
+      securityCode: "123",
+      cardholderName: "USUARIO PRUEBA",
+    })
   }
 
   // Manejar cambio en el contador de recurrencia
@@ -137,6 +174,17 @@ const DirectBookingForm: React.FC = () => {
       return
     }
 
+    // Validar campos de pago
+    if (
+      !paymentData.cardNumber ||
+      !paymentData.expiryDate ||
+      !paymentData.securityCode ||
+      !paymentData.cardholderName
+    ) {
+      toast.error("Por favor completa todos los datos de pago")
+      return
+    }
+
     // Simular envío de reserva
     setIsSubmitting(true)
     try {
@@ -153,12 +201,15 @@ const DirectBookingForm: React.FC = () => {
         paymentMethod: bookingData.paymentMethod,
         recurrence: bookingData.recurrence,
         recurrenceCount: bookingData.recurrenceCount,
-        additionalServices: bookingData.additionalServices, // Agregar esta propiedad
+        additionalServices: bookingData.additionalServices,
         additionalServicesNotes: bookingData.additionalServicesNotes,
         totalPrice: calculateTotalPrice(),
-        // Datos de pago que se completarán con la integración real
+        // Datos de pago
         paymentDetails: {
-          // Estos campos se completarán con la integración de Mercado Pago
+          cardNumber: paymentData.cardNumber,
+          expiryDate: paymentData.expiryDate,
+          securityCode: paymentData.securityCode,
+          cardholderName: paymentData.cardholderName,
         },
       }
 
@@ -486,54 +537,80 @@ const DirectBookingForm: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Formulario para datos de pago (a completar con integración backend) */}
+                    {/* Formulario para datos de pago */}
                     <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-3">Complete los siguientes datos para procesar el pago:</p>
+                      <div className="flex justify-between items-center mb-3">
+                        <p className="text-sm text-gray-600">Complete los siguientes datos para procesar el pago:</p>
+                        <button
+                          type="button"
+                          onClick={fillTestData}
+                          className="text-xs text-emerald-600 hover:text-emerald-700 underline flex items-center"
+                        >
+                          <CreditCard className="h-3 w-3 mr-1" />
+                          Usar datos de prueba
+                        </button>
+                      </div>
                       <div className="space-y-3">
                         <div>
                           <label htmlFor="cardNumber" className="block text-xs font-medium text-gray-700 mb-1">
-                            Número de tarjeta
+                            Número de tarjeta <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             id="cardNumber"
+                            name="cardNumber"
+                            value={paymentData.cardNumber}
+                            onChange={handlePaymentChange}
                             placeholder="XXXX XXXX XXXX XXXX"
                             className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                            required
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label htmlFor="expiryDate" className="block text-xs font-medium text-gray-700 mb-1">
-                              Fecha de vencimiento
+                              Fecha de vencimiento <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="text"
                               id="expiryDate"
+                              name="expiryDate"
+                              value={paymentData.expiryDate}
+                              onChange={handlePaymentChange}
                               placeholder="MM/AA"
                               className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                              required
                             />
                           </div>
                           <div>
                             <label htmlFor="securityCode" className="block text-xs font-medium text-gray-700 mb-1">
-                              Código de seguridad
+                              Código de seguridad <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="text"
                               id="securityCode"
+                              name="securityCode"
+                              value={paymentData.securityCode}
+                              onChange={handlePaymentChange}
                               placeholder="CVV"
                               className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                              required
                             />
                           </div>
                         </div>
                         <div>
                           <label htmlFor="cardholderName" className="block text-xs font-medium text-gray-700 mb-1">
-                            Nombre en la tarjeta
+                            Nombre en la tarjeta <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             id="cardholderName"
+                            name="cardholderName"
+                            value={paymentData.cardholderName}
+                            onChange={handlePaymentChange}
                             placeholder="Como aparece en la tarjeta"
                             className="w-full border border-gray-300 rounded-md py-1.5 px-3 text-sm"
+                            required
                           />
                         </div>
                       </div>
