@@ -427,7 +427,7 @@ const ManageFields: React.FC = () => {
               </FormField>
 
               <FormField
-                label="Precio por hora (ARS)"
+                label="Precio por turno (ARS)"
                 name="price"
                 type="number"
                 value={formData.price.toString()}
@@ -453,7 +453,7 @@ const ManageFields: React.FC = () => {
                 value={formData.players}
                 onChange={handleInputChange}
                 placeholder="Ej: 5 vs 5"
-                helpText="Formato recomendado (ej: 5 vs 5, 7 vs 7)"
+                helpText="Formato recomendado (ej: 5 vs 5, 7 vs 7, 11 vs 11)"
               />
 
               <FormField
@@ -603,7 +603,7 @@ const ManageFields: React.FC = () => {
               </FormField>
 
               <FormField
-                label="Precio por hora (ARS)"
+                label="Precio por turno (ARS)"
                 name="price"
                 type="number"
                 value={formData.price.toString()}
@@ -629,7 +629,7 @@ const ManageFields: React.FC = () => {
                 value={formData.players}
                 onChange={handleInputChange}
                 placeholder="Ej: 5 vs 5"
-                helpText="Formato recomendado (ej: 5 vs 5, 7 vs 7)"
+                helpText="Formato recomendado (ej: 5 vs 5, 7 vs 7, 11 vs 11)"
               />
 
               <FormField
