@@ -60,3 +60,13 @@ export function withErrorHandling<T extends (...args: any[]) => any>(
     }
   }
 }
+
+// src/utils/errorHandler.ts
+export const handleApiError = (error: any) => {
+if (axios.isAxiosError(error)) {
+  const message = error.response?.data?.message || 'An error occurred';
+  toast.error(message);
+  return message;
+}
+return 'An unexpected error occurred';
+};
