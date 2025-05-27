@@ -3,100 +3,100 @@ import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { AuthProvider } from "./context/AuthContext"
 import { ErrorBoundary } from "../src/components/common/ErrorBoundary"
-import Layout from "../src/components/layout/Layout"
-import HomePage from "../src/pages/common/Home"
-import LoginPage from "../src/pages/auth/Login"
-import RegisterPage from "../src/pages/auth/Register"
-import ProfilePage from "../src/pages/user/Profile"
-import BookingsPage from "../src/pages/user/Bookings"
-import FieldsPage from "../src/pages/sports/football/Fields"
-import FieldDetailPage from "../src/pages/sports/football/FieldDetails"
-import Booking from "../src/pages/sports/football/Booking"
-import AdminDashboard from "../src/pages/admin/Dashboard"
-import OwnerDashboard from "../src/pages/field-owner/ManageFields"
-import AboutPage from "../src/pages/About"
-import ContactPage from "../src/pages/Contact"
-import NotFoundPage from "../src/pages/common/NotFound"
-import ProtectedRoute from "../src/components/auth/ProtectedRoute"
-import DirectBookingForm from "../src/pages/sports/football/DirctBookingForm"
+import { Header } from './components/layout/Header'
+import { Footer } from './components/layout/Footer'
+
+// Layouts
+import AdminLayout from './layouts/AdminLayout'
+import MainLayout from './layouts/MainLayout'
+
+// Pages
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import ProfilePage from './pages/ProfilePage'
+import BookingsPage from './pages/BookingsPage'
+import NotFoundPage from './pages/404'
+import ForbiddenPage from './pages/403'
+
+// Admin Pages
+import AdminDashboardPage from './pages/admin/DashboardPage'
+import AdminUsersPage from './pages/admin/UsersPage'
+import AdminCourtsPage from './pages/admin/CourtsPage'
+import AdminBookingsPage from './pages/admin/BookingsPage'
+import AdminSettingsPage from './pages/admin/SettingsPage'
+import AdminHelpPage from './pages/admin/HelpPage'
+
+// Owner Pages
+import OwnerCourtsPage from './pages/owner/CourtsPage'
+import OwnerBookingsPage from './pages/owner/BookingsPage'
 
 function App() {
   return (
     <ErrorBoundary>
       <Router>
         <AuthProvider>
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<HomePage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="contact" element={<ContactPage />} />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+          
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            
+            <main className="flex-grow">
+              <Routes>
+                {/* Rutas públicas */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                </Route>
 
-              {/* Rutas protegidas para usuarios */}
-              <Route
-                path="profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="profile/bookings"
-                element={
-                  <ProtectedRoute>
-                    <BookingsPage />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Rutas de administración */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="courts" element={<AdminCourtsPage />} />
+                  <Route path="bookings" element={<AdminBookingsPage />} />
+                  <Route path="settings" element={<AdminSettingsPage />} />
+                  <Route path="help" element={<AdminHelpPage />} />
+                </Route>
 
-              {/* Rutas para canchas de fútbol */}
-              <Route path="football/fields" element={<FieldsPage />} />
-              <Route path="football/fields/:fieldId" element={<FieldDetailPage />} />
-              <Route
-                path="football/booking/:fieldId"
-                element={
-                  <ProtectedRoute>
-                    <Booking />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="football/direct-booking/:fieldId"
-                element={
-                  <ProtectedRoute>
-                    <DirectBookingForm />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Rutas de propietario */}
+                <Route path="/owner" element={<MainLayout />}>
+                  <Route path="courts" element={<OwnerCourtsPage />} />
+                  <Route path="bookings" element={<OwnerBookingsPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
 
-              {/* Rutas protegidas para administradores */}
-              <Route
-                path="admin/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Rutas de jugador */}
+                <Route path="/player" element={<MainLayout />}>
+                  <Route path="bookings" element={<BookingsPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
 
-              {/* Rutas protegidas para propietarios de canchas */}
-              <Route
-                path="field-owner/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="owner">
-                    <OwnerDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Páginas de error */}
+                <Route path="/403" element={<ForbiddenPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </main>
 
-              {/* Ruta para páginas no encontradas */}
-              <Route path="404" element={<NotFoundPage />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Route>
-          </Routes>
+            <Footer />
+          </div>
         </AuthProvider>
       </Router>
     </ErrorBoundary>

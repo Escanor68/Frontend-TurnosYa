@@ -4,14 +4,16 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
-import { Menu, X, User, LogOut, ClubIcon as Soccer, Settings } from "lucide-react"
+import { Menu, X, User, LogOut, ClubIcon as Soccer, Settings, Calendar, Home } from "lucide-react"
 import { ErrorBoundary } from "../common/ErrorBoundary"
+import { useRoleCheck } from '../../hooks/useRoleCheck'
 
 // Componente de encabezado para toda la aplicación
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
+  const { isAdmin, isOwner, canManageFields, canManageBookings } = useRoleCheck()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -33,12 +35,40 @@ const Header: React.FC = () => {
     logout()
     setIsProfileMenuOpen(false)
     setIsMenuOpen(false)
+    navigate('/login')
   }
 
-  // Verificar si el usuario es administrador
-  const isAdmin = user?.role === "admin"
-  // Verificar si el usuario es propietario de campo
-  const isOwner = user?.role === "owner"
+  const getNavigationItems = () => {
+    const items = [
+      { href: '/', label: 'Inicio', icon: Home },
+    ]
+
+    if (isAdmin()) {
+      items.push(
+        { href: '/admin/dashboard', label: 'Panel Admin', icon: Settings },
+        { href: '/admin/users', label: 'Usuarios', icon: User },
+        { href: '/admin/courts', label: 'Canchas', icon: Calendar }
+      )
+    }
+
+    if (isOwner()) {
+      items.push(
+        { href: '/owner/courts', label: 'Mis Canchas', icon: Calendar },
+        { href: '/owner/bookings', label: 'Reservas', icon: Calendar }
+      )
+    }
+
+    if (!isAdmin() && !isOwner()) {
+      items.push(
+        { href: '/bookings', label: 'Reservar', icon: Calendar },
+        { href: '/my-bookings', label: 'Mis Reservas', icon: Calendar }
+      )
+    }
+
+    return items
+  }
+
+  const navigationItems = getNavigationItems()
 
   return (
     <ErrorBoundary>
@@ -55,34 +85,16 @@ const Header: React.FC = () => {
 
             {/* Navegación de escritorio */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link
-                to="/football/fields"
-                className="text-gray-700 hover:text-emerald-600 font-medium transition-colors"
-              >
-                Canchas
-              </Link>
-              <Link to="/about" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
-                Nosotros
-              </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
-                Contacto
-              </Link>
-              {isAuthenticated && isAdmin && (
+              {navigationItems.map((item) => (
                 <Link
-                  to="/admin/dashboard"
+                  key={item.href}
+                  to={item.href}
                   className="text-gray-700 hover:text-emerald-600 font-medium transition-colors"
                 >
-                  Admin
+                  <item.icon className="h-4 w-4 mr-2" />
+                  {item.label}
                 </Link>
-              )}
-              {isAuthenticated && isOwner && (
-                <Link
-                  to="/field-owner/dashboard"
-                  className="text-gray-700 hover:text-emerald-600 font-medium transition-colors"
-                >
-                  Mis Canchas
-                </Link>
-              )}
+              ))}
             </nav>
 
             {/* Botones de autenticación para escritorio */}
@@ -173,45 +185,17 @@ const Header: React.FC = () => {
           <div className="md:hidden bg-white border-t border-gray-100 py-2">
             <div className="container mx-auto px-4">
               <nav className="flex flex-col space-y-3 py-3">
-                <Link
-                  to="/football/fields"
-                  className="text-gray-700 hover:text-emerald-600 font-medium transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Canchas
-                </Link>
-                <Link
-                  to="/about"
-                  className="text-gray-700 hover:text-emerald-600 font-medium transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Nosotros
-                </Link>
-                <Link
-                  to="/contact"
-                  className="text-gray-700 hover:text-emerald-600 font-medium transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Contacto
-                </Link>
-                {isAuthenticated && isAdmin && (
+                {navigationItems.map((item) => (
                   <Link
-                    to="/admin/dashboard"
+                    key={item.href}
+                    to={item.href}
                     className="text-gray-700 hover:text-emerald-600 font-medium transition-colors py-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Admin
+                    <item.icon className="h-5 w-5 mr-2" />
+                    {item.label}
                   </Link>
-                )}
-                {isAuthenticated && (isOwner || isAdmin) && (
-                  <Link
-                    to="/field-owner/dashboard"
-                    className="text-gray-700 hover:text-emerald-600 font-medium transition-colors py-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Mis Canchas
-                  </Link>
-                )}
+                ))}
 
                 {isAuthenticated && user ? (
                   <>
@@ -222,7 +206,7 @@ const Header: React.FC = () => {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <User className="h-5 w-5 mr-2" />
-                        Mi Perfil
+                        Perfil
                       </Link>
                       <Link
                         to="/profile/bookings"

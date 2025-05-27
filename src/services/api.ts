@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { API_URL } from '../config';
+import { AuthTokens } from '../types/auth';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -10,12 +11,28 @@ const api = axios.create({
   }
 });
 
-// Interceptor para tokens
+// Función para obtener tokens del localStorage
+const getStoredTokens = (): AuthTokens | null => {
+  const tokens = localStorage.getItem('tokens');
+  return tokens ? JSON.parse(tokens) : null;
+};
+
+// Función para guardar tokens en localStorage
+export const setStoredTokens = (tokens: AuthTokens): void => {
+  localStorage.setItem('tokens', JSON.stringify(tokens));
+};
+
+// Función para eliminar tokens del localStorage
+export const removeStoredTokens = (): void => {
+  localStorage.removeItem('tokens');
+};
+
+// Interceptor para agregar el token a las peticiones
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const tokens = getStoredTokens();
+    if (tokens?.accessToken) {
+      config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
     return config;
   },
@@ -33,17 +50,25 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const response = await api.post('/auth/refresh', { refreshToken });
-        const { token } = response.data;
-        
-        localStorage.setItem('token', token);
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        
+        const tokens = getStoredTokens();
+        if (!tokens?.refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Intentar refrescar el token
+        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
+          refreshToken: tokens.refreshToken,
+        });
+
+        const newTokens: AuthTokens = response.data;
+        setStoredTokens(newTokens);
+
+        // Reintentar la petición original con el nuevo token
+        originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        // Si falla el refresh, limpiar tokens y redirigir a login
+        removeStoredTokens();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
