@@ -49,38 +49,40 @@ function App() {
           />
           
           <Routes>
-            {/* Rutas públicas */}
-            <Route path="/" element={<Layout />}>
+            {/* Layout principal */}
+            <Route element={<Layout />}>
+              {/* Rutas públicas */}
               <Route index element={<HomePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
               <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="reset-password" element={<ResetPasswordPage />} />
-
-              {/* Rutas protegidas de administración */}
-              <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
-                <Route index element={<DashboardPage />} />
-                <Route path="users" element={<UsersPage />} />
-                <Route path="courts" element={<CourtsPage />} />
-                <Route path="bookings" element={<AdminBookingsPage />} />
-              </Route>
-
-              {/* Rutas protegidas de propietario */}
-              <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
-                <Route path="courts" element={<OwnerCourtsPage />} />
-                <Route path="bookings" element={<OwnerBookingsPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-              </Route>
-
-              {/* Rutas protegidas de jugador */}
-              <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
-                <Route path="bookings" element={<BookingsPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-              </Route>
-
-              {/* Páginas de error */}
               <Route path="403" element={<ForbiddenPage />} />
               <Route path="*" element={<NotFoundPage />} />
+
+              {/* Rutas protegidas */}
+              <Route element={<RequireAuth allowedRoles={['admin', 'owner', 'player']} />}>
+                {/* Rutas de administración */}
+                <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="courts" element={<CourtsPage />} />
+                  <Route path="bookings" element={<AdminBookingsPage />} />
+                </Route>
+
+                {/* Rutas de propietario */}
+                <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
+                  <Route path="courts" element={<OwnerCourtsPage />} />
+                  <Route path="bookings" element={<OwnerBookingsPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
+
+                {/* Rutas de jugador */}
+                <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
+                  <Route path="bookings" element={<BookingsPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
+              </Route>
             </Route>
           </Routes>
         </Router>

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AuthResponse, LoginCredentials, RegisterData, User, AuthTokens } from '../types/auth';
+import { mockService, USE_MOCK } from './mock/mockService';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -17,6 +18,13 @@ class AuthService {
 
   async login(email: string, password: string): Promise<User> {
     try {
+      if (USE_MOCK) {
+        const response = await mockService.login(email, password);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        return response.user;
+      }
+
       const response = await axios.post(`${API_URL}/auth/login`, {
         email,
         password,
@@ -35,6 +43,13 @@ class AuthService {
 
   async register(email: string, password: string, name: string, role: string): Promise<User> {
     try {
+      if (USE_MOCK) {
+        const response = await mockService.register(email, password, name, role);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        return response.user;
+      }
+
       const response = await axios.post(`${API_URL}/auth/register`, {
         email,
         password,
@@ -91,6 +106,11 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     try {
+      if (USE_MOCK) {
+        // Simular éxito en modo mock
+        return;
+      }
+
       await axios.post(`${API_URL}/auth/forgot-password`, { email });
     } catch (error) {
       throw this.handleError(error);
@@ -99,6 +119,11 @@ class AuthService {
 
   async resetPassword(token: string, password: string): Promise<void> {
     try {
+      if (USE_MOCK) {
+        // Simular éxito en modo mock
+        return;
+      }
+
       await axios.post(`${API_URL}/auth/reset-password`, {
         token,
         password,

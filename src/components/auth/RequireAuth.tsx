@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { LoadingSpinner } from '../common/LoadingSpinner';
 
 interface RequireAuthProps {
   allowedRoles: string[];
@@ -13,7 +14,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
+        <LoadingSpinner />
       </div>
     );
   }
@@ -23,7 +24,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
   }
 
   if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/403" state={{ from: location }} replace />;
   }
 
   return <Outlet />;

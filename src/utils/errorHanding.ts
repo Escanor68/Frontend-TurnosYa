@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
 // Utilidades para manejo de errores
 
 /**
@@ -61,12 +64,18 @@ export function withErrorHandling<T extends (...args: any[]) => any>(
   }
 }
 
-// src/utils/errorHandler.ts
-export const handleApiError = (error: any) => {
-if (axios.isAxiosError(error)) {
-  const message = error.response?.data?.message || 'An error occurred';
-  toast.error(message);
-  return message;
-}
-return 'An unexpected error occurred';
+/**
+ * Maneja errores de API de forma consistente
+ * @param error Error de la API
+ * @returns Mensaje de error formateado
+ */
+export const handleApiError = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message || 'Ha ocurrido un error en la comunicación con el servidor';
+    toast.error(message);
+    return message;
+  }
+  const defaultMessage = 'Ha ocurrido un error inesperado';
+  toast.error(defaultMessage);
+  return defaultMessage;
 };
