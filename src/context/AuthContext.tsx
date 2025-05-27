@@ -4,7 +4,7 @@ import type { User, AuthContextType } from '../types/auth';
 import authService from '../services/auth.service';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const AuthContext = createContext<AuthContextType>({
+const defaultContext: AuthContextType = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -13,12 +13,17 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => { throw new Error('AuthContext not initialized') },
   forgotPassword: async () => { throw new Error('AuthContext not initialized') },
   resetPassword: async () => { throw new Error('AuthContext not initialized') },
-});
+};
+
+const AuthContext = createContext<AuthContextType>(defaultContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [state, setState] = useState({
+    user: null as User | null,
+    isLoading: true,
+    error: null as Error | null,
+    isInitialized: false
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -27,22 +32,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          setIsLoading(false);
+          if (mounted) {
+            setState(prev => ({
+              ...prev,
+              isLoading: false,
+              isInitialized: true
+            }));
+          }
           return;
         }
 
         const userData = await authService.getCurrentUser();
         if (mounted) {
-          setUser(userData);
+          setState(prev => ({
+            ...prev,
+            user: userData,
+            isLoading: false,
+            isInitialized: true
+          }));
         }
       } catch (err) {
         console.error('Error initializing auth:', err);
+        localStorage.removeItem('token');
         if (mounted) {
-          setError(err instanceof Error ? err : new Error('Failed to initialize auth'));
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
+          setState(prev => ({
+            ...prev,
+            user: null,
+            error: err instanceof Error ? err : new Error('Failed to initialize auth'),
+            isLoading: false,
+            isInitialized: true
+          }));
         }
       }
     };
@@ -56,24 +75,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       const { token, user: userData } = await authService.login({ email, password });
       localStorage.setItem('token', token);
-      setUser(userData);
+      setState(prev => ({ ...prev, user: userData, isLoading: false }));
+      toast.success('¡Bienvenido!');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setState(prev => ({ ...prev, error: new Error(message), isLoading: false }));
       toast.error(message);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const logout = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       await authService.logout();
     } catch (err) {
       console.error('Error during logout:', err);
@@ -81,35 +98,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error(message);
     } finally {
       localStorage.removeItem('token');
-      setUser(null);
-      setIsLoading(false);
+      setState(prev => ({ ...prev, user: null, isLoading: false }));
     }
   };
 
   const register = async (userData: { email: string; password: string; name: string; role: string }) => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
       const { token, user: newUser } = await authService.register(userData);
       localStorage.setItem('token', token);
-      setUser(newUser);
+      setState(prev => ({ ...prev, user: newUser, isLoading: false }));
       toast.success('¡Registro exitoso!');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al registrarse';
+      setState(prev => ({ ...prev, error: new Error(message), isLoading: false }));
       toast.error(message);
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const forgotPassword = async (email: string) => {
     try {
-      setError(null);
+      setState(prev => ({ ...prev, error: null }));
       await authService.forgotPassword(email);
       toast.success('Se han enviado las instrucciones a tu email');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al procesar la solicitud';
+      setState(prev => ({ ...prev, error: new Error(message) }));
       toast.error(message);
       throw err;
     }
@@ -117,28 +132,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (token: string, password: string) => {
     try {
-      setError(null);
+      setState(prev => ({ ...prev, error: null }));
       await authService.resetPassword(token, password);
       toast.success('Contraseña actualizada exitosamente');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al restablecer la contraseña';
+      setState(prev => ({ ...prev, error: new Error(message) }));
       toast.error(message);
       throw err;
     }
   };
 
-  if (isLoading) {
+  if (!state.isInitialized) {
     return <LoadingSpinner />;
   }
 
-  if (error) {
-    throw error; // Let ErrorBoundary handle it
-  }
-
   const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
+    user: state.user,
+    isAuthenticated: !!state.user,
+    isLoading: state.isLoading,
     login,
     logout,
     register,
