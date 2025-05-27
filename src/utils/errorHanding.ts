@@ -1,62 +1,42 @@
-// Utilidades para manejo de errores
+import { toast } from 'react-toastify';
 
-/**
- * Función para manejar errores de forma centralizada
- * @param error Error capturado
- * @param context Contexto donde ocurrió el error
- */
-export const handleError = (error: unknown, context: string): string => {
-  console.error(`Error en ${context}:`, error)
+interface ErrorMetadata {
+  componentStack?: string;
+  timestamp?: string;
+  [key: string]: any;
+}
 
-  // Determinar el mensaje de error basado en el tipo de error
+export const logErrorToService = (error: Error, context: string, metadata?: ErrorMetadata): void => {
+  // In development, log to console
+  if (process.env.NODE_ENV === 'development') {
+    console.error("ERROR LOG:", {
+      timestamp: metadata?.timestamp || new Date().toISOString(),
+      context,
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      },
+      metadata,
+    });
+  }
+
+  // In production, you would send this to your error tracking service
+  // Example: Sentry, LogRocket, etc.
+  
+  // Show a user-friendly toast message
+  toast.error('Ha ocurrido un error inesperado. Por favor, intenta de nuevo.');
+};
+
+export const handleApiError = (error: unknown): string => {
+  let message = 'Ha ocurrido un error inesperado';
+
   if (error instanceof Error) {
-    return error.message
-  } else if (typeof error === "string") {
-    return error
-  } else {
-    return "Ha ocurrido un error inesperado"
+    message = error.message;
+  } else if (typeof error === 'string') {
+    message = error;
   }
-}
 
-/**
- * Función para enviar errores a un servicio de monitoreo (simulado)
- * @param error Error capturado
- * @param context Contexto donde ocurrió el error
- * @param metadata Metadatos adicionales
- */
-export const logErrorToService = (error: unknown, context: string, metadata?: Record<string, any>): void => {
-  // En una aplicación real, aquí enviarías el error a un servicio como Sentry, LogRocket, etc.
-  console.error("ERROR LOG:", {
-    timestamp: new Date().toISOString(),
-    context,
-    error:
-      error instanceof Error
-        ? {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          }
-        : error,
-    metadata,
-  })
-}
-
-/**
- * HOC para envolver funciones y capturar errores
- * @param fn Función a envolver
- * @param context Contexto para el registro de errores
- */
-export function withErrorHandling<T extends (...args: any[]) => any>(
-  fn: T,
-  context: string,
-): (...args: Parameters<T>) => ReturnType<T> {
-  return (...args: Parameters<T>): ReturnType<T> => {
-    try {
-      return fn(...args)
-    } catch (error) {
-      handleError(error, context)
-      logErrorToService(error, context, { args })
-      throw error // Re-lanzar para que pueda ser manejado más arriba si es necesario
-    }
-  }
-}
+  toast.error(message);
+  return message;
+};

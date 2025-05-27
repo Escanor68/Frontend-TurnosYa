@@ -1,106 +1,125 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
-import { AuthProvider } from "./context/AuthContext"
-import { ErrorBoundary } from "../src/components/common/ErrorBoundary"
-import Layout from "../src/components/layout/Layout"
-import HomePage from "../src/pages/common/Home"
-import LoginPage from "../src/pages/auth/Login"
-import RegisterPage from "../src/pages/auth/Register"
-import ProfilePage from "../src/pages/user/Profile"
-import BookingsPage from "../src/pages/user/Bookings"
-import FieldsPage from "../src/pages/sports/football/Fields"
-import FieldDetailPage from "../src/pages/sports/football/FieldDetails"
-import Booking from "../src/pages/sports/football/Booking"
-import AdminDashboard from "../src/pages/admin/Dashboard"
-import OwnerDashboard from "../src/pages/field-owner/ManageFields"
-import AboutPage from "../src/pages/About"
-import ContactPage from "../src/pages/Contact"
-import NotFoundPage from "../src/pages/common/NotFound"
-import ProtectedRoute from "../src/components/auth/ProtectedRoute"
-import DirectBookingForm from "../src/pages/sports/football/DirctBookingForm"
+import React, { Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from './context/AuthContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { routerConfig } from './router/config';
+
+// Layouts
+import Layout from './components/layout/Layout';
+import RequireAuth from './components/auth/RequireAuth';
+
+// Páginas públicas
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import NotFoundPage from './pages/404';
+import ForbiddenPage from './pages/403';
+
+// Páginas protegidas
+const DashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
+const UsersPage = React.lazy(() => import('./pages/admin/UsersPage'));
+const CourtsPage = React.lazy(() => import('./pages/admin/CourtsPage'));
+const AdminBookingsPage = React.lazy(() => import('./pages/admin/BookingsPage'));
+const OwnerCourtsPage = React.lazy(() => import('./pages/owner/CourtsPage'));
+const OwnerBookingsPage = React.lazy(() => import('./pages/owner/BookingsPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+const BookingsPage = React.lazy(() => import('./pages/BookingsPage'));
 
 function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <AuthProvider>
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} closeOnClick pauseOnHover />
+      <AuthProvider>
+        <Router future={routerConfig.future}>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+          
           <Routes>
-            <Route path="/" element={<Layout />}>
+            <Route element={<Layout />}>
+              {/* Rutas públicas */}
               <Route index element={<HomePage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="contact" element={<ContactPage />} />
+              <Route path="forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="reset-password" element={<ResetPasswordPage />} />
+              <Route path="403" element={<ForbiddenPage />} />
 
-              {/* Rutas protegidas para usuarios */}
-              <Route
-                path="profile"
-                element={
-                  <ProtectedRoute>
+              {/* Rutas protegidas */}
+              <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
+                <Route index element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <DashboardPage />
+                  </Suspense>
+                } />
+                <Route path="users" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <UsersPage />
+                  </Suspense>
+                } />
+                <Route path="courts" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <CourtsPage />
+                  </Suspense>
+                } />
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <AdminBookingsPage />
+                  </Suspense>
+                } />
+              </Route>
+
+              <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
+                <Route path="courts" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerCourtsPage />
+                  </Suspense>
+                } />
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerBookingsPage />
+                  </Suspense>
+                } />
+                <Route path="profile" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
                     <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="profile/bookings"
-                element={
-                  <ProtectedRoute>
+                  </Suspense>
+                } />
+              </Route>
+
+              <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
                     <BookingsPage />
-                  </ProtectedRoute>
-                }
-              />
+                  </Suspense>
+                } />
+                <Route path="profile" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <ProfilePage />
+                  </Suspense>
+                } />
+              </Route>
 
-              {/* Rutas para canchas de fútbol */}
-              <Route path="football/fields" element={<FieldsPage />} />
-              <Route path="football/fields/:fieldId" element={<FieldDetailPage />} />
-              <Route
-                path="football/booking/:fieldId"
-                element={
-                  <ProtectedRoute>
-                    <Booking />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="football/direct-booking/:fieldId"
-                element={
-                  <ProtectedRoute>
-                    <DirectBookingForm />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Rutas protegidas para administradores */}
-              <Route
-                path="admin/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Rutas protegidas para propietarios de canchas */}
-              <Route
-                path="field-owner/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="owner">
-                    <OwnerDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Ruta para páginas no encontradas */}
-              <Route path="404" element={<NotFoundPage />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
+              {/* Ruta 404 */}
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
-        </AuthProvider>
-      </Router>
+        </Router>
+      </AuthProvider>
     </ErrorBoundary>
-  )
+  );
 }
 
-export default App
+export default App;
