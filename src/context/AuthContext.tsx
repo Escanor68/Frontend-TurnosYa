@@ -1,7 +1,8 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import type { User, AuthContextType } from '../types/auth';
 import authService from '../services/auth.service';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Crear un valor inicial para el contexto
 const initialAuthContext: AuthContextType = {
@@ -15,59 +16,78 @@ const initialAuthContext: AuthContextType = {
   resetPassword: async () => { throw new Error('AuthContext not initialized') },
 };
 
-const AuthContext = createContext<AuthContextType>(initialAuthContext);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const currentUser = authService.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
+    const initializeAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        localStorage.removeItem('token');
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
-      const user = await authService.login(email, password);
-      setUser(user);
+      setIsLoading(true);
+      const { token, user: userData } = await authService.login(email, password);
+      localStorage.setItem('token', token);
+      setUser(userData);
       toast.success('¡Bienvenido!');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al iniciar sesión');
       throw error;
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
-  const register = useCallback(async (email: string, password: string, name: string, role: string) => {
+  const logout = async () => {
     try {
-      const user = await authService.register(email, password, name, role);
-      setUser(user);
-      toast.success('¡Registro exitoso!');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al registrarse');
-      throw error;
-    }
-  }, []);
-
-  const logout = useCallback(() => {
-    try {
-      authService.logout();
+      setIsLoading(true);
+      await authService.logout();
+      localStorage.removeItem('token');
       setUser(null);
       toast.success('¡Hasta pronto!');
     } catch (error) {
       console.error('Error during logout:', error);
       toast.error('Error al cerrar sesión');
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
 
-  const forgotPassword = useCallback(async (email: string) => {
+  const register = async (userData: any) => {
+    try {
+      setIsLoading(true);
+      const { token, user: newUser } = await authService.register(userData);
+      localStorage.setItem('token', token);
+      setUser(newUser);
+      toast.success('¡Registro exitoso!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al registrarse');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
     try {
       await authService.forgotPassword(email);
       toast.success('Se han enviado las instrucciones a tu email');
@@ -75,9 +95,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error(error instanceof Error ? error.message : 'Error al procesar la solicitud');
       throw error;
     }
-  }, []);
+  };
 
-  const resetPassword = useCallback(async (token: string, password: string) => {
+  const resetPassword = async (token: string, password: string) => {
     try {
       await authService.resetPassword(token, password);
       toast.success('Contraseña actualizada exitosamente');
@@ -85,28 +105,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error(error instanceof Error ? error.message : 'Error al restablecer la contraseña');
       throw error;
     }
-  }, []);
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     login,
-    register,
     logout,
+    register,
     forgotPassword,
     resetPassword,
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
-      </div>
-    );
-  }
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
 
 export default AuthContext;
