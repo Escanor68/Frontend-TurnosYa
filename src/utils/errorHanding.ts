@@ -9,40 +9,42 @@ import { toast } from 'react-toastify';
  * @param context Contexto donde ocurrió el error
  */
 export const handleError = (error: unknown, context: string): string => {
-  console.error(`Error en ${context}:`, error)
+  console.error(`Error en ${context}:`, error);
 
-  // Determinar el mensaje de error basado en el tipo de error
-  if (error instanceof Error) {
-    return error.message
-  } else if (typeof error === "string") {
-    return error
-  } else {
-    return "Ha ocurrido un error inesperado"
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message || 'Error de conexión con el servidor';
+    toast.error(message);
+    return message;
   }
-}
+
+  if (error instanceof Error) {
+    toast.error(error.message);
+    return error.message;
+  }
+
+  const defaultMessage = 'Ha ocurrido un error inesperado';
+  toast.error(defaultMessage);
+  return defaultMessage;
+};
 
 /**
- * Función para enviar errores a un servicio de monitoreo (simulado)
+ * Función para enviar errores a un servicio de monitoreo
  * @param error Error capturado
  * @param context Contexto donde ocurrió el error
  * @param metadata Metadatos adicionales
  */
 export const logErrorToService = (error: unknown, context: string, metadata?: Record<string, any>): void => {
-  // En una aplicación real, aquí enviarías el error a un servicio como Sentry, LogRocket, etc.
   console.error("ERROR LOG:", {
     timestamp: new Date().toISOString(),
     context,
-    error:
-      error instanceof Error
-        ? {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          }
-        : error,
+    error: error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    } : error,
     metadata,
-  })
-}
+  });
+};
 
 /**
  * HOC para envolver funciones y capturar errores
