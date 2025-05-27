@@ -1,24 +1,41 @@
 // Tipos relacionados con reservas
 
+import { Field } from './field';
+
 export interface Booking {
   id: string
   fieldId: string
+  field: Field
   userId: string
   date: string
-  time: string
-  players: number
-  contactName: string
-  contactPhone: string
-  contactEmail: string
-  paymentMethod: string
-  status: "pending" | "confirmed" | "cancelled" | "completed"
+  startTime: string
+  endTime: string
+  status: BookingStatus
   totalPrice: number
-  recurrence: string
-  recurrenceCount: number
-  additionalServices: string[]
-  additionalServicesNotes?: string
-  recurrenceExceptions: string[]
+  paymentStatus: PaymentStatus
   createdAt: string
+  updatedAt: string
+}
+
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
+export type PaymentStatus = 'pending' | 'partial' | 'completed' | 'refunded'
+
+export interface CreateBookingDTO {
+  fieldId: string
+  date: string
+  startTime: string
+  endTime: string
+  recurrence?: {
+    type: 'weekly' | 'monthly'
+    endDate: string
+  }
+}
+
+export interface BookingFilters {
+  userId?: string
+  fieldId?: string
+  date?: string
+  status?: BookingStatus
 }
 
 export interface BookingFormData {

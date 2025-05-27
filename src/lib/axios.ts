@@ -1,55 +1,41 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// URL base de tus microservicios (ajustalas según el entorno)
-const BASE_URLS = {
-  usuarios: import.meta.env.VITE_API_USUARIOS || 'http://localhost:3001/api',
-  futbol: import.meta.env.VITE_API_FUTBOL || 'http://localhost:3002/api',
-  pagos: import.meta.env.VITE_API_PAGOS || 'http://localhost:3003/api',
-};
+const createAxiosInstance = (baseURL: string) => {
+  const instance = axios.create({
+    baseURL,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-// Crea instancias separadas para cada microservicio
-export const axiosUsuarios = axios.create({
-  baseURL: BASE_URLS.usuarios,
-});
-
-export const axiosFutbol = axios.create({
-  baseURL: BASE_URLS.futbol,
-});
-
-export const axiosPagos = axios.create({
-  baseURL: BASE_URLS.pagos,
-});
-
-// Función para inyectar token JWT automáticamente
-const injectToken = (config: any) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-};
-
-// Interceptor de request
-const attachInterceptors = (instance: any) => {
-  instance.interceptors.request.use(
-    injectToken,
-    (error) => Promise.reject(error)
-  );
+  instance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
 
   instance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        'Error desconocido';
-
-      toast.error(message);
+    response => response,
+    error => {
+      if (error.response?.status === 401) {
+        // Token expirado o inválido
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+      if (error.response?.status === 429) {
+        // Rate limit alcanzado
+        console.error('Rate limit reached');
+      }
       return Promise.reject(error);
     }
   );
+
+  return instance;
 };
 
-// Aplicar interceptores a cada instancia
-[axiosUsuarios, axiosFutbol, axiosPagos].forEach(attachInterceptors);
+export const footballApi = createAxiosInstance(import.meta.env.VITE_FOOTBALL_API_URL);
+export const usersApi = createAxiosInstance(import.meta.env.VITE_USERS_API_URL);
+export const paymentsApi = createAxiosInstance(import.meta.env.VITE_MERCADOPAGO_API_URL);
