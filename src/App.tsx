@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,20 +15,18 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import ProfilePage from './pages/ProfilePage';
-import BookingsPage from './pages/BookingsPage';
 import NotFoundPage from './pages/404';
 import ForbiddenPage from './pages/403';
 
-// Páginas de administración
-import DashboardPage from './pages/admin/DashboardPage';
-import UsersPage from './pages/admin/UsersPage';
-import CourtsPage from './pages/admin/CourtsPage';
-import AdminBookingsPage from './pages/admin/BookingsPage';
-
-// Páginas de propietario
-import OwnerCourtsPage from './pages/owner/CourtsPage';
-import OwnerBookingsPage from './pages/owner/BookingsPage';
+// Páginas protegidas
+const DashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
+const UsersPage = React.lazy(() => import('./pages/admin/UsersPage'));
+const CourtsPage = React.lazy(() => import('./pages/admin/CourtsPage'));
+const AdminBookingsPage = React.lazy(() => import('./pages/admin/BookingsPage'));
+const OwnerCourtsPage = React.lazy(() => import('./pages/owner/CourtsPage'));
+const OwnerBookingsPage = React.lazy(() => import('./pages/owner/BookingsPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+const BookingsPage = React.lazy(() => import('./pages/BookingsPage'));
 
 function App() {
   return (
@@ -49,7 +47,6 @@ function App() {
           />
           
           <Routes>
-            {/* Layout principal */}
             <Route element={<Layout />}>
               {/* Rutas públicas */}
               <Route index element={<HomePage />} />
@@ -58,31 +55,64 @@ function App() {
               <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="reset-password" element={<ResetPasswordPage />} />
               <Route path="403" element={<ForbiddenPage />} />
-              <Route path="*" element={<NotFoundPage />} />
 
               {/* Rutas protegidas */}
-              <Route element={<RequireAuth allowedRoles={['admin', 'owner', 'player']} />}>
-                {/* Rutas de administración */}
-                <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
-                  <Route index element={<DashboardPage />} />
-                  <Route path="users" element={<UsersPage />} />
-                  <Route path="courts" element={<CourtsPage />} />
-                  <Route path="bookings" element={<AdminBookingsPage />} />
-                </Route>
-
-                {/* Rutas de propietario */}
-                <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
-                  <Route path="courts" element={<OwnerCourtsPage />} />
-                  <Route path="bookings" element={<OwnerBookingsPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                </Route>
-
-                {/* Rutas de jugador */}
-                <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
-                  <Route path="bookings" element={<BookingsPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                </Route>
+              <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
+                <Route index element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <DashboardPage />
+                  </Suspense>
+                } />
+                <Route path="users" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <UsersPage />
+                  </Suspense>
+                } />
+                <Route path="courts" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <CourtsPage />
+                  </Suspense>
+                } />
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <AdminBookingsPage />
+                  </Suspense>
+                } />
               </Route>
+
+              <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
+                <Route path="courts" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerCourtsPage />
+                  </Suspense>
+                } />
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerBookingsPage />
+                  </Suspense>
+                } />
+                <Route path="profile" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <ProfilePage />
+                  </Suspense>
+                } />
+              </Route>
+
+              <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
+                <Route path="bookings" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <BookingsPage />
+                  </Suspense>
+                } />
+                <Route path="profile" element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <ProfilePage />
+                  </Suspense>
+                } />
+              </Route>
+
+              {/* Ruta 404 */}
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </Router>
