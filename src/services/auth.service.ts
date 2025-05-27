@@ -53,7 +53,7 @@ class AuthService {
     }
   }
 
-  async logout(): void {
+  logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
@@ -131,4 +131,4 @@ class AuthService {
   }
 }
 
-export default AuthService.getInstance(); 
+export const authService = new AuthService(); 

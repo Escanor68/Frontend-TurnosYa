@@ -1,5 +1,3 @@
-"use client"
-
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import type { User, AuthContextType } from '../types/auth';
