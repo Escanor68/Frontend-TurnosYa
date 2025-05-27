@@ -68,28 +68,8 @@ const HelpSection: React.FC = () => {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
-                    ¿Qué comisión cobran?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
-                    Tenemos planes flexibles adaptados a diferentes necesidades.
-                    Contáctanos para conocer más detalles.
-                  </dd>
                 </div>
               </dl>
-            </div>
-          </div>
-
-          {/* Sistema de Tickets */}
-          <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">¿Necesitas más ayuda?</h3>
-            <div className="mt-4">
-              <Link
-                to="/support"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400"
-              >
-                Crear Ticket de Soporte
-              </Link>
             </div>
           </div>
         </div>
