@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
@@ -33,90 +33,88 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router future={routerConfig.future}>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-          
-          <Routes>
-            <Route element={<Layout />}>
-              {/* Rutas públicas */}
-              <Route index element={<HomePage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="reset-password" element={<ResetPasswordPage />} />
-              <Route path="403" element={<ForbiddenPage />} />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        
+        <Routes>
+          <Route element={<Layout />}>
+            {/* Rutas públicas */}
+            <Route index element={<HomePage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
+            <Route path="403" element={<ForbiddenPage />} />
 
-              {/* Rutas protegidas */}
-              <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
-                <Route index element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <DashboardPage />
-                  </Suspense>
-                } />
-                <Route path="users" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <UsersPage />
-                  </Suspense>
-                } />
-                <Route path="courts" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <CourtsPage />
-                  </Suspense>
-                } />
-                <Route path="bookings" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <AdminBookingsPage />
-                  </Suspense>
-                } />
-              </Route>
-
-              <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
-                <Route path="courts" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <OwnerCourtsPage />
-                  </Suspense>
-                } />
-                <Route path="bookings" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <OwnerBookingsPage />
-                  </Suspense>
-                } />
-                <Route path="profile" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <ProfilePage />
-                  </Suspense>
-                } />
-              </Route>
-
-              <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
-                <Route path="bookings" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <BookingsPage />
-                  </Suspense>
-                } />
-                <Route path="profile" element={
-                  <Suspense fallback={<div>Cargando...</div>}>
-                    <ProfilePage />
-                  </Suspense>
-                } />
-              </Route>
-
-              {/* Ruta 404 */}
-              <Route path="*" element={<NotFoundPage />} />
+            {/* Rutas protegidas */}
+            <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
+              <Route index element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <DashboardPage />
+                </Suspense>
+              } />
+              <Route path="users" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <UsersPage />
+                </Suspense>
+              } />
+              <Route path="courts" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <CourtsPage />
+                </Suspense>
+              } />
+              <Route path="bookings" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AdminBookingsPage />
+                </Suspense>
+              } />
             </Route>
-          </Routes>
-        </Router>
+
+            <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
+              <Route path="courts" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <OwnerCourtsPage />
+                </Suspense>
+              } />
+              <Route path="bookings" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <OwnerBookingsPage />
+                </Suspense>
+              } />
+              <Route path="profile" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <ProfilePage />
+                </Suspense>
+              } />
+            </Route>
+
+            <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
+              <Route path="bookings" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <BookingsPage />
+                </Suspense>
+              } />
+              <Route path="profile" element={
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <ProfilePage />
+                </Suspense>
+              } />
+            </Route>
+
+            {/* Ruta 404 */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
       </AuthProvider>
     </ErrorBoundary>
   );

@@ -4,12 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import App from './App.tsx';
 import { AuthProvider } from './context/AuthContext';
+import { routerConfig } from './router/config';
 import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter future={routerConfig.future}>
       <AuthProvider>
         <App />
         <ToastContainer
