@@ -1,61 +1,91 @@
 import axios from 'axios';
-import type { User } from '../types/auth';
+import type { User, AuthResponse, LoginCredentials, RegisterData } from '../types/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 class AuthService {
-  private static instance: AuthService;
-
-  private constructor() {}
-
-  public static getInstance(): AuthService {
-    if (!AuthService.instance) {
-      AuthService.instance = new AuthService();
+  private setAuthHeader(token: string | null) {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
     }
-    return AuthService.instance;
   }
 
-  async login(email: string, password: string): Promise<User> {
+  async getCurrentUser(): Promise<User> {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password,
-      });
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found');
       }
       
-      return response.data.user;
+      this.setAuthHeader(token);
+      const response = await axios.get<User>(`${API_URL}/auth/me`);
+      return response.data;
     } catch (error) {
-      throw this.handleError(error);
+      localStorage.removeItem('token');
+      this.setAuthHeader(null);
+      throw error;
     }
   }
 
-  async register(email: string, password: string, name: string, role: string): Promise<User> {
+  async login(credentials: LoginCredentials): Promise<{ token: string; user: User }> {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, {
-        email,
-        password,
-        name,
-        role,
-      });
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
-      
-      return response.data.user;
+      const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, credentials);
+      const { accessToken, user } = response.data;
+      this.setAuthHeader(accessToken);
+      return { token: accessToken, user };
     } catch (error) {
-      throw this.handleError(error);
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.message || 'Error al iniciar sesión');
+      }
+      throw error;
     }
   }
 
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async register(data: RegisterData): Promise<{ token: string; user: User }> {
+    try {
+      const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, data);
+      const { accessToken, user } = response.data;
+      this.setAuthHeader(accessToken);
+      return { token: accessToken, user };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.message || 'Error al registrarse');
+      }
+      throw error;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await axios.post(`${API_URL}/auth/logout`);
+    } finally {
+      localStorage.removeItem('token');
+      this.setAuthHeader(null);
+    }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      await axios.post(`${API_URL}/auth/forgot-password`, { email });
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.message || 'Error al procesar la solicitud');
+      }
+      throw error;
+    }
+  }
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    try {
+      await axios.post(`${API_URL}/auth/reset-password`, { token, password });
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(error.response.data.message || 'Error al restablecer la contraseña');
+      }
+      throw error;
+    }
   }
 
   async refreshToken(): Promise<string> {
@@ -71,14 +101,6 @@ class AuthService {
     return accessToken;
   }
 
-  getCurrentUser(): User | null {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      return JSON.parse(userStr);
-    }
-    return null;
-  }
-
   updateProfile(userId: string, data: Partial<User>): Promise<User> {
     // Implementation needed
     throw new Error('Method not implemented');
@@ -87,36 +109,6 @@ class AuthService {
   changePassword(oldPassword: string, newPassword: string): Promise<void> {
     // Implementation needed
     throw new Error('Method not implemented');
-  }
-
-  async forgotPassword(email: string): Promise<void> {
-    try {
-      await axios.post(`${API_URL}/auth/forgot-password`, { email });
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async resetPassword(token: string, password: string): Promise<void> {
-    try {
-      await axios.post(`${API_URL}/auth/reset-password`, {
-        token,
-        password,
-      });
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  private handleError(error: any): Error {
-    if (error.response) {
-      const message = error.response.data.message || 'Ha ocurrido un error';
-      return new Error(message);
-    } else if (error.request) {
-      return new Error('No se pudo conectar con el servidor');
-    } else {
-      return new Error('Error al procesar la solicitud');
-    }
   }
 
   getToken(): string | null {
@@ -128,4 +120,4 @@ class AuthService {
   }
 }
 
-export default AuthService.getInstance(); 
+export default new AuthService(); 

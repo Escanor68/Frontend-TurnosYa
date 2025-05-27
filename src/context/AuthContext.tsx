@@ -18,39 +18,53 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     const initializeAuth = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (token) {
-          const userData = await authService.getCurrentUser();
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
+
+        const userData = await authService.getCurrentUser();
+        if (mounted) {
           setUser(userData);
         }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        localStorage.removeItem('token');
-        setUser(null);
+      } catch (err) {
+        console.error('Error initializing auth:', err);
+        if (mounted) {
+          setError(err instanceof Error ? err : new Error('Failed to initialize auth'));
+        }
       } finally {
-        setIsLoading(false);
-        setIsInitialized(true);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { token, user: userData } = await authService.login(email, password);
+      setError(null);
+      const { token, user: userData } = await authService.login({ email, password });
       localStorage.setItem('token', token);
       setUser(userData);
-      toast.success('¡Bienvenido!');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al iniciar sesión');
-      throw error;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      toast.error(message);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -59,14 +73,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       await authService.logout();
+    } catch (err) {
+      console.error('Error during logout:', err);
+      const message = err instanceof Error ? err.message : 'Error al cerrar sesión';
+      toast.error(message);
+    } finally {
       localStorage.removeItem('token');
       setUser(null);
-      toast.success('¡Hasta pronto!');
-    } catch (error) {
-      console.error('Error during logout:', error);
-      toast.error('Error al cerrar sesión');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -74,13 +89,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: { email: string; password: string; name: string; role: string }) => {
     try {
       setIsLoading(true);
+      setError(null);
       const { token, user: newUser } = await authService.register(userData);
       localStorage.setItem('token', token);
       setUser(newUser);
       toast.success('¡Registro exitoso!');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al registrarse');
-      throw error;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al registrarse';
+      toast.error(message);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -88,26 +105,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forgotPassword = async (email: string) => {
     try {
+      setError(null);
       await authService.forgotPassword(email);
       toast.success('Se han enviado las instrucciones a tu email');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al procesar la solicitud');
-      throw error;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al procesar la solicitud';
+      toast.error(message);
+      throw err;
     }
   };
 
   const resetPassword = async (token: string, password: string) => {
     try {
+      setError(null);
       await authService.resetPassword(token, password);
       toast.success('Contraseña actualizada exitosamente');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al restablecer la contraseña');
-      throw error;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al restablecer la contraseña';
+      toast.error(message);
+      throw err;
     }
   };
 
-  if (!isInitialized) {
+  if (isLoading) {
     return <LoadingSpinner />;
+  }
+
+  if (error) {
+    throw error; // Let ErrorBoundary handle it
   }
 
   const value: AuthContextType = {
