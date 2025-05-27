@@ -15,33 +15,47 @@ class AuthService {
     return AuthService.instance;
   }
 
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    this.setTokens(response.data.accessToken, response.data.refreshToken);
-    return response.data;
-  }
-
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/auth/register`, data);
-    this.setTokens(response.data.accessToken, response.data.refreshToken);
-    return response.data;
-  }
-
-  async logout(): Promise<void> {
+  async login(email: string, password: string): Promise<User> {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        // Intentar invalidar el token en el servidor
-        await axios.post(`${API_URL}/auth/logout`, {
-          refreshToken,
-        });
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email,
+        password,
+      });
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
       }
+      
+      return response.data.user;
     } catch (error) {
-      console.error('Error during logout:', error);
-    } finally {
-      // Limpiar tokens localmente incluso si falla la petición
-      this.clearTokens();
+      throw this.handleError(error);
     }
+  }
+
+  async register(email: string, password: string, name: string, role: string): Promise<User> {
+    try {
+      const response = await axios.post(`${API_URL}/auth/register`, {
+        email,
+        password,
+        name,
+        role,
+      });
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response.data.user;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 
   async refreshToken(): Promise<string> {
@@ -57,54 +71,63 @@ class AuthService {
     return accessToken;
   }
 
-  async getCurrentUser(): Promise<User> {
-    const response = await axios.get(`${API_URL}/auth/me`);
-    return response.data;
+  getCurrentUser(): User | null {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      return JSON.parse(userStr);
+    }
+    return null;
   }
 
-  async updateProfile(userId: string, data: Partial<User>): Promise<User> {
-    const response = await axios.patch(`${API_URL}/users/${userId}`, data);
-    return response.data;
+  updateProfile(userId: string, data: Partial<User>): Promise<User> {
+    // Implementation needed
+    throw new Error('Method not implemented');
   }
 
-  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
-    await axios.post(`${API_URL}/auth/change-password`, {
-      oldPassword,
-      newPassword,
-    });
+  changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    // Implementation needed
+    throw new Error('Method not implemented');
   }
 
-  async requestPasswordReset(email: string): Promise<void> {
-    await axios.post(`${API_URL}/auth/forgot-password`, { email });
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      await axios.post(`${API_URL}/auth/forgot-password`, { email });
+    } catch (error) {
+      throw this.handleError(error);
+    }
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    await axios.post(`${API_URL}/auth/reset-password`, {
-      token,
-      newPassword,
-    });
+  async resetPassword(token: string, password: string): Promise<void> {
+    try {
+      await axios.post(`${API_URL}/auth/reset-password`, {
+        token,
+        password,
+      });
+    } catch (error) {
+      throw this.handleError(error);
+    }
   }
 
-  private setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+  private handleError(error: any): Error {
+    if (error.response) {
+      // El servidor respondió con un código de estado fuera del rango 2xx
+      const message = error.response.data.message || 'Ha ocurrido un error';
+      return new Error(message);
+    } else if (error.request) {
+      // La petición fue hecha pero no se recibió respuesta
+      return new Error('No se pudo conectar con el servidor');
+    } else {
+      // Algo sucedió al configurar la petición
+      return new Error('Error al procesar la solicitud');
+    }
   }
 
-  private clearTokens(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  }
-
-  getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
-  }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   isAuthenticated(): boolean {
-    return !!this.getAccessToken();
+    return !!this.getToken();
   }
 }
 

@@ -1,145 +1,88 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import type { User } from '../types/auth';
+import type { User, AuthContextType } from '../types/auth';
 import { authService } from '../services/auth.service';
 
-// Tipos
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (email: string, password: string, name: string, role: string) => Promise<void>;
-}
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-// Crear el contexto
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // Verificar autenticación al cargar
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (authService.isAuthenticated()) {
-          const userData = await authService.getCurrentUser();
-          setUser(userData);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        await logout();
-      } finally {
-        setIsLoading(false);
+    const initAuth = () => {
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
       }
+      setIsLoading(false);
     };
 
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-
+  const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await authService.login({ email, password });
-      setUser(response.user);
-      toast.success(`¡Bienvenido, ${response.user.name}!`);
-
-      // Redireccionar según el rol
-      const from = location.state?.from?.pathname || getDefaultRoute(response.user.role);
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError('Credenciales inválidas');
-      toast.error('Email o contraseña incorrectos');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (email: string, password: string, name: string, role: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await authService.register({
-        email,
-        password,
-        name,
-        role,
-      });
-      setUser(response.user);
-      toast.success('¡Registro exitoso!');
-      navigate(getDefaultRoute(response.user.role));
-    } catch (err) {
-      setError('Error en el registro');
-      toast.error('Error al registrar usuario');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    setIsLoading(true);
-    try {
-      await authService.logout();
-      setUser(null);
-      toast.info('Has cerrado sesión');
-      navigate('/login');
+      const user = await authService.login(email, password);
+      setUser(user);
+      toast.success('¡Bienvenido!');
     } catch (error) {
-      console.error('Error during logout:', error);
-      toast.error('Error al cerrar sesión');
-    } finally {
-      setIsLoading(false);
+      toast.error(error instanceof Error ? error.message : 'Error al iniciar sesión');
+      throw error;
     }
-  };
+  }, []);
 
-  const getDefaultRoute = (role: string): string => {
-    switch (role) {
-      case 'admin':
-        return '/admin/dashboard';
-      case 'owner':
-        return '/owner/courts';
-      case 'player':
-        return '/bookings';
-      default:
-        return '/';
+  const register = useCallback(async (email: string, password: string, name: string, role: string) => {
+    try {
+      const user = await authService.register(email, password, name, role);
+      setUser(user);
+      toast.success('¡Registro exitoso!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al registrarse');
+      throw error;
     }
-  };
+  }, []);
+
+  const logout = useCallback(() => {
+    authService.logout();
+    setUser(null);
+    toast.success('¡Hasta pronto!');
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string) => {
+    try {
+      await authService.forgotPassword(email);
+      toast.success('Se han enviado las instrucciones a tu email');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al procesar la solicitud');
+      throw error;
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, password: string) => {
+    try {
+      await authService.resetPassword(token, password);
+      toast.success('Contraseña actualizada exitosamente');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error al restablecer la contraseña');
+      throw error;
+    }
+  }, []);
 
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
-    error,
     login,
-    logout,
     register,
+    logout,
+    forgotPassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
-// Hook personalizado para usar el contexto
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
-  return context;
-}
+export default AuthContext;
