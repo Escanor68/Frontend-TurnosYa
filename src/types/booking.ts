@@ -31,6 +31,7 @@ export interface BookingFormData {
   paymentMethod: string
   termsAccepted: boolean
   recurrence: string
+  weekDay: number
   recurrenceCount: number
   additionalServices: string[]
   additionalServicesNotes: string
@@ -41,4 +42,36 @@ export interface RecurrenceOption {
   id: string
   name: string
   discount: number
+}
+
+export interface BookingPayload {
+  fieldId: string
+  userId?: string
+  dates: Array<{
+    date: string
+    time: string
+  }>
+  contactInfo: {
+    name: string
+    phone: string
+    email: string
+  }
+  recurrence: {
+    type: string
+    weekDay: number
+    count: number
+    exceptions: string[]
+  }
+  additionalServices: string[]
+  additionalServicesNotes: string
+  paymentMethod: string
+  totalPrice: number
+  deposit: number
+}
+
+export interface BookingResponse {
+  bookingId: string
+  status: string
+  message: string
+  checkoutUrl?: string
 }

@@ -5,6 +5,7 @@ import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, C
 import { useBooking } from "../../hooks/useBooking"
 import { useFormValidation, bookingValidationSchema } from "../../hooks/useFormValidation"
 import { additionalServices, recurrenceOptions, paymentMethods } from "../../services/mockData"
+import RecurrenceSelector from "../RecurrenceSelector"
 
 // Componente para el formulario de reserva
 const BookingForm: React.FC = () => {
@@ -199,111 +200,46 @@ const BookingForm: React.FC = () => {
                             onChange={handleInputChange}
                             className={`pl-10 w-full border ${
                               hasError("date") ? "border-red-500" : "border-gray-300"
-                            } rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
-                            required
+                            } rounded-lg p-2`}
+                            min={new Date().toISOString().split("T")[0]}
                           />
-                          {hasError("date") && <p className="mt-1 text-sm text-red-500">{getFieldError("date")}</p>}
                         </div>
+                        {getFieldError("date") && (
+                          <p className="mt-1 text-sm text-red-500">{getFieldError("date")}</p>
+                        )}
                       </div>
 
+                      {/* Time Slots */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Horario Disponible</label>
-                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                          {timeSlots.map((time) => (
+                        <div className="grid grid-cols-3 gap-2">
+                          {timeSlots.map((slot) => (
                             <button
-                              key={time}
+                              key={slot}
                               type="button"
-                              onClick={() => handleTimeSelect(time)}
+                              onClick={() => handleTimeSelect(slot)}
                               className={`py-2 px-3 rounded-lg text-center transition-colors ${
-                                bookingData.time === time
+                                bookingData.time === slot
                                   ? "bg-emerald-600 text-white"
                                   : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                               }`}
                             >
-                              {time}
+                              {slot}
                             </button>
                           ))}
                         </div>
-                        {timeSlots.length === 0 && (
-                          <p className="text-sm text-gray-500 mt-2">
-                            Selecciona una fecha para ver los horarios disponibles
-                          </p>
-                        )}
-                        {hasError("time") && <p className="mt-1 text-sm text-red-500">{getFieldError("time")}</p>}
-                      </div>
-
-                      {/* Reservas Recurrentes */}
-                      <div className="border border-gray-200 rounded-lg p-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowRecurrenceOptions(!showRecurrenceOptions)}
-                          className="flex justify-between items-center w-full"
-                        >
-                          <div className="flex items-center">
-                            <Repeat className="h-5 w-5 mr-2 text-emerald-600" />
-                            <span className="font-medium">Reservas Recurrentes</span>
-                          </div>
-                          {showRecurrenceOptions ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          )}
-                        </button>
-
-                        {showRecurrenceOptions && (
-                          <div className="mt-4 space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Repetir reserva</label>
-                              <select
-                                name="recurrence"
-                                value={bookingData.recurrence}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                              >
-                                {recurrenceOptions.map((option) => (
-                                  <option key={option.id} value={option.id}>
-                                    {option.name} {option.discount > 0 && `(${option.discount}% descuento)`}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            {bookingData.recurrence && bookingData.recurrence !== "none" && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Número de repeticiones
-                                </label>
-                                <div className="flex items-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRecurrenceCountChange(false)}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
-                                    disabled={bookingData.recurrenceCount <= 2}
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </button>
-                                  <div className="h-8 px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white">
-                                    {bookingData.recurrenceCount}
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRecurrenceCountChange(true)}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
-                                    disabled={bookingData.recurrenceCount >= 12}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </button>
-                                  <span className="ml-3 text-sm text-gray-600">
-                                    {bookingData.recurrence === "weekly" && "semanas"}
-                                    {bookingData.recurrence === "biweekly" && "quincenas"}
-                                    {bookingData.recurrence === "monthly" && "meses"}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                        {getFieldError("time") && (
+                          <p className="mt-1 text-sm text-red-500">{getFieldError("time")}</p>
                         )}
                       </div>
+
+                      {/* Recurrence Selector */}
+                      {bookingData.date && bookingData.time && (
+                        <RecurrenceSelector
+                          onRecurrenceChange={handleRecurrenceChange}
+                          selectedDate={bookingData.date}
+                        />
+                      )}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad de Jugadores</label>
@@ -690,6 +626,55 @@ const BookingForm: React.FC = () => {
                   <p className="text-center text-sm text-gray-600 mb-4">
                     Se realizará un cargo del 10% del valor total a través de Mercado Pago o Transferencia Bancaria
                   </p>
+                </div>
+              )}
+
+              {/* Resumen de Reserva */}
+              {bookingData.date && bookingData.time && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-800 mb-2">Resumen de Reserva</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-blue-700">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>Primera reserva: {formatDate(bookingData.date)}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-blue-700">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>Horario: {bookingData.time}</span>
+                    </div>
+                    {bookingData.recurrence !== "none" && (
+                      <div>
+                        <div className="flex items-center text-sm text-blue-700">
+                          <Repeat className="h-4 w-4 mr-2" />
+                          <span>
+                            Recurrencia: {recurrenceOptions.find(opt => opt.id === bookingData.recurrence)?.name}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-sm text-blue-700 mb-1">Fechas programadas:</div>
+                          <div className="bg-white rounded p-2 max-h-32 overflow-y-auto">
+                            {getRecurrenceDates().map((date, index) => (
+                              <div key={date} className="text-sm text-gray-600 py-1">
+                                {index + 1}. {formatDate(date)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center text-sm font-medium text-emerald-700 mt-2">
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      <span>
+                        Precio Total: ${calculateTotalPrice().toLocaleString()}
+                        {bookingData.recurrence !== "none" && (
+                          <span className="text-xs ml-2">
+                            (Incluye descuento del{" "}
+                            {recurrenceOptions.find(opt => opt.id === bookingData.recurrence)?.discount}%)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
 

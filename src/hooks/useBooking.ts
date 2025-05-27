@@ -38,6 +38,7 @@ export const useBooking = () => {
     additionalServices: [],
     additionalServicesNotes: "",
     recurrenceExceptions: [],
+    weekDay: 0,
   })
 
   // Actualizar datos de contacto cuando el usuario está autenticado
@@ -117,11 +118,13 @@ export const useBooking = () => {
     setBookingData((prev) => ({ ...prev, time }))
   }
 
-  // Manejar cambio de recurrencia
-  const handleRecurrenceChange = (recurrenceId: string) => {
+  // Manejar cambio de recurrencia desde el RecurrenceSelector
+  const handleRecurrenceChange = (recurrence: { type: string; weekDay: number; count: number }) => {
     setBookingData((prev) => ({
       ...prev,
-      recurrence: recurrenceId,
+      recurrence: recurrence.type,
+      weekDay: recurrence.weekDay,
+      recurrenceCount: recurrence.count,
     }))
   }
 
@@ -150,22 +153,42 @@ export const useBooking = () => {
     })
   }
 
-  // Calcular precio total con descuentos y servicios adicionales
-  const calculateTotalPrice = (): number => {
-    if (!field) return 0
+  // Obtener fechas recurrentes
+  const getRecurrenceDates = (): string[] => {
+    if (!bookingData.date || bookingData.recurrence === "none") return []
 
-    // Precio base
+    const dates: string[] = []
+    const startDate = new Date(bookingData.date)
+    
+    // Ajustar la fecha inicial al próximo día de la semana seleccionado
+    while (startDate.getDay() !== bookingData.weekDay) {
+      startDate.setDate(startDate.getDate() + 1)
+    }
+
+    for (let i = 0; i < bookingData.recurrenceCount; i++) {
+      const currentDate = new Date(startDate)
+      currentDate.setDate(currentDate.getDate() + (i * 7))
+
+      // Verificar si la fecha está en las excepciones
+      const dateString = currentDate.toISOString().split("T")[0]
+      if (!bookingData.recurrenceExceptions.includes(dateString)) {
+        dates.push(dateString)
+      }
+    }
+
+    return dates
+  }
+
+  // Calcular precio total con el 10% de seña
+  const calculateTotalPrice = (): { total: number; deposit: number } => {
+    if (!field) return { total: 0, deposit: 0 }
+
+    // Precio base por reserva
     const basePrice = field.price
 
-    // Aplicar descuento por recurrencia si corresponde
-    const recurrenceOption = recurrenceOptions.find((option) => option.id === bookingData.recurrence)
-    const recurrenceDiscount = recurrenceOption ? recurrenceOption.discount / 100 : 0
-
-    // Calcular precio con descuento
-    const discountedPrice = basePrice * (1 - recurrenceDiscount)
-
-    // Multiplicar por la cantidad de recurrencias si no es "none"
-    const recurrenceMultiplier = bookingData.recurrence !== "none" ? bookingData.recurrenceCount : 1
+    // Multiplicar por la cantidad de reservas
+    const totalReservations = bookingData.recurrence === "none" ? 1 : bookingData.recurrenceCount
+    const subtotal = basePrice * totalReservations
 
     // Calcular precio de servicios adicionales
     const servicesPrice = bookingData.additionalServices.reduce((total, serviceId) => {
@@ -174,7 +197,12 @@ export const useBooking = () => {
     }, 0)
 
     // Precio total
-    return discountedPrice * recurrenceMultiplier + servicesPrice
+    const total = subtotal + servicesPrice
+
+    // Calcular el 10% de seña
+    const deposit = Math.ceil(total * 0.1)
+
+    return { total, deposit }
   }
 
   // Navegación entre pasos
@@ -213,56 +241,86 @@ export const useBooking = () => {
   }
 
   // Enviar formulario
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!bookingData.termsAccepted) {
-      toast.error("Debes aceptar los términos y condiciones")
-      return
-    }
+    if (!field) return
 
-    // Simular envío de reserva
-    setLoading(true)
-    setTimeout(() => {
+    try {
+      setLoading(true)
+
+      // Obtener todas las fechas recurrentes
+      const bookingDates = getRecurrenceDates()
+      const { total, deposit } = calculateTotalPrice()
+
+      // Crear objeto de reserva
+      const bookingPayload = {
+        fieldId: field.id,
+        userId: user?.id,
+        dates: bookingDates.map(date => ({
+          date,
+          time: bookingData.time,
+        })),
+        contactInfo: {
+          name: bookingData.contactName,
+          phone: bookingData.contactPhone,
+          email: bookingData.contactEmail,
+        },
+        recurrence: {
+          type: bookingData.recurrence,
+          weekDay: bookingData.weekDay,
+          count: bookingData.recurrenceCount,
+          exceptions: bookingData.recurrenceExceptions,
+        },
+        additionalServices: bookingData.additionalServices,
+        additionalServicesNotes: bookingData.additionalServicesNotes,
+        paymentMethod: bookingData.paymentMethod,
+        totalPrice: total,
+        deposit,
+      }
+
+      // Llamada al backend
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingPayload),
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al procesar la reserva')
+      }
+
+      const data = await response.json()
+
+      // Mostrar mensaje de éxito
+      toast.success(
+        bookingData.recurrence === "none"
+          ? "¡Reserva realizada con éxito!"
+          : `¡Se han programado ${bookingDates.length} reservas con éxito!`
+      )
+
+      // Redireccionar al checkout para pagar la seña
+      navigate(`/checkout/${data.bookingId}`)
+    } catch (error) {
+      console.error("Error al procesar la reserva:", error)
+      toast.error("Ocurrió un error al procesar la reserva. Por favor, intenta nuevamente.")
+    } finally {
       setLoading(false)
-      toast.success("¡Reserva realizada con éxito!")
-      navigate("/profile")
-    }, 1500)
+    }
   }
 
   // Formatear fecha para mostrar
   const formatDate = (dateString: string): string => {
     if (!dateString) return ""
     const date = new Date(dateString)
-    return date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
-  }
-
-  // Obtener fechas recurrentes basadas en la configuración
-  const getRecurrenceDates = (): string[] => {
-    if (bookingData.recurrence === "none" || !bookingData.date) return []
-
-    const dates: string[] = []
-    const startDate = new Date(bookingData.date)
-
-    for (let i = 0; i < bookingData.recurrenceCount; i++) {
-      const currentDate = new Date(startDate)
-
-      if (bookingData.recurrence === "weekly") {
-        currentDate.setDate(currentDate.getDate() + i * 7)
-      } else if (bookingData.recurrence === "biweekly") {
-        currentDate.setDate(currentDate.getDate() + i * 14)
-      } else if (bookingData.recurrence === "monthly") {
-        currentDate.setMonth(currentDate.getMonth() + i)
-      }
-
-      // Verificar si la fecha está en excepciones
-      const dateString = currentDate.toISOString().split("T")[0]
-      if (!bookingData.recurrenceExceptions.includes(dateString)) {
-        dates.push(dateString)
-      }
-    }
-
-    return dates
+    return date.toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
   }
 
   return {
