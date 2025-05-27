@@ -4,23 +4,21 @@ import type { User, AuthContextType } from '../types/auth';
 import authService from '../services/auth.service';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-// Crear un valor inicial para el contexto
-const initialAuthContext: AuthContextType = {
+const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
   login: async () => { throw new Error('AuthContext not initialized') },
   register: async () => { throw new Error('AuthContext not initialized') },
-  logout: () => { throw new Error('AuthContext not initialized') },
+  logout: async () => { throw new Error('AuthContext not initialized') },
   forgotPassword: async () => { throw new Error('AuthContext not initialized') },
   resetPassword: async () => { throw new Error('AuthContext not initialized') },
-};
-
-const AuthContext = createContext<AuthContextType | null>(null);
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -36,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
       } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
 
@@ -72,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (userData: any) => {
+  const register = async (userData: { email: string; password: string; name: string; role: string }) => {
     try {
       setIsLoading(true);
       const { token, user: newUser } = await authService.register(userData);
@@ -107,11 +106,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  if (isLoading) {
+  if (!isInitialized) {
     return <LoadingSpinner />;
   }
 
-  const value = {
+  const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
     isLoading,

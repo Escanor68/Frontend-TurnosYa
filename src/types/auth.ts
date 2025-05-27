@@ -2,9 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'owner' | 'player';
-  createdAt: string;
-  updatedAt: string;
+  role: string;
 }
 
 export interface AuthState {
@@ -38,8 +36,13 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: string) => Promise<void>;
-  logout: () => void;
+  register: (userData: {
+    email: string;
+    password: string;
+    name: string;
+    role: string;
+  }) => Promise<void>;
+  logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
 }
