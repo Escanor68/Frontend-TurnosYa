@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -33,11 +34,15 @@ import AdminHelpPage from './pages/admin/HelpPage'
 import OwnerCourtsPage from './pages/owner/CourtsPage'
 import OwnerBookingsPage from './pages/owner/BookingsPage'
 
+// Componentes comunes
+import Layout from './components/layout/Layout'
+import RequireAuth from './components/auth/RequireAuth'
+
 function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <AuthProvider>
+      <AuthProvider>
+        <Router>
           <ToastContainer
             position="top-right"
             autoClose={3000}
@@ -57,23 +62,20 @@ function App() {
             <main className="flex-grow">
               <Routes>
                 {/* Rutas públicas */}
-                <Route element={<MainLayout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                </Route>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="login" element={<LoginPage />} />
+                  <Route path="register" element={<RegisterPage />} />
+                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="reset-password" element={<ResetPasswordPage />} />
 
-                {/* Rutas de administración */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Navigate to="dashboard" replace />} />
-                  <Route path="dashboard" element={<AdminDashboardPage />} />
-                  <Route path="users" element={<AdminUsersPage />} />
-                  <Route path="courts" element={<AdminCourtsPage />} />
-                  <Route path="bookings" element={<AdminBookingsPage />} />
-                  <Route path="settings" element={<AdminSettingsPage />} />
-                  <Route path="help" element={<AdminHelpPage />} />
+                  {/* Rutas protegidas de administración */}
+                  <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
+                    <Route index element={<AdminDashboardPage />} />
+                    <Route path="users" element={<AdminUsersPage />} />
+                    <Route path="courts" element={<AdminCourtsPage />} />
+                    <Route path="bookings" element={<AdminBookingsPage />} />
+                  </Route>
                 </Route>
 
                 {/* Rutas de propietario */}
@@ -97,8 +99,8 @@ function App() {
 
             <Footer />
           </div>
-        </AuthProvider>
-      </Router>
+        </Router>
+      </AuthProvider>
     </ErrorBoundary>
   )
 }

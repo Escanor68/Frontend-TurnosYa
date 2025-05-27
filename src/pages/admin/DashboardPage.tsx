@@ -1,79 +1,90 @@
-import { useAuthRedirect } from '../../hooks/useAuthRedirect';
-import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import React from 'react';
+import { UsersIcon, CalendarIcon, CurrencyDollarIcon, ChartBarIcon } from '@heroicons/react/outline';
 
-export default function AdminDashboardPage() {
-  const { isLoading } = useAuthRedirect({
-    requireAuth: true,
-    allowedRoles: ['admin'],
-  });
+const stats = [
+  { name: 'Total Usuarios', stat: '0', icon: UsersIcon },
+  { name: 'Reservas Activas', stat: '0', icon: CalendarIcon },
+  { name: 'Ingresos del Mes', stat: '$0', icon: CurrencyDollarIcon },
+  { name: 'Tasa de Ocupación', stat: '0%', icon: ChartBarIcon },
+];
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
+const DashboardPage: React.FC = () => {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Panel de Administración</h1>
+    <div className="px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
       
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Tarjeta de Usuarios */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Usuarios</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Gestiona los usuarios de la plataforma
-            </p>
-          </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <a
-              href="/admin/users"
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-500"
+      <div className="mt-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((item) => (
+            <div
+              key={item.name}
+              className="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden"
             >
-              Ver todos los usuarios
-            </a>
-          </div>
+              <dt>
+                <div className="absolute bg-primary-500 rounded-md p-3">
+                  <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                </div>
+                <p className="ml-16 text-sm font-medium text-gray-500 truncate">{item.name}</p>
+              </dt>
+              <dd className="ml-16 pb-6 flex items-baseline sm:pb-7">
+                <p className="text-2xl font-semibold text-gray-900">{item.stat}</p>
+              </dd>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Tarjeta de Canchas */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Canchas</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Administra las canchas registradas
-            </p>
+      <div className="mt-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Gráfico de Reservas */}
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <CalendarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Reservas Recientes
+                    </dt>
+                    <dd>
+                      <div className="text-lg font-medium text-gray-900">
+                        Próximamente
+                      </div>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <a
-              href="/admin/courts"
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-500"
-            >
-              Ver todas las canchas
-            </a>
-          </div>
-        </div>
 
-        {/* Tarjeta de Reservas */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <h3 className="text-lg font-medium text-gray-900">Reservas</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Visualiza y gestiona las reservas
-            </p>
-          </div>
-          <div className="bg-gray-50 px-5 py-3">
-            <a
-              href="/admin/bookings"
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-500"
-            >
-              Ver todas las reservas
-            </a>
+          {/* Gráfico de Ingresos */}
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <CurrencyDollarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      Ingresos por Mes
+                    </dt>
+                    <dd>
+                      <div className="text-lg font-medium text-gray-900">
+                        Próximamente
+                      </div>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+};
+
+export default DashboardPage; 
