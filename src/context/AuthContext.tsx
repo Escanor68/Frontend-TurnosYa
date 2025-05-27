@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import type { User, AuthContextType } from '../types/auth';
-import { authService } from '../services/auth.service';
+import authService from '../services/auth.service';
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
