@@ -1,10 +1,13 @@
 // Tipos relacionados con ubicaciones
 
 export interface Location {
+  name: string
   address: string
   city: string
   province: string
-  coordinates?: {
+  country: string
+  postalCode: string
+  coordinates: {
     lat: number
     lng: number
   }
@@ -16,4 +19,9 @@ export interface GeocodingResult {
     lat: number
     lng: number
   }
+}
+
+export interface Coordinates {
+  lat: number
+  lng: number
 }
