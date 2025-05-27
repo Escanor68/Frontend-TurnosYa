@@ -21,16 +21,16 @@ const Footer: React.FC = () => {
                   Servicios
                 </h3>
                 <ul className="mt-4 space-y-4">
-                  <li>
+              <li>
                     <Link to="/" className="text-base text-gray-500 hover:text-gray-900">
                       Buscar Canchas
-                    </Link>
-                  </li>
-                  <li>
+                </Link>
+              </li>
+              <li>
                     <Link to="/register" className="text-base text-gray-500 hover:text-gray-900">
                       Registrar Cancha
-                    </Link>
-                  </li>
+                </Link>
+              </li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
@@ -38,19 +38,19 @@ const Footer: React.FC = () => {
                   Soporte
                 </h3>
                 <ul className="mt-4 space-y-4">
-                  <li>
+              <li>
                     <Link to="/help" className="text-base text-gray-500 hover:text-gray-900">
                       Ayuda
-                    </Link>
-                  </li>
-                  <li>
+                </Link>
+              </li>
+              <li>
                     <Link to="/contact" className="text-base text-gray-500 hover:text-gray-900">
                       Contacto
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
+                </Link>
+              </li>
+            </ul>
+          </div>
+          </div>
           </div>
         </div>
         <div className="mt-12 border-t border-gray-200 pt-8">
