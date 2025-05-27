@@ -3,22 +3,35 @@ import { toast } from 'react-toastify';
 import type { User, AuthContextType } from '../types/auth';
 import authService from '../services/auth.service';
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+// Crear un valor inicial para el contexto
+const initialAuthContext: AuthContextType = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  login: async () => { throw new Error('AuthContext not initialized') },
+  register: async () => { throw new Error('AuthContext not initialized') },
+  logout: () => { throw new Error('AuthContext not initialized') },
+  forgotPassword: async () => { throw new Error('AuthContext not initialized') },
+  resetPassword: async () => { throw new Error('AuthContext not initialized') },
+};
+
+const AuthContext = createContext<AuthContextType>(initialAuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = () => {
+    try {
       const currentUser = authService.getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
       }
+    } catch (error) {
+      console.error('Error loading user:', error);
+    } finally {
       setIsLoading(false);
-    };
-
-    initAuth();
+    }
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -44,9 +57,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(() => {
-    authService.logout();
-    setUser(null);
-    toast.success('¡Hasta pronto!');
+    try {
+      authService.logout();
+      setUser(null);
+      toast.success('¡Hasta pronto!');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error('Error al cerrar sesión');
+    }
   }, []);
 
   const forgotPassword = useCallback(async (email: string) => {
@@ -79,6 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     forgotPassword,
     resetPassword,
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
