@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { routerConfig } from './router/config';
 
 // Layouts
 import Layout from './components/layout/Layout';
@@ -32,7 +33,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
+        <Router future={routerConfig.future}>
           <ToastContainer
             position="top-right"
             autoClose={3000}

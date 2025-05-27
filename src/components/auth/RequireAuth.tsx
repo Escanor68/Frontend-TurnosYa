@@ -11,6 +11,9 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
   const auth = useAuth();
   const location = useLocation();
 
+  console.log('Ruta actual:', window.location.pathname);
+  console.log('Estado de autenticación:', auth.isAuthenticated);
+
   if (auth.isLoading) {
     return <LoadingSpinner />;
   }
