@@ -1,5 +1,5 @@
 import React from 'react';
-import { GoogleMap as GoogleMapComponent } from '@react-google-maps/api';
+import { GoogleMap as GoogleMapComponent, Marker } from '@react-google-maps/api';
 
 interface GoogleMapProps {
   center: {
