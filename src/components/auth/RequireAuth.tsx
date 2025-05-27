@@ -30,4 +30,4 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ allowedRoles }) => {
   return <Outlet />;
 };
 
-export default RequireAuth; 
+export default RequireAuth;

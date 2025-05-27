@@ -1,17 +1,7 @@
-import type React from 'react';
+import React from 'react';
 
-interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
-  color?: 'primary' | 'white' | 'gray';
-  className?: string;
-}
-
-const LoadingSpinner: React.FC = () => {
+export const LoadingSpinner: React.FC = () => {
   return (
-    <div className="flex justify-center items-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-    </div>
+    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
   );
 };
-
-export default LoadingSpinner;

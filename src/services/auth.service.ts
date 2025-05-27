@@ -1,6 +1,5 @@
 import axios from 'axios';
-import type { AuthResponse, LoginCredentials, RegisterData, User, AuthTokens } from '../types/auth';
-import { mockService, USE_MOCK } from './mock/mockService';
+import type { User } from '../types/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -18,13 +17,6 @@ class AuthService {
 
   async login(email: string, password: string): Promise<User> {
     try {
-      if (USE_MOCK) {
-        const response = await mockService.login(email, password);
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        return response.user;
-      }
-
       const response = await axios.post(`${API_URL}/auth/login`, {
         email,
         password,
@@ -43,13 +35,6 @@ class AuthService {
 
   async register(email: string, password: string, name: string, role: string): Promise<User> {
     try {
-      if (USE_MOCK) {
-        const response = await mockService.register(email, password, name, role);
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        return response.user;
-      }
-
       const response = await axios.post(`${API_URL}/auth/register`, {
         email,
         password,
@@ -106,11 +91,6 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     try {
-      if (USE_MOCK) {
-        // Simular éxito en modo mock
-        return;
-      }
-
       await axios.post(`${API_URL}/auth/forgot-password`, { email });
     } catch (error) {
       throw this.handleError(error);
@@ -119,11 +99,6 @@ class AuthService {
 
   async resetPassword(token: string, password: string): Promise<void> {
     try {
-      if (USE_MOCK) {
-        // Simular éxito en modo mock
-        return;
-      }
-
       await axios.post(`${API_URL}/auth/reset-password`, {
         token,
         password,
@@ -135,14 +110,11 @@ class AuthService {
 
   private handleError(error: any): Error {
     if (error.response) {
-      // El servidor respondió con un código de estado fuera del rango 2xx
       const message = error.response.data.message || 'Ha ocurrido un error';
       return new Error(message);
     } else if (error.request) {
-      // La petición fue hecha pero no se recibió respuesta
       return new Error('No se pudo conectar con el servidor');
     } else {
-      // Algo sucedió al configurar la petición
       return new Error('Error al procesar la solicitud');
     }
   }
@@ -156,4 +128,4 @@ class AuthService {
   }
 }
 
-export const authService = new AuthService(); 
+export default AuthService.getInstance(); 
