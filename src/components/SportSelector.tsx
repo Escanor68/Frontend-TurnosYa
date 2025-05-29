@@ -6,7 +6,10 @@ interface SportSelectorProps {
   onSportSelect: (sportId: string) => void;
 }
 
-const SportSelector: React.FC<SportSelectorProps> = ({ selectedSport, onSportSelect }) => {
+const SportSelector: React.FC<SportSelectorProps> = ({
+  selectedSport,
+  onSportSelect,
+}) => {
   return (
     <div className="flex overflow-x-auto space-x-4 py-2">
       {SPORTS.map((sport) => (

@@ -32,4 +32,4 @@ export interface FieldFilters {
   isIndoor?: boolean;
   availableDate?: string;
   availableTime?: string;
-} 
+}

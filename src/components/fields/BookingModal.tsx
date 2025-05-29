@@ -45,7 +45,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
           <X className="h-6 w-6" />
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Confirmar Reserva</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Confirmar Reserva
+        </h2>
 
         <div className="space-y-4 mb-6">
           <div>
@@ -59,7 +61,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
             <div className="flex items-center">
               <Clock className="h-5 w-5 text-emerald-500 mr-2" />
-              <span className="text-gray-600">{time} ({duration} min)</span>
+              <span className="text-gray-600">
+                {time} ({duration} min)
+              </span>
             </div>
           </div>
 

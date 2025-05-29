@@ -25,7 +25,8 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
       <div className="flex items-center mb-4">
         <Clock className="h-5 w-5 text-emerald-600 mr-2" />
         <h3 className="text-lg font-semibold text-gray-900">
-          Horarios disponibles para {new Date(date).toLocaleDateString('es-ES', {
+          Horarios disponibles para{' '}
+          {new Date(date).toLocaleDateString('es-ES', {
             weekday: 'long',
             day: 'numeric',
             month: 'long',

@@ -12,7 +12,7 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
+    error: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -32,7 +32,8 @@ export class ErrorBoundary extends Component<Props, State> {
               Algo salió mal
             </h2>
             <p className="text-gray-600 mb-4">
-              Lo sentimos, ha ocurrido un error inesperado. Por favor, intenta recargar la página.
+              Lo sentimos, ha ocurrido un error inesperado. Por favor, intenta
+              recargar la página.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -43,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {process.env.NODE_ENV === 'development' && (
               <div className="mt-4 p-4 bg-gray-100 rounded">
                 <p className="text-sm font-mono text-gray-700">
-                    {this.state.error?.toString()}
+                  {this.state.error?.toString()}
                 </p>
               </div>
             )}

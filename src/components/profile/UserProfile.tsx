@@ -54,7 +54,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
         {/* Reservas */}
         <TabsContent value="reservas">
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Historial de Reservas</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Historial de Reservas
+            </h2>
             <div className="space-y-4">
               {profile.bookingHistory.map((booking) => (
                 <div key={booking.id} className="border-b pb-4">
@@ -67,11 +69,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm ${
-                        booking.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-sm ${
+                          booking.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : booking.status === 'upcoming'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {booking.status}
                       </span>
                       <p className="mt-1 font-medium">${booking.price}</p>
@@ -95,7 +101,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
                       <Star
                         key={i}
                         className={`w-5 h-5 ${
-                          i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                          i < review.rating
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
                         }`}
                       />
                     ))}
@@ -120,7 +128,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
                   <h3 className="font-medium text-lg mb-2">{team.name}</h3>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {team.members.map((member) => (
-                      <div key={member.id} className="flex items-center space-x-2">
+                      <div
+                        key={member.id}
+                        className="flex items-center space-x-2"
+                      >
                         <img
                           src={member.profileImage || '/default-avatar.png'}
                           alt={member.name}
@@ -163,7 +174,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <p className={`${notification.read ? 'text-gray-600' : 'text-gray-900'}`}>
+                      <p
+                        className={`${
+                          notification.read ? 'text-gray-600' : 'text-gray-900'
+                        }`}
+                      >
                         {notification.message}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
@@ -184,4 +199,4 @@ const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;

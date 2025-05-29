@@ -50,8 +50,11 @@ const FeaturedCourts: React.FC = () => {
             Canchas Destacadas
           </h2>
           <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURED_COURTS.map(court => (
-              <div key={court.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105">
+            {FEATURED_COURTS.map((court) => (
+              <div
+                key={court.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105"
+              >
                 <div className="aspect-w-16 aspect-h-9">
                   <img
                     className="object-cover w-full h-48"
@@ -84,4 +87,4 @@ const FeaturedCourts: React.FC = () => {
   );
 };
 
-export default FeaturedCourts; 
+export default FeaturedCourts;

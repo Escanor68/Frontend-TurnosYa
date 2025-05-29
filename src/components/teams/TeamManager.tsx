@@ -97,11 +97,15 @@ const TeamManager: React.FC<TeamManagerProps> = ({
         <div className="md:col-span-2">
           {selectedTeam ? (
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold mb-6">{selectedTeam.name}</h2>
+              <h2 className="text-2xl font-semibold mb-6">
+                {selectedTeam.name}
+              </h2>
 
               {/* Miembros */}
               <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4">Miembros del Equipo</h3>
+                <h3 className="text-lg font-medium mb-4">
+                  Miembros del Equipo
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {selectedTeam.members.map((member) => (
                     <div
@@ -175,4 +179,4 @@ const TeamManager: React.FC<TeamManagerProps> = ({
   );
 };
 
-export default TeamManager; 
+export default TeamManager;

@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
                 TurnosYa
               </Link>
             </div>
-            
+
             {/* Enlaces de navegación según rol */}
             {isAuthenticated && (
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
                     </Link>
                   </>
                 )}
-                
+
                 {user?.role === 'owner' && (
                   <>
                     <Link
@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
                     </Link>
                   </>
                 )}
-                
+
                 {user?.role === 'player' && (
                   <Link
                     to="/player/bookings"
@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
                     Mis Reservas
                   </Link>
                 )}
-                
+
                 <Link
                   to={`/${user?.role}/profile`}
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
@@ -117,4 +117,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

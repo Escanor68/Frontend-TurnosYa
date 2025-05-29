@@ -1,5 +1,10 @@
 import axios from 'axios';
-import type { User, AuthResponse, LoginCredentials, RegisterData } from '../types/auth';
+import type {
+  User,
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+} from '../types/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -18,7 +23,7 @@ class AuthService {
       if (!token) {
         throw new Error('No token found');
       }
-      
+
       this.setAuthHeader(token);
       const response = await axios.get<User>(`${API_URL}/auth/me`);
       return response.data;
@@ -29,15 +34,22 @@ class AuthService {
     }
   }
 
-  async login(credentials: LoginCredentials): Promise<{ token: string; user: User }> {
+  async login(
+    credentials: LoginCredentials
+  ): Promise<{ token: string; user: User }> {
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, credentials);
+      const response = await axios.post<AuthResponse>(
+        `${API_URL}/auth/login`,
+        credentials
+      );
       const { accessToken, user } = response.data;
       this.setAuthHeader(accessToken);
       return { token: accessToken, user };
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || 'Error al iniciar sesión');
+        throw new Error(
+          error.response.data.message || 'Error al iniciar sesión'
+        );
       }
       throw error;
     }
@@ -45,7 +57,10 @@ class AuthService {
 
   async register(data: RegisterData): Promise<{ token: string; user: User }> {
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, data);
+      const response = await axios.post<AuthResponse>(
+        `${API_URL}/auth/register`,
+        data
+      );
       const { accessToken, user } = response.data;
       this.setAuthHeader(accessToken);
       return { token: accessToken, user };
@@ -71,7 +86,9 @@ class AuthService {
       await axios.post(`${API_URL}/auth/forgot-password`, { email });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || 'Error al procesar la solicitud');
+        throw new Error(
+          error.response.data.message || 'Error al procesar la solicitud'
+        );
       }
       throw error;
     }
@@ -82,7 +99,9 @@ class AuthService {
       await axios.post(`${API_URL}/auth/reset-password`, { token, password });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || 'Error al restablecer la contraseña');
+        throw new Error(
+          error.response.data.message || 'Error al restablecer la contraseña'
+        );
       }
       throw error;
     }
@@ -120,4 +139,4 @@ class AuthService {
   }
 }
 
-export default new AuthService(); 
+export default new AuthService();

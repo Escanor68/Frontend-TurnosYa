@@ -15,4 +15,4 @@ footballApi.interceptors.request.use((config) => {
   return config;
 });
 
-export default footballApi; 
+export default footballApi;

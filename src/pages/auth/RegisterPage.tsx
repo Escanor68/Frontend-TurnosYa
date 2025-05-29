@@ -5,17 +5,24 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-const schema = yup.object({
-  name: yup.string().required('Nombre es requerido'),
-  email: yup.string().email('Email inválido').required('Email es requerido'),
-  password: yup.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .required('Contraseña es requerida'),
-  confirmPassword: yup.string()
-    .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir')
-    .required('Confirmar contraseña es requerido'),
-  role: yup.string().oneOf(['owner', 'player'], 'Rol inválido').required('Rol es requerido'),
-}).required();
+const schema = yup
+  .object({
+    name: yup.string().required('Nombre es requerido'),
+    email: yup.string().email('Email inválido').required('Email es requerido'),
+    password: yup
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .required('Contraseña es requerida'),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir')
+      .required('Confirmar contraseña es requerido'),
+    role: yup
+      .string()
+      .oneOf(['owner', 'player'], 'Rol inválido')
+      .required('Rol es requerido'),
+  })
+  .required();
 
 type RegisterFormData = {
   name: string;
@@ -27,8 +34,12 @@ type RegisterFormData = {
 
 const RegisterPage: React.FC = () => {
   const { register: registerUser, isAuthenticated, isLoading } = useAuth();
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
-    resolver: yupResolver(schema)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: yupResolver(schema),
   });
 
   if (isAuthenticated) {
@@ -52,7 +63,10 @@ const RegisterPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+              to="/login"
+              className="font-medium text-primary-600 hover:text-primary-500"
+            >
               Inicia sesión
             </Link>
           </p>
@@ -60,7 +74,9 @@ const RegisterPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="name" className="sr-only">Nombre</label>
+              <label htmlFor="name" className="sr-only">
+                Nombre
+              </label>
               <input
                 {...register('name')}
                 type="text"
@@ -68,11 +84,15 @@ const RegisterPage: React.FC = () => {
                 placeholder="Nombre completo"
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.name.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="email" className="sr-only">Email</label>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
               <input
                 {...register('email')}
                 type="email"
@@ -80,11 +100,15 @@ const RegisterPage: React.FC = () => {
                 placeholder="Email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Contraseña</label>
+              <label htmlFor="password" className="sr-only">
+                Contraseña
+              </label>
               <input
                 {...register('password')}
                 type="password"
@@ -92,11 +116,15 @@ const RegisterPage: React.FC = () => {
                 placeholder="Contraseña"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirmar Contraseña</label>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirmar Contraseña
+              </label>
               <input
                 {...register('confirmPassword')}
                 type="password"
@@ -104,11 +132,15 @@ const RegisterPage: React.FC = () => {
                 placeholder="Confirmar contraseña"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="role" className="sr-only">Rol</label>
+              <label htmlFor="role" className="sr-only">
+                Rol
+              </label>
               <select
                 {...register('role')}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
@@ -118,7 +150,9 @@ const RegisterPage: React.FC = () => {
                 <option value="owner">Propietario</option>
               </select>
               {errors.role && (
-                <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.role.message}
+                </p>
               )}
             </div>
           </div>
@@ -143,4 +177,4 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

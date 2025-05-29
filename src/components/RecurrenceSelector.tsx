@@ -1,85 +1,92 @@
-import React from "react"
-import { Repeat, Calendar } from "lucide-react"
+import React from 'react';
+import { Repeat, Calendar } from 'lucide-react';
 
 interface RecurrenceSelectorProps {
-  onRecurrenceChange: (recurrence: { type: string; weekDay: number; count: number }) => void
-  selectedDate: string
+  onRecurrenceChange: (recurrence: {
+    type: string;
+    weekDay: number;
+    count: number;
+  }) => void;
+  selectedDate: string;
 }
 
-const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceChange, selectedDate }) => {
-  const [weekDay, setWeekDay] = React.useState<number>(-1)
-  const [count, setCount] = React.useState<number>(4)
+const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
+  onRecurrenceChange,
+  selectedDate,
+}) => {
+  const [weekDay, setWeekDay] = React.useState<number>(-1);
+  const [count, setCount] = React.useState<number>(4);
 
   React.useEffect(() => {
     if (selectedDate) {
-      const date = new Date(selectedDate)
-      setWeekDay(date.getDay())
+      const date = new Date(selectedDate);
+      setWeekDay(date.getDay());
     }
-  }, [selectedDate])
+  }, [selectedDate]);
 
   const weekDays = [
-    { value: 0, label: "Domingo" },
-    { value: 1, label: "Lunes" },
-    { value: 2, label: "Martes" },
-    { value: 3, label: "Miércoles" },
-    { value: 4, label: "Jueves" },
-    { value: 5, label: "Viernes" },
-    { value: 6, label: "Sábado" }
-  ]
+    { value: 0, label: 'Domingo' },
+    { value: 1, label: 'Lunes' },
+    { value: 2, label: 'Martes' },
+    { value: 3, label: 'Miércoles' },
+    { value: 4, label: 'Jueves' },
+    { value: 5, label: 'Viernes' },
+    { value: 6, label: 'Sábado' },
+  ];
 
   // Obtener fechas recurrentes basadas en la configuración
   const getRecurrenceDates = () => {
-    if (!selectedDate || weekDay === -1) return []
+    if (!selectedDate || weekDay === -1) return [];
 
-    const dates = []
-    const startDate = new Date(selectedDate)
-    
+    const dates = [];
+    const startDate = new Date(selectedDate);
+
     // Ajustar la fecha inicial al próximo día de la semana seleccionado
     while (startDate.getDay() !== weekDay) {
-      startDate.setDate(startDate.getDate() + 1)
+      startDate.setDate(startDate.getDate() + 1);
     }
 
     for (let i = 0; i < count; i++) {
-      const currentDate = new Date(startDate)
-      currentDate.setDate(currentDate.getDate() + (i * 7))
-      dates.push(currentDate.toISOString().split("T")[0])
+      const currentDate = new Date(startDate);
+      currentDate.setDate(currentDate.getDate() + i * 7);
+      dates.push(currentDate.toISOString().split('T')[0]);
     }
 
-    return dates
-  }
+    return dates;
+  };
 
   // Formatear fecha para mostrar
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    })
-  }
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
 
   const handleWeekDayChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newWeekDay = parseInt(e.target.value)
-    setWeekDay(newWeekDay)
+    const newWeekDay = parseInt(e.target.value);
+    setWeekDay(newWeekDay);
     onRecurrenceChange({
-      type: newWeekDay === -1 ? "none" : "weekly",
+      type: newWeekDay === -1 ? 'none' : 'weekly',
       weekDay: newWeekDay,
-      count
-    })
-  }
+      count,
+    });
+  };
 
   const handleCountChange = (newCount: number) => {
-    const validCount = Math.min(Math.max(newCount, 1), 12)
-    setCount(validCount)
+    const validCount = Math.min(Math.max(newCount, 1), 12);
+    setCount(validCount);
     if (weekDay !== -1) {
       onRecurrenceChange({
-        type: "weekly",
+        type: 'weekly',
         weekDay,
-        count: validCount
-      })
+        count: validCount,
+      });
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -90,7 +97,9 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceCha
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Repetir cada</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Repetir cada
+          </label>
           <select
             value={weekDay}
             onChange={handleWeekDayChange}
@@ -108,7 +117,9 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceCha
         {weekDay !== -1 && (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Durante cuántas semanas</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Durante cuántas semanas
+              </label>
               <div className="flex items-center">
                 <button
                   type="button"
@@ -118,7 +129,9 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceCha
                 >
                   -
                 </button>
-                <span className="px-4 py-1 border-t border-b border-gray-300 bg-white">{count}</span>
+                <span className="px-4 py-1 border-t border-b border-gray-300 bg-white">
+                  {count}
+                </span>
                 <button
                   type="button"
                   onClick={() => handleCountChange(count + 1)}
@@ -139,7 +152,10 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceCha
               </label>
               <div className="bg-gray-50 p-3 rounded-lg max-h-32 overflow-y-auto">
                 {getRecurrenceDates().map((date, index) => (
-                  <div key={date} className="flex items-center justify-between py-1 border-b border-gray-100 last:border-0">
+                  <div
+                    key={date}
+                    className="flex items-center justify-between py-1 border-b border-gray-100 last:border-0"
+                  >
                     <span className="text-sm">
                       {index + 1}. {formatDate(date)}
                     </span>
@@ -151,7 +167,7 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ onRecurrenceCha
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RecurrenceSelector
+export default RecurrenceSelector;

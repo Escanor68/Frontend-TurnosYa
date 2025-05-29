@@ -8,7 +8,11 @@ export function useAuthRedirect(options: {
   allowedRoles?: ('admin' | 'owner' | 'player')[];
   redirectAuthenticatedTo?: string;
 }) {
-  const { requireAuth = false, allowedRoles = [], redirectAuthenticatedTo } = options;
+  const {
+    requireAuth = false,
+    allowedRoles = [],
+    redirectAuthenticatedTo,
+  } = options;
   const { isAuthenticated, isLoading, user } = useAuth();
   const { canAccessRoute } = useRoleCheck();
   const navigate = useNavigate();
@@ -34,7 +38,16 @@ export function useAuthRedirect(options: {
       navigate('/403', { replace: true });
       return;
     }
-  }, [isAuthenticated, isLoading, location, navigate, requireAuth, redirectAuthenticatedTo, allowedRoles, canAccessRoute]);
+  }, [
+    isAuthenticated,
+    isLoading,
+    location,
+    navigate,
+    requireAuth,
+    redirectAuthenticatedTo,
+    allowedRoles,
+    canAccessRoute,
+  ]);
 
   return { isLoading, isAuthenticated, user };
-} 
+}

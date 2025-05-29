@@ -43,4 +43,4 @@ const BookingsPage: React.FC = () => {
   );
 };
 
-export default BookingsPage; 
+export default BookingsPage;

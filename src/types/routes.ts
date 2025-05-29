@@ -20,4 +20,4 @@ export interface NavigationItem {
   icon?: React.ComponentType<{ className?: string }>;
   current?: boolean;
   children?: NavigationItem[];
-} 
+}

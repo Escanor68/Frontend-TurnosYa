@@ -1,15 +1,18 @@
-import React from 'react'
-import { MapPin, Search, Loader2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import Map from '../common/Map'
-import type { SportField } from '../../types'
+import React from 'react';
+import { MapPin, Search, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Map from '../common/Map';
+import type { SportField } from '../../types';
 
 const Home: React.FC = () => {
-  const navigate = useNavigate()
-  const [userLocation, setUserLocation] = React.useState<{ lat: number; lng: number } | null>(null)
-  const [nearbyFields, setNearbyFields] = React.useState<SportField[]>([])
-  const [loading, setLoading] = React.useState(false)
-  const [searchQuery, setSearchQuery] = React.useState('')
+  const navigate = useNavigate();
+  const [userLocation, setUserLocation] = React.useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [nearbyFields, setNearbyFields] = React.useState<SportField[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   // Obtener la ubicación del usuario cuando se monta el componente
   React.useEffect(() => {
@@ -19,37 +22,43 @@ const Home: React.FC = () => {
           setUserLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          })
-          fetchNearbyFields(position.coords.latitude, position.coords.longitude)
+          });
+          fetchNearbyFields(
+            position.coords.latitude,
+            position.coords.longitude
+          );
         },
         (error) => {
-          console.error('Error getting user location:', error)
+          console.error('Error getting user location:', error);
         }
-      )
+      );
     }
-  }, [])
+  }, []);
 
   // Buscar canchas cercanas
   const fetchNearbyFields = async (lat: number, lng: number) => {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/fields/nearby?lat=${lat}&lng=${lng}`)
-      if (!response.ok) throw new Error('Error fetching nearby fields')
-      const data = await response.json()
-      setNearbyFields(data)
+      setLoading(true);
+      const response = await fetch(`/api/fields/nearby?lat=${lat}&lng=${lng}`);
+      if (!response.ok) throw new Error('Error fetching nearby fields');
+      const data = await response.json();
+      setNearbyFields(data);
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Filtrar canchas por búsqueda
-  const filteredFields = nearbyFields.filter(field => 
-    field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    field.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    field.location.city.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredFields = nearbyFields.filter(
+    (field) =>
+      field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      field.location.address
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      field.location.city.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,26 +111,36 @@ const Home: React.FC = () => {
                   >
                     <div className="aspect-video rounded-lg overflow-hidden mb-4">
                       <img
-                        src={field.image || "/placeholder.svg"}
+                        src={field.image || '/placeholder.svg'}
                         alt={field.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <h3 className="font-semibold text-gray-900">{field.name}</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      {field.name}
+                    </h3>
                     <div className="flex items-start mt-2 text-sm text-gray-600">
                       <MapPin className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0 text-emerald-600" />
-                      <span>{field.location.address}, {field.location.city}</span>
+                      <span>
+                        {field.location.address}, {field.location.city}
+                      </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between">
-                      <span className="text-emerald-600 font-semibold">${field.price}</span>
-                      <span className="text-sm text-gray-500">{field.type}</span>
+                      <span className="text-emerald-600 font-semibold">
+                        ${field.price}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {field.type}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                {userLocation ? 'No se encontraron canchas cercanas' : 'Activá la ubicación para ver canchas cercanas'}
+                {userLocation
+                  ? 'No se encontraron canchas cercanas'
+                  : 'Activá la ubicación para ver canchas cercanas'}
               </div>
             )}
           </div>
@@ -132,11 +151,11 @@ const Home: React.FC = () => {
               {userLocation ? (
                 <Map
                   center={userLocation}
-                  markers={filteredFields.map(field => ({
+                  markers={filteredFields.map((field) => ({
                     id: field.id,
                     position: field.location.coordinates,
                     title: field.name,
-                    address: field.location.address
+                    address: field.location.address,
                   }))}
                   zoom={13}
                   height="100%"
@@ -151,7 +170,7 @@ const Home: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home 
+export default Home;

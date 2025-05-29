@@ -1,5 +1,9 @@
 import React from 'react';
-import { CalendarIcon, ClockIcon, LocationMarkerIcon } from '@heroicons/react/outline';
+import {
+  CalendarIcon,
+  ClockIcon,
+  LocationMarkerIcon,
+} from '@heroicons/react/outline';
 
 const BookingsPage: React.FC = () => {
   return (
@@ -19,19 +23,34 @@ const BookingsPage: React.FC = () => {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    <th
+                      scope="col"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    >
                       Usuario
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Cancha
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Fecha
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Estado
                     </th>
-                    <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                    <th
+                      scope="col"
+                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                    >
                       <span className="sr-only">Acciones</span>
                     </th>
                   </tr>
@@ -49,7 +68,9 @@ const BookingsPage: React.FC = () => {
                           />
                         </div>
                         <div className="ml-4">
-                          <div className="font-medium text-gray-900">Usuario de ejemplo</div>
+                          <div className="font-medium text-gray-900">
+                            Usuario de ejemplo
+                          </div>
                           <div className="text-gray-500">ejemplo@email.com</div>
                         </div>
                       </div>
@@ -92,4 +113,4 @@ const BookingsPage: React.FC = () => {
   );
 };
 
-export default BookingsPage; 
+export default BookingsPage;

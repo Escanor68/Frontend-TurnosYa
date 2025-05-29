@@ -4,17 +4,23 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-const schema = yup.object({
-  email: yup.string().email('Email inválido').required('Email es requerido'),
-}).required();
+const schema = yup
+  .object({
+    email: yup.string().email('Email inválido').required('Email es requerido'),
+  })
+  .required();
 
 type ForgotPasswordFormData = {
   email: string;
 };
 
 const ForgotPasswordPage: React.FC = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ForgotPasswordFormData>({
-    resolver: yupResolver(schema)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: yupResolver(schema),
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
@@ -39,7 +45,9 @@ const ForgotPasswordPage: React.FC = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
             <input
               {...register('email')}
               type="email"
@@ -47,7 +55,9 @@ const ForgotPasswordPage: React.FC = () => {
               placeholder="Email"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -67,7 +77,10 @@ const ForgotPasswordPage: React.FC = () => {
           </div>
 
           <div className="text-sm text-center">
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+              to="/login"
+              className="font-medium text-primary-600 hover:text-primary-500"
+            >
               Volver al inicio de sesión
             </Link>
           </div>
@@ -77,4 +90,4 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage; 
+export default ForgotPasswordPage;

@@ -1,5 +1,10 @@
 import React from 'react';
-import { UsersIcon, CalendarIcon, CurrencyDollarIcon, ChartBarIcon } from '@heroicons/react/outline';
+import {
+  UsersIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+} from '@heroicons/react/outline';
 
 const stats = [
   { name: 'Total Usuarios', stat: '0', icon: UsersIcon },
@@ -12,7 +17,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-      
+
       <div className="mt-8">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((item) => (
@@ -22,12 +27,19 @@ const DashboardPage: React.FC = () => {
             >
               <dt>
                 <div className="absolute bg-primary-500 rounded-md p-3">
-                  <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
+                  <item.icon
+                    className="h-6 w-6 text-white"
+                    aria-hidden="true"
+                  />
                 </div>
-                <p className="ml-16 text-sm font-medium text-gray-500 truncate">{item.name}</p>
+                <p className="ml-16 text-sm font-medium text-gray-500 truncate">
+                  {item.name}
+                </p>
               </dt>
               <dd className="ml-16 pb-6 flex items-baseline sm:pb-7">
-                <p className="text-2xl font-semibold text-gray-900">{item.stat}</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {item.stat}
+                </p>
               </dd>
             </div>
           ))}
@@ -41,7 +53,10 @@ const DashboardPage: React.FC = () => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <CalendarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                  <CalendarIcon
+                    className="h-6 w-6 text-gray-400"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
@@ -64,7 +79,10 @@ const DashboardPage: React.FC = () => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <CurrencyDollarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                  <CurrencyDollarIcon
+                    className="h-6 w-6 text-gray-400"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
@@ -87,4 +105,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

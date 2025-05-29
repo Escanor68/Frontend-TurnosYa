@@ -31,7 +31,7 @@ const FieldCard: React.FC<FieldCardProps> = ({
     <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
       <div className="relative h-48">
         <img
-          src={image || "/placeholder.svg"}
+          src={image || '/placeholder.svg'}
           alt={name}
           className="w-full h-full object-cover"
         />
@@ -53,7 +53,10 @@ const FieldCard: React.FC<FieldCardProps> = ({
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {amenities.slice(0, 3).map((amenity, index) => (
-            <span key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+            <span
+              key={index}
+              className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm"
+            >
               {amenity}
             </span>
           ))}

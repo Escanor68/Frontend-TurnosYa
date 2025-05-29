@@ -13,12 +13,15 @@ const HeroSection: React.FC = () => {
             <div className="sm:text-center lg:text-left">
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
                 <span className="block xl:inline">Reserva tu cancha con</span>{' '}
-                <span className="block text-primary-600 xl:inline">TurnosYa</span>
+                <span className="block text-primary-600 xl:inline">
+                  TurnosYa
+                </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                La forma más rápida y sencilla de reservar tu cancha deportiva. Sin llamadas, sin esperas.
+                La forma más rápida y sencilla de reservar tu cancha deportiva.
+                Sin llamadas, sin esperas.
               </p>
-              
+
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 {!isAuthenticated ? (
                   <>
@@ -58,4 +61,4 @@ const HeroSection: React.FC = () => {
   );
 };
 
-export default HeroSection; 
+export default HeroSection;

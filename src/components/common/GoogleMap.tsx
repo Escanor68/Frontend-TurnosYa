@@ -1,5 +1,8 @@
 import React from 'react';
-import { GoogleMap as GoogleMapComponent, Marker } from '@react-google-maps/api';
+import {
+  GoogleMap as GoogleMapComponent,
+  Marker,
+} from '@react-google-maps/api';
 
 interface GoogleMapProps {
   center: {
@@ -16,7 +19,11 @@ interface GoogleMapProps {
   }>;
 }
 
-const GoogleMap: React.FC<GoogleMapProps> = ({ center, zoom, markers = [] }) => {
+const GoogleMap: React.FC<GoogleMapProps> = ({
+  center,
+  zoom,
+  markers = [],
+}) => {
   const mapContainerStyle = {
     width: '100%',
     height: '400px',
@@ -36,15 +43,11 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ center, zoom, markers = [] }) => 
         options={options}
       >
         {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            position={marker.position}
-            title={marker.title}
-          />
+          <Marker key={index} position={marker.position} title={marker.title} />
         ))}
       </GoogleMapComponent>
     </div>
   );
 };
 
-export default GoogleMap; 
+export default GoogleMap;

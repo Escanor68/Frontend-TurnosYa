@@ -5,10 +5,12 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-const schema = yup.object({
-  email: yup.string().email('Email inválido').required('Email es requerido'),
-  password: yup.string().required('Contraseña es requerida'),
-}).required();
+const schema = yup
+  .object({
+    email: yup.string().email('Email inválido').required('Email es requerido'),
+    password: yup.string().required('Contraseña es requerida'),
+  })
+  .required();
 
 type LoginFormData = {
   email: string;
@@ -17,8 +19,12 @@ type LoginFormData = {
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
-    resolver: yupResolver(schema)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: yupResolver(schema),
   });
 
   if (isAuthenticated) {
@@ -42,7 +48,10 @@ const LoginPage: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿No tienes una cuenta?{' '}
-            <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+              to="/register"
+              className="font-medium text-primary-600 hover:text-primary-500"
+            >
               Regístrate
             </Link>
           </p>
@@ -50,7 +59,9 @@ const LoginPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">Email</label>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
               <input
                 {...register('email')}
                 type="email"
@@ -58,11 +69,15 @@ const LoginPage: React.FC = () => {
                 placeholder="Email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Contraseña</label>
+              <label htmlFor="password" className="sr-only">
+                Contraseña
+              </label>
               <input
                 {...register('password')}
                 type="password"
@@ -70,14 +85,19 @@ const LoginPage: React.FC = () => {
                 placeholder="Contraseña"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-primary-600 hover:text-primary-500"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -103,4 +123,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

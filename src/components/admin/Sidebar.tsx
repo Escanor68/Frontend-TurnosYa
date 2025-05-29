@@ -22,7 +22,9 @@ export function Sidebar() {
     <div className="flex flex-col w-64 bg-white border-r">
       <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4">
-          <span className="text-xl font-semibold text-gray-800">Admin Panel</span>
+          <span className="text-xl font-semibold text-gray-800">
+            Admin Panel
+          </span>
         </div>
         <nav className="mt-5 flex-1 px-2 space-y-1">
           {navigation.map((item) => (
@@ -48,4 +50,4 @@ export function Sidebar() {
       </div>
     </div>
   );
-} 
+}

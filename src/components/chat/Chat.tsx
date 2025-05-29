@@ -16,7 +16,11 @@ interface ChatProps {
   onSendMessage: (message: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ currentUser, recipient, onSendMessage }) => {
+const Chat: React.FC<ChatProps> = ({
+  currentUser,
+  recipient,
+  onSendMessage,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -58,7 +62,9 @@ const Chat: React.FC<ChatProps> = ({ currentUser, recipient, onSendMessage }) =>
           <div
             key={message.id}
             className={`flex ${
-              message.senderId === currentUser.id ? 'justify-end' : 'justify-start'
+              message.senderId === currentUser.id
+                ? 'justify-end'
+                : 'justify-start'
             }`}
           >
             <div
@@ -107,4 +113,4 @@ const Chat: React.FC<ChatProps> = ({ currentUser, recipient, onSendMessage }) =>
   );
 };
 
-export default Chat; 
+export default Chat;

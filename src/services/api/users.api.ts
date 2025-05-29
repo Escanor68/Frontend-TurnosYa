@@ -15,4 +15,4 @@ usersApi.interceptors.request.use((config) => {
   return config;
 });
 
-export default usersApi; 
+export default usersApi;

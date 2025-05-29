@@ -25,24 +25,33 @@ export const bookingsService = {
   },
 
   createBooking: async (bookingData: CreateBookingData) => {
-    const response = await api.post<ApiResponse<Booking>>('/bookings', bookingData);
+    const response = await api.post<ApiResponse<Booking>>(
+      '/bookings',
+      bookingData
+    );
     return response.data.data;
   },
 
   cancelBooking: async (id: string) => {
-    const response = await api.patch<ApiResponse<Booking>>(`/bookings/${id}/cancel`);
+    const response = await api.patch<ApiResponse<Booking>>(
+      `/bookings/${id}/cancel`
+    );
     return response.data.data;
   },
 
   // Para administradores y dueños de canchas
   confirmBooking: async (id: string) => {
-    const response = await api.patch<ApiResponse<Booking>>(`/bookings/${id}/confirm`);
+    const response = await api.patch<ApiResponse<Booking>>(
+      `/bookings/${id}/confirm`
+    );
     return response.data.data;
   },
 
   // Para administradores y dueños de canchas
   getFieldBookings: async (fieldId: string) => {
-    const response = await api.get<ApiResponse<Booking[]>>(`/bookings/field/${fieldId}`);
+    const response = await api.get<ApiResponse<Booking[]>>(
+      `/bookings/field/${fieldId}`
+    );
     return response.data.data;
-  }
-}; 
+  },
+};

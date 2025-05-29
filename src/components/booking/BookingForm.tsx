@@ -1,11 +1,32 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { Calendar, Clock, Users, MapPin, CreditCard, CheckCircle, AlertCircle, ChevronLeft, Repeat, Plus, Minus, ChevronDown, ChevronUp } from 'lucide-react'
-import { useBooking } from "../../hooks/useBooking"
-import { useFormValidation, bookingValidationSchema } from "../../hooks/useFormValidation"
-import { additionalServices, recurrenceOptions, paymentMethods } from "../../services/mockData"
-import RecurrenceSelector from "../RecurrenceSelector"
+import type React from 'react';
+import {
+  Calendar,
+  Clock,
+  Users,
+  MapPin,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  ChevronLeft,
+  Repeat,
+  Plus,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+import { useBooking } from '../../hooks/useBooking';
+import {
+  useFormValidation,
+  bookingValidationSchema,
+} from '../../hooks/useFormValidation';
+import {
+  additionalServices,
+  recurrenceOptions,
+  paymentMethods,
+} from '../../services/mockData';
+import RecurrenceSelector from '../RecurrenceSelector';
 
 // Componente para el formulario de reserva
 const BookingForm: React.FC = () => {
@@ -31,61 +52,65 @@ const BookingForm: React.FC = () => {
     setShowRecurrenceOptions,
     setShowAdditionalServices,
     navigate,
-  } = useBooking()
+  } = useBooking();
 
-  const { validateForm, getFieldError, hasError } = useFormValidation(bookingValidationSchema)
+  const { validateForm, getFieldError, hasError } = useFormValidation(
+    bookingValidationSchema
+  );
 
   // Validar formulario antes de avanzar al siguiente paso
   const validateAndProceed = () => {
     // Determinar qué campos validar según el paso actual
-    let fieldsToValidate = {}
+    let fieldsToValidate = {};
 
     if (currentStep === 1) {
       fieldsToValidate = {
         date: bookingData.date,
         time: bookingData.time,
-      }
+      };
     } else if (currentStep === 2) {
       fieldsToValidate = {
         contactName: bookingData.contactName,
         contactPhone: bookingData.contactPhone,
         contactEmail: bookingData.contactEmail,
-      }
+      };
     } else if (currentStep === 3) {
       fieldsToValidate = {
         termsAccepted: bookingData.termsAccepted,
-      }
+      };
     }
 
-    const validationResult = validateForm(fieldsToValidate)
+    const validationResult = validateForm(fieldsToValidate);
 
     if (validationResult.isValid) {
-      handleNextStep()
+      handleNextStep();
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
       </div>
-    )
+    );
   }
 
   if (!field) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-700">Campo no encontrado</h2>
+          <h2 className="text-xl font-semibold text-gray-700">
+            Campo no encontrado
+          </h2>
           <button
-            onClick={() => navigate("/football/fields")}
+            onClick={() => navigate('/football/fields')}
             className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
           >
             Ver todos los campos
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -115,29 +140,47 @@ const BookingForm: React.FC = () => {
                 <div className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      currentStep >= 1 ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-600"
+                      currentStep >= 1
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
                     }`}
                   >
                     1
                   </div>
-                  <span className="text-sm mt-2 text-gray-600">Fecha y Hora</span>
+                  <span className="text-sm mt-2 text-gray-600">
+                    Fecha y Hora
+                  </span>
                 </div>
-                <div className={`flex-1 h-1 mx-4 ${currentStep >= 2 ? "bg-emerald-600" : "bg-gray-200"}`}></div>
+                <div
+                  className={`flex-1 h-1 mx-4 ${
+                    currentStep >= 2 ? 'bg-emerald-600' : 'bg-gray-200'
+                  }`}
+                ></div>
                 <div className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      currentStep >= 2 ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-600"
+                      currentStep >= 2
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
                     }`}
                   >
                     2
                   </div>
-                  <span className="text-sm mt-2 text-gray-600">Datos de Contacto</span>
+                  <span className="text-sm mt-2 text-gray-600">
+                    Datos de Contacto
+                  </span>
                 </div>
-                <div className={`flex-1 h-1 mx-4 ${currentStep >= 3 ? "bg-emerald-600" : "bg-gray-200"}`}></div>
+                <div
+                  className={`flex-1 h-1 mx-4 ${
+                    currentStep >= 3 ? 'bg-emerald-600' : 'bg-gray-200'
+                  }`}
+                ></div>
                 <div className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      currentStep >= 3 ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-600"
+                      currentStep >= 3
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
                     }`}
                   >
                     3
@@ -156,18 +199,21 @@ const BookingForm: React.FC = () => {
                     <div className="md:w-1/3">
                       <div className="aspect-video rounded-lg overflow-hidden mb-4">
                         <img
-                          src={field.image || "/placeholder.svg"}
+                          src={field.image || '/placeholder.svg'}
                           alt={field.name}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-semibold text-gray-900 mb-3">{field.name}</h3>
+                        <h3 className="font-semibold text-gray-900 mb-3">
+                          {field.name}
+                        </h3>
                         <div className="space-y-2 text-sm text-gray-600">
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 mr-2 text-emerald-600" />
                             <span>
-                              {field.location.address}, {field.location.city}, {field.location.province}
+                              {field.location.address}, {field.location.city},{' '}
+                              {field.location.province}
                             </span>
                           </div>
                           <div className="flex items-center">
@@ -190,7 +236,9 @@ const BookingForm: React.FC = () => {
 
                     <div className="md:w-2/3 space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Reserva</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Fecha de Reserva
+                        </label>
                         <div className="relative">
                           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
@@ -199,19 +247,25 @@ const BookingForm: React.FC = () => {
                             value={bookingData.date}
                             onChange={handleInputChange}
                             className={`pl-10 w-full border ${
-                              hasError("date") ? "border-red-500" : "border-gray-300"
+                              hasError('date')
+                                ? 'border-red-500'
+                                : 'border-gray-300'
                             } rounded-lg p-2`}
-                            min={new Date().toISOString().split("T")[0]}
+                            min={new Date().toISOString().split('T')[0]}
                           />
                         </div>
-                        {getFieldError("date") && (
-                          <p className="mt-1 text-sm text-red-500">{getFieldError("date")}</p>
+                        {getFieldError('date') && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {getFieldError('date')}
+                          </p>
                         )}
                       </div>
 
                       {/* Time Slots */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Horario Disponible</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Horario Disponible
+                        </label>
                         <div className="grid grid-cols-3 gap-2">
                           {timeSlots.map((slot) => (
                             <button
@@ -220,16 +274,18 @@ const BookingForm: React.FC = () => {
                               onClick={() => handleTimeSelect(slot)}
                               className={`py-2 px-3 rounded-lg text-center transition-colors ${
                                 bookingData.time === slot
-                                  ? "bg-emerald-600 text-white"
-                                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                                  ? 'bg-emerald-600 text-white'
+                                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                               }`}
                             >
                               {slot}
                             </button>
                           ))}
                         </div>
-                        {getFieldError("time") && (
-                          <p className="mt-1 text-sm text-red-500">{getFieldError("time")}</p>
+                        {getFieldError('time') && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {getFieldError('time')}
+                          </p>
                         )}
                       </div>
 
@@ -242,7 +298,9 @@ const BookingForm: React.FC = () => {
                       )}
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Cantidad de Jugadores</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Cantidad de Jugadores
+                        </label>
                         <input
                           type="number"
                           name="players"
@@ -252,7 +310,9 @@ const BookingForm: React.FC = () => {
                           onChange={handleInputChange}
                           className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
-                        <p className="text-sm text-gray-500 mt-1">Esto nos ayuda a preparar la cancha adecuadamente</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Esto nos ayuda a preparar la cancha adecuadamente
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -264,54 +324,72 @@ const BookingForm: React.FC = () => {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre Completo
+                      </label>
                       <input
                         type="text"
                         name="contactName"
                         value={bookingData.contactName}
                         onChange={handleInputChange}
                         className={`w-full border ${
-                          hasError("contactName") ? "border-red-500" : "border-gray-300"
+                          hasError('contactName')
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                         } rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
                         required
                       />
-                      {hasError("contactName") && (
-                        <p className="mt-1 text-sm text-red-500">{getFieldError("contactName")}</p>
+                      {hasError('contactName') && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {getFieldError('contactName')}
+                        </p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono de Contacto</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Teléfono de Contacto
+                      </label>
                       <input
                         type="tel"
                         name="contactPhone"
                         value={bookingData.contactPhone}
                         onChange={handleInputChange}
                         className={`w-full border ${
-                          hasError("contactPhone") ? "border-red-500" : "border-gray-300"
+                          hasError('contactPhone')
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                         } rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
                         placeholder="11-1234-5678"
                         required
                       />
-                      {hasError("contactPhone") && (
-                        <p className="mt-1 text-sm text-red-500">{getFieldError("contactPhone")}</p>
+                      {hasError('contactPhone') && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {getFieldError('contactPhone')}
+                        </p>
                       )}
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
                       <input
                         type="email"
                         name="contactEmail"
                         value={bookingData.contactEmail}
                         onChange={handleInputChange}
                         className={`w-full border ${
-                          hasError("contactEmail") ? "border-red-500" : "border-gray-300"
+                          hasError('contactEmail')
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                         } rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
                         required
                       />
-                      {hasError("contactEmail") && (
-                        <p className="mt-1 text-sm text-red-500">{getFieldError("contactEmail")}</p>
+                      {hasError('contactEmail') && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {getFieldError('contactEmail')}
+                        </p>
                       )}
                       <p className="text-sm text-gray-500 mt-1">
                         Te enviaremos la confirmación de la reserva a este email
@@ -324,12 +402,16 @@ const BookingForm: React.FC = () => {
                     <div className="border border-gray-200 rounded-lg p-4">
                       <button
                         type="button"
-                        onClick={() => setShowAdditionalServices(!showAdditionalServices)}
+                        onClick={() =>
+                          setShowAdditionalServices(!showAdditionalServices)
+                        }
                         className="flex justify-between items-center w-full"
                       >
                         <div className="flex items-center">
                           <Plus className="h-5 w-5 mr-2 text-emerald-600" />
-                          <span className="font-medium">Servicios Adicionales</span>
+                          <span className="font-medium">
+                            Servicios Adicionales
+                          </span>
                         </div>
                         {showAdditionalServices ? (
                           <ChevronUp className="h-5 w-5 text-gray-500" />
@@ -345,9 +427,11 @@ const BookingForm: React.FC = () => {
                               <div
                                 key={service.id}
                                 className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                                  bookingData.additionalServices.includes(service.id)
-                                    ? "border-emerald-500 bg-emerald-50"
-                                    : "border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50"
+                                  bookingData.additionalServices.includes(
+                                    service.id
+                                  )
+                                    ? 'border-emerald-500 bg-emerald-50'
+                                    : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
                                 }`}
                                 onClick={() => handleServiceToggle(service.id)}
                               >
@@ -355,24 +439,34 @@ const BookingForm: React.FC = () => {
                                   <div className="flex items-center">
                                     <div
                                       className={`p-2 rounded-full mr-3 ${
-                                        bookingData.additionalServices.includes(service.id)
-                                          ? "bg-emerald-100 text-emerald-600"
-                                          : "bg-gray-100 text-gray-500"
+                                        bookingData.additionalServices.includes(
+                                          service.id
+                                        )
+                                          ? 'bg-emerald-100 text-emerald-600'
+                                          : 'bg-gray-100 text-gray-500'
                                       }`}
                                     >
                                       {service.icon}
                                     </div>
                                     <div>
-                                      <h4 className="font-medium">{service.name}</h4>
-                                      <p className="text-sm text-gray-600">{service.description}</p>
+                                      <h4 className="font-medium">
+                                        {service.name}
+                                      </h4>
+                                      <p className="text-sm text-gray-600">
+                                        {service.description}
+                                      </p>
                                     </div>
                                   </div>
                                   <div className="text-right">
-                                    <span className="font-semibold text-emerald-600">${service.price}</span>
+                                    <span className="font-semibold text-emerald-600">
+                                      ${service.price}
+                                    </span>
                                     <div className="mt-1">
                                       <input
                                         type="checkbox"
-                                        checked={bookingData.additionalServices.includes(service.id)}
+                                        checked={bookingData.additionalServices.includes(
+                                          service.id
+                                        )}
                                         onChange={() => {}} // Controlado por el onClick del div padre
                                         className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                                       />
@@ -387,7 +481,7 @@ const BookingForm: React.FC = () => {
                           </label>
                           <textarea
                             name="additionalServicesNotes"
-                            value={bookingData.additionalServicesNotes || ""}
+                            value={bookingData.additionalServicesNotes || ''}
                             onChange={handleInputChange}
                             className="w-full p-2 border border-gray-300 rounded-md"
                             rows={3}
@@ -404,13 +498,24 @@ const BookingForm: React.FC = () => {
                         <AlertCircle className="h-5 w-5 text-blue-500" />
                       </div>
                       <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-800">Información importante</h3>
+                        <h3 className="text-sm font-medium text-blue-800">
+                          Información importante
+                        </h3>
                         <div className="mt-2 text-sm text-blue-700">
                           <ul className="list-disc pl-5 space-y-1">
-                            <li>Llega 15 minutos antes de tu horario reservado</li>
-                            <li>Trae tu propio equipo (pelotas, pecheras, etc.)</li>
-                            <li>En caso de lluvia, la cancha puede estar cerrada</li>
-                            <li>Cancelaciones con menos de 24hs tienen un cargo del 50%</li>
+                            <li>
+                              Llega 15 minutos antes de tu horario reservado
+                            </li>
+                            <li>
+                              Trae tu propio equipo (pelotas, pecheras, etc.)
+                            </li>
+                            <li>
+                              En caso de lluvia, la cancha puede estar cerrada
+                            </li>
+                            <li>
+                              Cancelaciones con menos de 24hs tienen un cargo
+                              del 50%
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -423,7 +528,9 @@ const BookingForm: React.FC = () => {
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                    <h3 className="font-semibold text-gray-900 mb-3">Resumen de la Reserva</h3>
+                    <h3 className="font-semibold text-gray-900 mb-3">
+                      Resumen de la Reserva
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-gray-600">Cancha:</p>
@@ -434,11 +541,13 @@ const BookingForm: React.FC = () => {
                         <p className="font-medium">{field.type}</p>
                       </div>
 
-                      {bookingData.recurrence === "none" ? (
+                      {bookingData.recurrence === 'none' ? (
                         <>
                           <div>
                             <p className="text-gray-600">Fecha:</p>
-                            <p className="font-medium">{formatDate(bookingData.date)}</p>
+                            <p className="font-medium">
+                              {formatDate(bookingData.date)}
+                            </p>
                           </div>
                           <div>
                             <p className="text-gray-600">Hora:</p>
@@ -450,18 +559,23 @@ const BookingForm: React.FC = () => {
                           <p className="text-gray-600">Fechas:</p>
                           <div className="font-medium">
                             <p className="mb-1">
-                              {recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.name} -
-                              {bookingData.recurrenceCount}{" "}
-                              {bookingData.recurrence === "weekly"
-                                ? "semanas"
-                                : bookingData.recurrence === "biweekly"
-                                  ? "quincenas"
-                                  : "meses"}
+                              {
+                                recurrenceOptions.find(
+                                  (o) => o.id === bookingData.recurrence
+                                )?.name
+                              }{' '}
+                              -{bookingData.recurrenceCount}{' '}
+                              {bookingData.recurrence === 'weekly'
+                                ? 'semanas'
+                                : bookingData.recurrence === 'biweekly'
+                                ? 'quincenas'
+                                : 'meses'}
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
                               {getRecurrenceDates().map((date, index) => (
                                 <p key={date}>
-                                  {index + 1}. {formatDate(date)} - {bookingData.time}hs
+                                  {index + 1}. {formatDate(date)} -{' '}
+                                  {bookingData.time}hs
                                 </p>
                               ))}
                             </div>
@@ -482,21 +596,30 @@ const BookingForm: React.FC = () => {
                     {/* Servicios adicionales seleccionados */}
                     {bookingData.additionalServices.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <p className="text-gray-600 mb-2">Servicios adicionales:</p>
+                        <p className="text-gray-600 mb-2">
+                          Servicios adicionales:
+                        </p>
                         <div className="space-y-2">
                           {bookingData.additionalServices.map((serviceId) => {
-                            const service = additionalServices.find((s) => s.id === serviceId)
+                            const service = additionalServices.find(
+                              (s) => s.id === serviceId
+                            );
                             return service ? (
-                              <div key={service.id} className="flex justify-between">
+                              <div
+                                key={service.id}
+                                className="flex justify-between"
+                              >
                                 <div className="flex items-center">
                                   <div className="p-1 bg-emerald-100 rounded-full mr-2 text-emerald-600">
                                     {service.icon}
                                   </div>
                                   <span>{service.name}</span>
                                 </div>
-                                <span className="font-medium">${service.price}</span>
+                                <span className="font-medium">
+                                  ${service.price}
+                                </span>
                               </div>
-                            ) : null
+                            ) : null;
                           })}
                         </div>
                       </div>
@@ -504,15 +627,17 @@ const BookingForm: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Método de Pago</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Método de Pago
+                    </label>
                     <div className="space-y-3">
                       {paymentMethods.map((method) => (
                         <label
                           key={method.id}
                           className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                             bookingData.paymentMethod === method.id
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-gray-300 hover:bg-gray-50"
+                              ? 'border-emerald-500 bg-emerald-50'
+                              : 'border-gray-300 hover:bg-gray-50'
                           }`}
                         >
                           <input
@@ -540,34 +665,45 @@ const BookingForm: React.FC = () => {
                         <span className="font-medium">${field.price}</span>
                       </div>
 
-                      {bookingData.recurrence !== "none" && (
+                      {bookingData.recurrence !== 'none' && (
                         <div className="flex justify-between">
                           <span className="text-gray-700">
-                            Descuento por reserva{" "}
-                            {recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.name.toLowerCase()}
+                            Descuento por reserva{' '}
+                            {recurrenceOptions
+                              .find((o) => o.id === bookingData.recurrence)
+                              ?.name.toLowerCase()}
                           </span>
                           <span className="font-medium text-green-600">
-                            -{recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.discount}%
+                            -
+                            {
+                              recurrenceOptions.find(
+                                (o) => o.id === bookingData.recurrence
+                              )?.discount
+                            }
+                            %
                           </span>
                         </div>
                       )}
 
-                      {bookingData.recurrence !== "none" && (
+                      {bookingData.recurrence !== 'none' && (
                         <div className="flex justify-between">
                           <span className="text-gray-700">
-                            Subtotal por {bookingData.recurrenceCount}{" "}
-                            {bookingData.recurrence === "weekly"
-                              ? "semanas"
-                              : bookingData.recurrence === "biweekly"
-                                ? "quincenas"
-                                : "meses"}
+                            Subtotal por {bookingData.recurrenceCount}{' '}
+                            {bookingData.recurrence === 'weekly'
+                              ? 'semanas'
+                              : bookingData.recurrence === 'biweekly'
+                              ? 'quincenas'
+                              : 'meses'}
                           </span>
                           <span className="font-medium">
                             $
                             {(
                               field.price *
                               (1 -
-                                (recurrenceOptions.find((o) => o.id === bookingData.recurrence)?.discount || 0) / 100) *
+                                (recurrenceOptions.find(
+                                  (o) => o.id === bookingData.recurrence
+                                )?.discount || 0) /
+                                  100) *
                               bookingData.recurrenceCount
                             ).toFixed(0)}
                           </span>
@@ -576,13 +712,20 @@ const BookingForm: React.FC = () => {
 
                       {bookingData.additionalServices.length > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-700">Servicios adicionales</span>
+                          <span className="text-gray-700">
+                            Servicios adicionales
+                          </span>
                           <span className="font-medium">
                             $
-                            {bookingData.additionalServices.reduce((total, serviceId) => {
-                              const service = additionalServices.find((s) => s.id === serviceId)
-                              return total + (service ? service.price : 0)
-                            }, 0)}
+                            {bookingData.additionalServices.reduce(
+                              (total, serviceId) => {
+                                const service = additionalServices.find(
+                                  (s) => s.id === serviceId
+                                );
+                                return total + (service ? service.price : 0);
+                              },
+                              0
+                            )}
                           </span>
                         </div>
                       )}
@@ -592,7 +735,9 @@ const BookingForm: React.FC = () => {
 
                     <div className="flex justify-between font-semibold text-lg mt-4">
                       <span>Total</span>
-                      <span className="text-emerald-600">${calculateTotalPrice().toFixed(0)}</span>
+                      <span className="text-emerald-600">
+                        ${calculateTotalPrice().toFixed(0)}
+                      </span>
                     </div>
                   </div>
 
@@ -604,27 +749,36 @@ const BookingForm: React.FC = () => {
                         checked={bookingData.termsAccepted}
                         onChange={handleInputChange}
                         className={`h-4 w-4 mt-1 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded ${
-                          hasError("termsAccepted") ? "border-red-500" : ""
+                          hasError('termsAccepted') ? 'border-red-500' : ''
                         }`}
                         required
                       />
                       <span className="ml-2 text-sm text-gray-600">
-                        Acepto los{" "}
-                        <a href="#" className="text-emerald-600 hover:underline">
+                        Acepto los{' '}
+                        <a
+                          href="#"
+                          className="text-emerald-600 hover:underline"
+                        >
                           términos y condiciones
-                        </a>{" "}
-                        y la{" "}
-                        <a href="#" className="text-emerald-600 hover:underline">
+                        </a>{' '}
+                        y la{' '}
+                        <a
+                          href="#"
+                          className="text-emerald-600 hover:underline"
+                        >
                           política de privacidad
                         </a>
                       </span>
                     </label>
-                    {hasError("termsAccepted") && (
-                      <p className="mt-1 text-sm text-red-500">{getFieldError("termsAccepted")}</p>
+                    {hasError('termsAccepted') && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {getFieldError('termsAccepted')}
+                      </p>
                     )}
                   </div>
                   <p className="text-center text-sm text-gray-600 mb-4">
-                    Se realizará un cargo del 10% del valor total a través de Mercado Pago o Transferencia Bancaria
+                    Se realizará un cargo del 10% del valor total a través de
+                    Mercado Pago o Transferencia Bancaria
                   </p>
                 </div>
               )}
@@ -632,29 +786,43 @@ const BookingForm: React.FC = () => {
               {/* Resumen de Reserva */}
               {bookingData.date && bookingData.time && (
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-800 mb-2">Resumen de Reserva</h4>
+                  <h4 className="font-medium text-blue-800 mb-2">
+                    Resumen de Reserva
+                  </h4>
                   <div className="space-y-2">
                     <div className="flex items-center text-sm text-blue-700">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>Primera reserva: {formatDate(bookingData.date)}</span>
+                      <span>
+                        Primera reserva: {formatDate(bookingData.date)}
+                      </span>
                     </div>
                     <div className="flex items-center text-sm text-blue-700">
                       <Clock className="h-4 w-4 mr-2" />
                       <span>Horario: {bookingData.time}</span>
                     </div>
-                    {bookingData.recurrence !== "none" && (
+                    {bookingData.recurrence !== 'none' && (
                       <div>
                         <div className="flex items-center text-sm text-blue-700">
                           <Repeat className="h-4 w-4 mr-2" />
                           <span>
-                            Recurrencia: {recurrenceOptions.find(opt => opt.id === bookingData.recurrence)?.name}
+                            Recurrencia:{' '}
+                            {
+                              recurrenceOptions.find(
+                                (opt) => opt.id === bookingData.recurrence
+                              )?.name
+                            }
                           </span>
                         </div>
                         <div className="mt-2">
-                          <div className="text-sm text-blue-700 mb-1">Fechas programadas:</div>
+                          <div className="text-sm text-blue-700 mb-1">
+                            Fechas programadas:
+                          </div>
                           <div className="bg-white rounded p-2 max-h-32 overflow-y-auto">
                             {getRecurrenceDates().map((date, index) => (
-                              <div key={date} className="text-sm text-gray-600 py-1">
+                              <div
+                                key={date}
+                                className="text-sm text-gray-600 py-1"
+                              >
                                 {index + 1}. {formatDate(date)}
                               </div>
                             ))}
@@ -666,10 +834,15 @@ const BookingForm: React.FC = () => {
                       <CreditCard className="h-4 w-4 mr-2" />
                       <span>
                         Precio Total: ${calculateTotalPrice().toLocaleString()}
-                        {bookingData.recurrence !== "none" && (
+                        {bookingData.recurrence !== 'none' && (
                           <span className="text-xs ml-2">
-                            (Incluye descuento del{" "}
-                            {recurrenceOptions.find(opt => opt.id === bookingData.recurrence)?.discount}%)
+                            (Incluye descuento del{' '}
+                            {
+                              recurrenceOptions.find(
+                                (opt) => opt.id === bookingData.recurrence
+                              )?.discount
+                            }
+                            %)
                           </span>
                         )}
                       </span>
@@ -725,7 +898,7 @@ const BookingForm: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookingForm
+export default BookingForm;

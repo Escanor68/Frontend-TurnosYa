@@ -80,7 +80,7 @@ export const MainMenu = () => {
   // Seleccionar los items del menú según el rol
   const getMenuItems = () => {
     if (!isAuthenticated) return publicMenuItems;
-    
+
     switch (user?.role) {
       case 'admin':
         return adminMenuItems;
@@ -133,10 +133,7 @@ export const MainMenu = () => {
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {!isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <Link
-                  to="/login"
-                  className="text-gray-500 hover:text-gray-700"
-                >
+                <Link to="/login" className="text-gray-500 hover:text-gray-700">
                   Iniciar Sesión
                 </Link>
                 <Link
@@ -210,4 +207,4 @@ export const MainMenu = () => {
       </div>
     </nav>
   );
-}; 
+};

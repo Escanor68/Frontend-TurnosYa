@@ -8,7 +8,7 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 });
 
 // Función para obtener tokens del localStorage
@@ -56,9 +56,12 @@ api.interceptors.response.use(
         }
 
         // Intentar refrescar el token
-        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
-          refreshToken: tokens.refreshToken,
-        });
+        const response = await axios.post(
+          `${api.defaults.baseURL}/auth/refresh`,
+          {
+            refreshToken: tokens.refreshToken,
+          }
+        );
 
         const newTokens: AuthTokens = response.data;
         setStoredTokens(newTokens);
@@ -74,10 +77,11 @@ api.interceptors.response.use(
       }
     }
 
-    const errorMessage = error.response?.data?.message || 'Ha ocurrido un error';
+    const errorMessage =
+      error.response?.data?.message || 'Ha ocurrido un error';
     toast.error(errorMessage);
     return Promise.reject(error);
   }
 );
 
-export default api; 
+export default api;

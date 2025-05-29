@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LoadingSpinner } from '../common/LoadingSpinner';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface PublicRouteProps {
   children: React.ReactNode;
@@ -35,4 +35,4 @@ export const PublicRoute = ({ children }: PublicRouteProps) => {
   }
 
   return <>{children}</>;
-}; 
+};

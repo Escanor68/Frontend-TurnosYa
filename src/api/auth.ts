@@ -22,41 +22,47 @@ export interface RegisterData {
 // Mock data for development
 const MOCK_USERS = {
   admin: {
-    id: "admin1",
-    name: "Administrador",
-    email: "admin@example.com",
+    id: 'admin1',
+    name: 'Administrador',
+    email: 'admin@example.com',
     isAdmin: true,
     hasFields: true,
   },
   user: {
-    id: "user1",
-    name: "Demo User",
-    email: "demo@example.com",
+    id: 'user1',
+    name: 'Demo User',
+    email: 'demo@example.com',
     isAdmin: false,
     hasFields: true,
-  }
+  },
 };
 
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<User> => {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     // Mock authentication logic
-    if (credentials.email === "admin@example.com" && credentials.password === "admin123") {
+    if (
+      credentials.email === 'admin@example.com' &&
+      credentials.password === 'admin123'
+    ) {
       return MOCK_USERS.admin;
     }
-    
-    if (credentials.email === "demo@example.com" && credentials.password === "password") {
+
+    if (
+      credentials.email === 'demo@example.com' &&
+      credentials.password === 'password'
+    ) {
       return MOCK_USERS.user;
     }
 
-    throw new Error("Invalid credentials");
+    throw new Error('Invalid credentials');
   },
 
   register: async (data: RegisterData): Promise<User> => {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     // Mock registration
     const newUser: User = {
@@ -72,15 +78,15 @@ export const authApi = {
 
   logout: async (): Promise<void> => {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
   },
 
   getCurrentUser: async (): Promise<User | null> => {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     // Check localStorage for existing session
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
-  }
+  },
 };

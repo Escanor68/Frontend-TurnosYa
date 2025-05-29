@@ -4,14 +4,18 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-const schema = yup.object({
-  password: yup.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .required('Contraseña es requerida'),
-  confirmPassword: yup.string()
-    .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir')
-    .required('Confirmar contraseña es requerido'),
-}).required();
+const schema = yup
+  .object({
+    password: yup
+      .string()
+      .min(8, 'La contraseña debe tener al menos 8 caracteres')
+      .required('Contraseña es requerida'),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir')
+      .required('Confirmar contraseña es requerido'),
+  })
+  .required();
 
 type ResetPasswordFormData = {
   password: string;
@@ -22,14 +26,23 @@ const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ResetPasswordFormData>({
-    resolver: yupResolver(schema)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordFormData>({
+    resolver: yupResolver(schema),
   });
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     try {
       // TODO: Implementar lógica de reseteo de contraseña
-      console.log('Resetear contraseña con token:', token, 'y nueva contraseña:', data.password);
+      console.log(
+        'Resetear contraseña con token:',
+        token,
+        'y nueva contraseña:',
+        data.password
+      );
     } catch (error) {
       console.error('Error al resetear contraseña:', error);
     }
@@ -70,7 +83,9 @@ const ResetPasswordPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="password" className="sr-only">Nueva contraseña</label>
+              <label htmlFor="password" className="sr-only">
+                Nueva contraseña
+              </label>
               <input
                 {...register('password')}
                 type="password"
@@ -78,11 +93,15 @@ const ResetPasswordPage: React.FC = () => {
                 placeholder="Nueva contraseña"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirmar contraseña</label>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirmar contraseña
+              </label>
               <input
                 {...register('confirmPassword')}
                 type="password"
@@ -90,7 +109,9 @@ const ResetPasswordPage: React.FC = () => {
                 placeholder="Confirmar contraseña"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
           </div>
@@ -111,7 +132,10 @@ const ResetPasswordPage: React.FC = () => {
           </div>
 
           <div className="text-sm text-center">
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+              to="/login"
+              className="font-medium text-primary-600 hover:text-primary-500"
+            >
               Volver al inicio de sesión
             </Link>
           </div>
@@ -121,4 +145,4 @@ const ResetPasswordPage: React.FC = () => {
   );
 };
 
-export default ResetPasswordPage; 
+export default ResetPasswordPage;

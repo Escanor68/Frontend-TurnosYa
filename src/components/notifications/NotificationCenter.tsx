@@ -17,7 +17,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const count = notifications.filter(n => !n.read).length;
+    const count = notifications.filter((n) => !n.read).length;
     setUnreadCount(count);
   }, [notifications]);
 
@@ -79,7 +79,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   <div className="flex items-start space-x-3">
                     {getNotificationIcon(notification.type)}
                     <div className="flex-1">
-                      <p className={`${!notification.read ? 'font-medium' : ''}`}>
+                      <p
+                        className={`${!notification.read ? 'font-medium' : ''}`}
+                      >
                         {notification.message}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
@@ -104,4 +106,4 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   );
 };
 
-export default NotificationCenter; 
+export default NotificationCenter;

@@ -8,7 +8,9 @@ const NotFoundPage: React.FC = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="text-center">
             <h1 className="text-6xl font-bold text-primary-600">404</h1>
-            <h2 className="mt-4 text-2xl font-medium text-gray-900">Página no encontrada</h2>
+            <h2 className="mt-4 text-2xl font-medium text-gray-900">
+              Página no encontrada
+            </h2>
             <p className="mt-2 text-base text-gray-500">
               Lo sentimos, no pudimos encontrar la página que estás buscando.
             </p>
@@ -27,4 +29,4 @@ const NotFoundPage: React.FC = () => {
   );
 };
 
-export default NotFoundPage; 
+export default NotFoundPage;

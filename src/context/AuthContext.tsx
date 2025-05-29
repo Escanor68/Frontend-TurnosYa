@@ -6,7 +6,9 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -38,12 +40,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const { token, user: userData } = await authService.login({ email, password });
+      const { token, user: userData } = await authService.login({
+        email,
+        password,
+      });
       localStorage.setItem('token', token);
       setUser(userData);
       toast.success('¡Bienvenido!');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
+      const message =
+        error instanceof Error ? error.message : 'Error al iniciar sesión';
       toast.error(message);
       throw error;
     } finally {
@@ -60,14 +66,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('¡Hasta pronto!');
     } catch (error) {
       console.error('Error during logout:', error);
-      const message = error instanceof Error ? error.message : 'Error al cerrar sesión';
+      const message =
+        error instanceof Error ? error.message : 'Error al cerrar sesión';
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (userData: { email: string; password: string; name: string; role: string }) => {
+  const register = async (userData: {
+    email: string;
+    password: string;
+    name: string;
+    role: string;
+  }) => {
     setIsLoading(true);
     try {
       const { token, user: newUser } = await authService.register(userData);
@@ -75,7 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newUser);
       toast.success('¡Registro exitoso!');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al registrarse';
+      const message =
+        error instanceof Error ? error.message : 'Error al registrarse';
       toast.error(message);
       throw error;
     } finally {
@@ -88,7 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.forgotPassword(email);
       toast.success('Se han enviado las instrucciones a tu email');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al procesar la solicitud';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Error al procesar la solicitud';
       toast.error(message);
       throw error;
     }
@@ -99,7 +115,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.resetPassword(token, password);
       toast.success('Contraseña actualizada exitosamente');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al restablecer la contraseña';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Error al restablecer la contraseña';
       toast.error(message);
       throw error;
     }
@@ -121,7 +140,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

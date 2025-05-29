@@ -1,74 +1,82 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Link, useNavigate, useLocation } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
-import { Menu, X, User, LogOut, ClubIcon as Soccer, Settings, Calendar, Home } from "lucide-react"
-import { ErrorBoundary } from "../common/ErrorBoundary"
-import { useRoleCheck } from '../../hooks/useRoleCheck'
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  ClubIcon as Soccer,
+  Settings,
+  Calendar,
+  Home,
+} from 'lucide-react';
+import { ErrorBoundary } from '../common/ErrorBoundary';
+import { useRoleCheck } from '../../hooks/useRoleCheck';
 
 // Componente de encabezado para toda la aplicación
 const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-  const { user, isAuthenticated, logout } = useAuth()
-  const { isAdmin, isOwner, canManageFields, canManageBookings } = useRoleCheck()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const { isAdmin, isOwner, canManageFields, canManageBookings } =
+    useRoleCheck();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Cerrar menús al cambiar de ruta
   useEffect(() => {
-    setIsMenuOpen(false)
-    setIsProfileMenuOpen(false)
-  }, [location.pathname])
+    setIsMenuOpen(false);
+    setIsProfileMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const toggleProfileMenu = () => {
-    setIsProfileMenuOpen(!isProfileMenuOpen)
-  }
+    setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
 
   const handleLogout = () => {
-    logout()
-    setIsProfileMenuOpen(false)
-    setIsMenuOpen(false)
-    navigate('/login')
-  }
+    logout();
+    setIsProfileMenuOpen(false);
+    setIsMenuOpen(false);
+    navigate('/login');
+  };
 
   const getNavigationItems = () => {
-    const items = [
-      { href: '/', label: 'Inicio', icon: Home },
-    ]
+    const items = [{ href: '/', label: 'Inicio', icon: Home }];
 
     if (isAdmin()) {
       items.push(
         { href: '/admin/dashboard', label: 'Panel Admin', icon: Settings },
         { href: '/admin/users', label: 'Usuarios', icon: User },
         { href: '/admin/courts', label: 'Canchas', icon: Calendar }
-      )
+      );
     }
 
     if (isOwner()) {
       items.push(
         { href: '/owner/courts', label: 'Mis Canchas', icon: Calendar },
         { href: '/owner/bookings', label: 'Reservas', icon: Calendar }
-      )
+      );
     }
 
     if (!isAdmin() && !isOwner()) {
       items.push(
         { href: '/bookings', label: 'Reservar', icon: Calendar },
         { href: '/my-bookings', label: 'Mis Reservas', icon: Calendar }
-      )
+      );
     }
 
-    return items
-  }
+    return items;
+  };
 
-  const navigationItems = getNavigationItems()
+  const navigationItems = getNavigationItems();
 
   return (
     <ErrorBoundary>
@@ -77,9 +85,15 @@ const Header: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             {/* Logo */}
             <div className="flex items-center">
-              <Link to="/" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
+              <Link
+                to="/"
+                className="flex items-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 <Soccer className="h-8 w-8 text-emerald-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">TurnosYa</span>
+                <span className="ml-2 text-xl font-bold text-gray-900">
+                  TurnosYa
+                </span>
               </Link>
             </div>
 
@@ -108,7 +122,7 @@ const Header: React.FC = () => {
                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
                       {user.avatar ? (
                         <img
-                          src={user.avatar || "/placeholder.svg"}
+                          src={user.avatar || '/placeholder.svg'}
                           alt={user.name}
                           className="w-8 h-8 rounded-full object-cover"
                         />
@@ -116,19 +130,29 @@ const Header: React.FC = () => {
                         <User className="h-5 w-5 text-emerald-600" />
                       )}
                     </div>
-                    <span className="font-medium">{user.name?.split(" ")[0] || "Usuario"}</span>
+                    <span className="font-medium">
+                      {user.name?.split(' ')[0] || 'Usuario'}
+                    </span>
                   </button>
 
                   {/* Menú desplegable de perfil */}
                   {isProfileMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user.email}
+                        </p>
                       </div>
                       {(isAdmin || isOwner) && (
                         <Link
-                          to={isAdmin ? "/admin/dashboard" : "/field-owner/dashboard"}
+                          to={
+                            isAdmin
+                              ? '/admin/dashboard'
+                              : '/field-owner/dashboard'
+                          }
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
@@ -160,7 +184,10 @@ const Header: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Link to="/login" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-emerald-600 font-medium transition-colors"
+                  >
                     Iniciar Sesión
                   </Link>
                   <Link
@@ -174,8 +201,15 @@ const Header: React.FC = () => {
             </div>
 
             {/* Botón de menú móvil */}
-            <button className="md:hidden text-gray-700 focus:outline-none" onClick={toggleMenu}>
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <button
+              className="md:hidden text-gray-700 focus:outline-none"
+              onClick={toggleMenu}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -249,7 +283,7 @@ const Header: React.FC = () => {
         )}
       </header>
     </ErrorBoundary>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

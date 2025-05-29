@@ -15,4 +15,4 @@ mercadoPagoApi.interceptors.request.use((config) => {
   return config;
 });
 
-export default mercadoPagoApi; 
+export default mercadoPagoApi;

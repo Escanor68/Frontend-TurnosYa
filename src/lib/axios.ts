@@ -18,8 +18,8 @@ const createAxiosInstance = (baseURL: string) => {
   });
 
   instance.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
       if (error.response?.status === 401) {
         // Token expirado o inválido
         localStorage.removeItem('token');
@@ -36,6 +36,10 @@ const createAxiosInstance = (baseURL: string) => {
   return instance;
 };
 
-export const footballApi = createAxiosInstance(import.meta.env.VITE_FOOTBALL_API_URL);
+export const footballApi = createAxiosInstance(
+  import.meta.env.VITE_FOOTBALL_API_URL
+);
 export const usersApi = createAxiosInstance(import.meta.env.VITE_USERS_API_URL);
-export const paymentsApi = createAxiosInstance(import.meta.env.VITE_MERCADOPAGO_API_URL);
+export const paymentsApi = createAxiosInstance(
+  import.meta.env.VITE_MERCADOPAGO_API_URL
+);

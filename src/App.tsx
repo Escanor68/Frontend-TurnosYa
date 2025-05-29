@@ -23,9 +23,13 @@ import ForbiddenPage from './pages/403';
 const DashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
 const UsersPage = React.lazy(() => import('./pages/admin/UsersPage'));
 const CourtsPage = React.lazy(() => import('./pages/admin/CourtsPage'));
-const AdminBookingsPage = React.lazy(() => import('./pages/admin/BookingsPage'));
+const AdminBookingsPage = React.lazy(
+  () => import('./pages/admin/BookingsPage')
+);
 const OwnerCourtsPage = React.lazy(() => import('./pages/owner/CourtsPage'));
-const OwnerBookingsPage = React.lazy(() => import('./pages/owner/BookingsPage'));
+const OwnerBookingsPage = React.lazy(
+  () => import('./pages/owner/BookingsPage')
+);
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 const BookingsPage = React.lazy(() => import('./pages/BookingsPage'));
 
@@ -45,7 +49,7 @@ function App() {
           pauseOnHover
           theme="light"
         />
-        
+
         <Routes>
           <Route element={<Layout />}>
             {/* Rutas públicas */}
@@ -57,58 +61,94 @@ function App() {
             <Route path="403" element={<ForbiddenPage />} />
 
             {/* Rutas protegidas */}
-            <Route path="admin" element={<RequireAuth allowedRoles={['admin']} />}>
-              <Route index element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <DashboardPage />
-                </Suspense>
-              } />
-              <Route path="users" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <UsersPage />
-                </Suspense>
-              } />
-              <Route path="courts" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <CourtsPage />
-                </Suspense>
-              } />
-              <Route path="bookings" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <AdminBookingsPage />
-                </Suspense>
-              } />
+            <Route
+              path="admin"
+              element={<RequireAuth allowedRoles={['admin']} />}
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <DashboardPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="users"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <UsersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="courts"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <CourtsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="bookings"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <AdminBookingsPage />
+                  </Suspense>
+                }
+              />
             </Route>
 
-            <Route path="owner" element={<RequireAuth allowedRoles={['owner']} />}>
-              <Route path="courts" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <OwnerCourtsPage />
-                </Suspense>
-              } />
-              <Route path="bookings" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <OwnerBookingsPage />
-                </Suspense>
-              } />
-              <Route path="profile" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <ProfilePage />
-                </Suspense>
-              } />
+            <Route
+              path="owner"
+              element={<RequireAuth allowedRoles={['owner']} />}
+            >
+              <Route
+                path="courts"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerCourtsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="bookings"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <OwnerBookingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <ProfilePage />
+                  </Suspense>
+                }
+              />
             </Route>
 
-            <Route path="player" element={<RequireAuth allowedRoles={['player']} />}>
-              <Route path="bookings" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <BookingsPage />
-                </Suspense>
-              } />
-              <Route path="profile" element={
-                <Suspense fallback={<div>Cargando...</div>}>
-                  <ProfilePage />
-                </Suspense>
-              } />
+            <Route
+              path="player"
+              element={<RequireAuth allowedRoles={['player']} />}
+            >
+              <Route
+                path="bookings"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <BookingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <Suspense fallback={<div>Cargando...</div>}>
+                    <ProfilePage />
+                  </Suspense>
+                }
+              />
             </Route>
 
             {/* Ruta 404 */}

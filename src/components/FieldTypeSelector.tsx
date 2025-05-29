@@ -7,9 +7,13 @@ interface FieldTypeSelectorProps {
   onTypeSelect: (typeId: string) => void;
 }
 
-const FieldTypeSelector: React.FC<FieldTypeSelectorProps> = ({ sportId, selectedType, onTypeSelect }) => {
-  const sport = SPORTS.find(s => s.id === sportId);
-  
+const FieldTypeSelector: React.FC<FieldTypeSelectorProps> = ({
+  sportId,
+  selectedType,
+  onTypeSelect,
+}) => {
+  const sport = SPORTS.find((s) => s.id === sportId);
+
   if (!sport) return null;
 
   return (
