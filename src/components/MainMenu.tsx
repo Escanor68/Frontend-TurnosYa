@@ -20,8 +20,8 @@ const MenuItem = ({ to, label, icon }: MenuItemProps) => (
 export const MainMenu = () => {
   const { user } = useAuth();
 
-  const isAdmin = user?.roles.includes('admin');
-  const isOwner = user?.roles.includes('owner');
+  const isAdmin = user?.role === 'owner';
+  const isOwner = user?.role === 'owner';
 
   return (
     <nav className="space-y-1">
@@ -37,7 +37,7 @@ export const MainMenu = () => {
         </>
       )}
 
-      {/* Menú solo para admin/owner */}
+      {/* Menú solo para owner/owner */}
       {(isAdmin || isOwner) && (
         <>
           <div className="px-4 py-2 text-sm font-semibold text-gray-400">
@@ -57,15 +57,15 @@ export const MainMenu = () => {
         </>
       )}
 
-      {/* Menú solo para admin */}
+      {/* Menú solo para owner */}
       {isAdmin && (
         <>
           <div className="px-4 py-2 text-sm font-semibold text-gray-400">
             Configuración
           </div>
-          <MenuItem to="/admin/users" label="Usuarios" icon="group" />
+          <MenuItem to="/owner/users" label="Usuarios" icon="group" />
           <MenuItem
-            to="/admin/settings"
+            to="/owner/settings"
             label="Configuración"
             icon="settings"
           />

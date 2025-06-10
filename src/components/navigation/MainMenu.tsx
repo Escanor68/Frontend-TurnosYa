@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { Soccer, Calendar, User, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { Trophy, Calendar, User, Settings, LogOut } from 'lucide-react';
 
 export const MainMenu = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -12,7 +12,7 @@ export const MainMenu = () => {
   const publicMenuItems = [
     {
       to: '/football/fields',
-      icon: <Soccer className="w-5 h-5" />,
+      icon: <Trophy className="w-5 h-5" />,
       label: 'Canchas',
     },
     {
@@ -29,7 +29,7 @@ export const MainMenu = () => {
   const playerMenuItems = [
     {
       to: '/football/fields',
-      icon: <Soccer className="w-5 h-5" />,
+      icon: <Trophy className="w-5 h-5" />,
       label: 'Canchas',
     },
     {
@@ -48,7 +48,7 @@ export const MainMenu = () => {
   const ownerMenuItems = [
     {
       to: '/field-owner/dashboard',
-      icon: <Soccer className="w-5 h-5" />,
+      icon: <Trophy className="w-5 h-5" />,
       label: 'Dashboard',
     },
     {
@@ -63,27 +63,11 @@ export const MainMenu = () => {
     },
   ];
 
-  // Menú para administradores
-  const adminMenuItems = [
-    {
-      to: '/admin/dashboard',
-      icon: <Settings className="w-5 h-5" />,
-      label: 'Dashboard',
-    },
-    {
-      to: '/profile',
-      icon: <User className="w-5 h-5" />,
-      label: 'Mi Perfil',
-    },
-  ];
-
   // Seleccionar los items del menú según el rol
   const getMenuItems = () => {
     if (!isAuthenticated) return publicMenuItems;
 
     switch (user?.role) {
-      case 'admin':
-        return adminMenuItems;
       case 'owner':
         return ownerMenuItems;
       case 'player':
@@ -103,7 +87,7 @@ export const MainMenu = () => {
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
-                <Soccer className="h-8 w-8 text-emerald-600" />
+                <Trophy className="h-8 w-8 text-emerald-600" />
                 <span className="ml-2 text-xl font-bold text-gray-900">
                   TurnosYa
                 </span>

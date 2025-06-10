@@ -6,18 +6,18 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
-import ProfilePage from '../pages/ProfilePage';
+import { ProfilePage } from '../pages/profile/ProfilePage';
 import BookingsPage from '../pages/BookingsPage';
 import NotFoundPage from '../pages/404';
 import ForbiddenPage from '../pages/403';
 
 // Admin Pages
-import AdminDashboardPage from '../pages/admin/DashboardPage';
-import AdminUsersPage from '../pages/admin/UsersPage';
-import AdminCourtsPage from '../pages/admin/CourtsPage';
-import AdminBookingsPage from '../pages/admin/BookingsPage';
-import AdminSettingsPage from '../pages/admin/SettingsPage';
-import AdminHelpPage from '../pages/admin/HelpPage';
+import AdminDashboardPage from '../pages/owner/DashboardPage';
+import AdminUsersPage from '../pages/owner/UsersPage';
+import AdminCourtsPage from '../pages/owner/CourtsPage';
+import AdminBookingsPage from '../pages/owner/BookingsPage';
+import AdminSettingsPage from '../pages/owner/SettingsPage';
+import AdminHelpPage from '../pages/owner/HelpPage';
 
 // Owner Pages
 import OwnerCourtsPage from '../pages/owner/CourtsPage';
@@ -56,10 +56,10 @@ export const publicRoutes: RouteConfig[] = [
 
 export const adminRoutes: RouteConfig[] = [
   {
-    path: '/admin',
+    path: '/owner',
     element: null,
     requireAuth: true,
-    allowedRoles: ['admin'],
+    allowedRoles: ['owner'],
     children: [
       {
         path: 'dashboard',

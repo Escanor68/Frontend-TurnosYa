@@ -1,151 +1,157 @@
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Mail, Lock, User } from 'lucide-react';
-import { RegisterData } from '../../api/auth';
+import { useState, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import { useNotification } from '../../hooks/useNotification';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Link } from '../ui/Link';
 
-const schema = yup.object().shape({
-  name: yup.string().required('Nombre es requerido'),
-  email: yup.string().email('Email inválido').required('Email es requerido'),
-  password: yup
-    .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .required('Contraseña es requerida'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Las contraseñas no coinciden')
-    .required('Confirmar contraseña es requerido'),
-});
-
-interface RegisterFormProps {
-  onSubmit: (data: RegisterData) => Promise<void>;
-  isLoading: boolean;
+interface RegisterFormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  [key: string]: string;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({
-  onSubmit,
-  isLoading,
-}) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterData & { confirmPassword: string }>({
-    resolver: yupResolver(schema),
-  });
+const initialValues: RegisterFormData = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
 
-  const handleFormSubmit = async (
-    data: RegisterData & { confirmPassword: string }
-  ) => {
-    const { confirmPassword, ...registerData } = data;
-    await onSubmit(registerData);
+const validationRules = {
+  name: [
+    (value: string) => !value && 'El nombre es requerido',
+    (value: string) =>
+      value.length < 2 && 'El nombre debe tener al menos 2 caracteres',
+  ],
+  email: [
+    (value: string) => !value && 'El email es requerido',
+    (value: string) =>
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && 'Email inválido',
+  ],
+  password: [
+    (value: string) => !value && 'La contraseña es requerida',
+    (value: string) =>
+      value.length < 6 && 'La contraseña debe tener al menos 6 caracteres',
+  ],
+  confirmPassword: [
+    (value: string) => !value && 'La confirmación de contraseña es requerida',
+    (value: string, formData: RegisterFormData) =>
+      value !== formData.password && 'Las contraseñas no coinciden',
+  ],
+};
+
+export const RegisterForm = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  const { showNotification } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit } =
+    useFormValidation<RegisterFormData>({
+      initialValues,
+      validationRules,
+      onSubmit: async (formData) => {
+        try {
+          setIsLoading(true);
+          await register(formData.name, formData.email, formData.password);
+          showNotification({
+            type: 'success',
+            message: 'Registro exitoso',
+          });
+          navigate('/dashboard');
+        } catch (error) {
+          showNotification({
+            type: 'error',
+            message:
+              error instanceof Error ? error.message : 'Error al registrarse',
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    handleChange(name as keyof RegisterFormData, value);
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Nombre completo
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <User className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            {...register('name')}
-            type="text"
-            className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="Tu nombre completo"
-          />
-        </div>
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-        )}
+        <Input
+          type="text"
+          name="name"
+          value={values.name}
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('name')}
+          placeholder="Nombre completo"
+          error={touched.name ? errors.name : undefined}
+          disabled={isLoading}
+        />
       </div>
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Correo electrónico
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Mail className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            {...register('email')}
-            type="email"
-            className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="tu@email.com"
-          />
-        </div>
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-        )}
+        <Input
+          type="email"
+          name="email"
+          value={values.email}
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('email')}
+          placeholder="Email"
+          error={touched.email ? errors.email : undefined}
+          disabled={isLoading}
+        />
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Contraseña
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Lock className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            {...register('password')}
-            type="password"
-            className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="********"
-          />
-        </div>
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-        )}
+        <Input
+          type="password"
+          name="password"
+          value={values.password}
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('password')}
+          placeholder="Contraseña"
+          error={touched.password ? errors.password : undefined}
+          disabled={isLoading}
+        />
       </div>
 
       <div>
-        <label
-          htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Confirmar contraseña
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Lock className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            {...register('confirmPassword')}
-            type="password"
-            className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
-            placeholder="********"
-          />
-        </div>
-        {errors.confirmPassword && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.confirmPassword.message}
-          </p>
-        )}
+        <Input
+          type="password"
+          name="confirmPassword"
+          value={values.confirmPassword}
+          onChange={handleInputChange}
+          onBlur={() => handleBlur('confirmPassword')}
+          placeholder="Confirmar contraseña"
+          error={touched.confirmPassword ? errors.confirmPassword : undefined}
+          disabled={isLoading}
+        />
       </div>
 
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        className="w-full"
         disabled={isLoading}
-        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${
-          isLoading ? 'opacity-70 cursor-not-allowed' : ''
-        }`}
       >
-        {isLoading ? 'Creando cuenta...' : 'Registrarse'}
-      </button>
+        {isLoading ? 'Registrando...' : 'Registrarse'}
+      </Button>
+
+      <div className="text-center">
+        <span className="text-sm text-gray-600">
+          ¿Ya tienes una cuenta?{' '}
+          <Link to="/login" className="text-primary-600 hover:text-primary-700">
+            Inicia sesión
+          </Link>
+        </span>
+      </div>
     </form>
   );
 };

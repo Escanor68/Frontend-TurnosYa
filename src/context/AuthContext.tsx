@@ -1,10 +1,23 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import type { User, AuthContextType } from '../types/auth';
-import authService from '../services/auth.service';
+import { User, RegisterData } from '../types/user';
+import { userService } from '../services/user.service';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
+  updateProfile: (userData: Partial<User>) => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -12,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -23,11 +37,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        const userData = await authService.getCurrentUser();
+        const userData = await userService.getProfile();
         setUser(userData);
       } catch (error) {
         console.error('Error initializing auth:', error);
         localStorage.removeItem('token');
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Error al inicializar la autenticación'
+        );
       } finally {
         setIsLoading(false);
         setIsInitialized(true);
@@ -40,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const { token, user: userData } = await authService.login({
+      const { token, user: userData } = await userService.login({
         email,
         password,
       });
@@ -57,33 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = async () => {
+  const register = async (userData: RegisterData) => {
     setIsLoading(true);
     try {
-      await authService.logout();
-      localStorage.removeItem('token');
-      setUser(null);
-      toast.success('¡Hasta pronto!');
-    } catch (error) {
-      console.error('Error during logout:', error);
-      const message =
-        error instanceof Error ? error.message : 'Error al cerrar sesión';
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (userData: {
-    email: string;
-    password: string;
-    name: string;
-    role: string;
-  }) => {
-    setIsLoading(true);
-    try {
-      const { token, user: newUser } = await authService.register(userData);
-      localStorage.setItem('token', token);
+      const newUser = await userService.register(userData);
       setUser(newUser);
       toast.success('¡Registro exitoso!');
     } catch (error) {
@@ -96,10 +92,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const forgotPassword = async (email: string) => {
+  const logout = async () => {
+    setIsLoading(true);
     try {
-      await authService.forgotPassword(email);
-      toast.success('Se han enviado las instrucciones a tu email');
+      localStorage.removeItem('token');
+      setUser(null);
+      toast.success('¡Hasta pronto!');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Error al cerrar sesión';
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    try {
+      await userService.forgotPassword({ email });
+      toast.success('Se ha enviado un correo con las instrucciones');
     } catch (error) {
       const message =
         error instanceof Error
@@ -107,13 +119,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           : 'Error al procesar la solicitud';
       toast.error(message);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const resetPassword = async (token: string, password: string) => {
+    setIsLoading(true);
     try {
-      await authService.resetPassword(token, password);
-      toast.success('Contraseña actualizada exitosamente');
+      await userService.resetPassword({ token, newPassword: password });
+      toast.success('Contraseña actualizada correctamente');
     } catch (error) {
       const message =
         error instanceof Error
@@ -121,36 +136,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           : 'Error al restablecer la contraseña';
       toast.error(message);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // No mostrar nada hasta que la inicialización esté completa
+  const updateProfile = async (userData: Partial<User>) => {
+    setIsLoading(true);
+    try {
+      const updatedUser = await userService.updateProfile(userData);
+      setUser(updatedUser);
+      toast.success('Perfil actualizado correctamente');
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Error al actualizar el perfil';
+      toast.error(message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isInitialized) {
     return <LoadingSpinner />;
   }
 
-  const contextValue: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-    register,
-    forgotPassword,
-    resetPassword,
-  };
-
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        error,
+        login,
+        register,
+        logout,
+        forgotPassword,
+        resetPassword,
+        updateProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === null) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  const context = React.useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
 };
-
-export default AuthContext;

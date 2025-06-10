@@ -88,10 +88,18 @@ const Chat: React.FC<ChatProps> = ({
       <form onSubmit={handleSend} className="p-4 border-t">
         <div className="flex items-center space-x-2">
           <button
-            type="button"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={handleSend}
+            className="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-full"
+            title="Enviar mensaje"
           >
-            <Paperclip className="w-5 h-5 text-gray-500" />
+            <Send className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleSend}
+            className="p-2 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-full"
+            title="Adjuntar archivo"
+          >
+            <Paperclip className="h-5 w-5" />
           </button>
           <input
             type="text"
@@ -100,13 +108,6 @@ const Chat: React.FC<ChatProps> = ({
             placeholder="Escribe un mensaje..."
             className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
-          <button
-            type="submit"
-            className="p-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-colors"
-            disabled={!newMessage.trim()}
-          >
-            <Send className="w-5 h-5" />
-          </button>
         </div>
       </form>
     </div>

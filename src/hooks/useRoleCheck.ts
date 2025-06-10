@@ -1,49 +1,81 @@
-import { useAuth } from '../context/AuthContext';
-import type { User } from '../types/auth';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './useAuth';
+import type { UserRole } from '../types/user';
 
-export function useRoleCheck() {
+interface RoleCheckOptions {
+  redirectTo?: string;
+  requiredRoles?: UserRole[];
+}
+
+export const useRoleCheck = ({
+  redirectTo = '/',
+  requiredRoles = [],
+}: RoleCheckOptions = {}) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
-  const hasRole = (role: User['role']) => {
-    return user?.role === role;
-  };
+  const checkRole = useCallback(() => {
+    if (!user) {
+      navigate(redirectTo);
+      return false;
+    }
 
-  const hasAnyRole = (roles: User['role'][]) => {
-    if (!user) return false;
-    return roles.includes(user.role);
-  };
+    if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
+      navigate(redirectTo);
+      return false;
+    }
 
-  const canAccessRoute = (allowedRoles: User['role'][]) => {
+    return true;
+  }, [user, requiredRoles, redirectTo, navigate]);
+
+  const hasRole = useCallback(
+    (role: UserRole) => {
+      return user?.role === role;
+    },
+    [user]
+  );
+
+  const hasAnyRole = useCallback(
+    (roles: UserRole[]) => {
+      return user ? roles.includes(user.role) : false;
+    },
+    [user]
+  );
+
+  const hasAllRoles = useCallback(
+    (roles: UserRole[]) => {
+      return user ? roles.every((role) => user.role === role) : false;
+    },
+    [user]
+  );
+
+  const canAccessRoute = (allowedRoles: UserRole[]) => {
     if (!user) return false;
     if (allowedRoles.length === 0) return true;
     return hasAnyRole(allowedRoles);
   };
 
-  const isAdmin = () => hasRole('admin');
   const isOwner = () => hasRole('owner');
   const isPlayer = () => hasRole('player');
 
   const canManageFields = () => {
-    return hasAnyRole(['admin', 'owner']);
+    return hasAnyRole(['owner', 'owner']);
   };
 
   const canManageBookings = () => {
-    return hasAnyRole(['admin', 'owner', 'player']);
-  };
-
-  const canAccessAdminPanel = () => {
-    return isAdmin();
+    return hasAnyRole(['owner', 'owner', 'player']);
   };
 
   return {
+    checkRole,
     hasRole,
     hasAnyRole,
+    hasAllRoles,
     canAccessRoute,
-    isAdmin,
     isOwner,
     isPlayer,
     canManageFields,
     canManageBookings,
-    canAccessAdminPanel,
   };
-}
+};

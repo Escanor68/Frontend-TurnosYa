@@ -1,8 +1,9 @@
-import { User } from './auth';
+import { User } from './user';
+import type { ComponentType } from 'react';
 
 export interface RouteConfig {
   path: string;
-  element: React.ReactNode;
+  element: ComponentType | null;
   requireAuth?: boolean;
   allowedRoles?: User['role'][];
   children?: RouteConfig[];
@@ -17,7 +18,7 @@ export interface BreadcrumbItem {
 export interface NavigationItem {
   name: string;
   href: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }>;
   current?: boolean;
   children?: NavigationItem[];
 }

@@ -1,40 +1,37 @@
 // Archivo de exportación central para todos los tipos
 // Esto facilita las importaciones en otros archivos
 
-export * from './auth';
 export * from './routes';
 export * from './common';
 export * from './booking';
 export * from './sports';
 export * from './location';
 export * from './payment';
+export * from './user';
+export * from './notification';
+export * from './api';
+export * from './field';
 
 import type React from 'react';
+import type { PaymentMethod } from './payment';
+
 // Definición de tipos centralizados para toda la aplicación
 
-// Tipos para usuarios
+// Tipos para autenticación
 export interface User {
   id: string;
   name: string;
   email: string;
   phone?: string;
-  role: 'admin' | 'owner' | 'user';
+  role: 'owner' | 'user';
   avatar?: string;
 }
 
-// Tipos para autenticación
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-}
-
-export interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  register: (userData: RegisterData) => Promise<void>;
-  updateProfile: (userData: Partial<User>) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -43,6 +40,26 @@ export interface RegisterData {
   password: string;
   phone?: string;
   role?: 'owner' | 'user';
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+export interface PasswordResetData {
+  email: string;
+}
+
+export interface PasswordResetConfirmData {
+  token: string;
+  password: string;
+  confirmPassword: string;
 }
 
 // Tipos para campos deportivos
@@ -55,6 +72,7 @@ export interface SportField {
   players: string;
   image: string;
   hasAdditionalServices: boolean;
+  additionalServices?: AdditionalService[];
   location: Location;
   ownerId?: string;
   rating?: number;
@@ -93,7 +111,7 @@ export interface Booking {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   totalPrice: number;
   recurrence: string;
@@ -113,7 +131,7 @@ export interface BookingFormData {
   contactName: string;
   contactPhone: string;
   contactEmail: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   paymentDetails: {
     cardNumber: string;
@@ -135,7 +153,7 @@ export interface AdditionalService {
   name: string;
   description: string;
   price: number;
-  icon: React.ReactNode;
+  icon: string;
 }
 
 // Tipos para opciones de recurrencia
@@ -143,13 +161,6 @@ export interface RecurrenceOption {
   id: string;
   name: string;
   discount: number;
-}
-
-// Tipos para métodos de pago
-export interface PaymentMethod {
-  id: string;
-  name: string;
-  icon: string;
 }
 
 // Tipos para validación de formularios

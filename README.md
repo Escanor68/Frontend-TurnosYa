@@ -7,17 +7,20 @@ TurnosYa es una aplicación web moderna desarrollada con React y TypeScript que 
 ## 🚀 Características
 
 - **Autenticación y Autorización**
+
   - Sistema de login y registro
-  - Manejo de roles (admin, owner, player)
+  - Manejo de roles (owner, owner, player)
   - Protección de rutas por rol
   - Recuperación de contraseña
 
 - **Gestión de Canchas**
+
   - Alta, baja y modificación de canchas
   - Visualización de disponibilidad
   - Filtros y búsqueda
 
 - **Reservas**
+
   - Creación y cancelación de reservas
   - Historial de reservas
   - Notificaciones
@@ -48,17 +51,20 @@ npm >= 8.0.0
 ## 🔧 Instalación
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone https://github.com/tuusuario/turnosya-frontend.git
 cd turnosya-frontend
 ```
 
 2. **Instalar dependencias**
+
 ```bash
 npm install
 ```
 
 3. **Configurar variables de entorno**
+
 ```bash
 # Crear archivo .env.local
 cp .env.example .env.local
@@ -68,6 +74,7 @@ VITE_API_URL=http://localhost:3000/api
 ```
 
 4. **Iniciar en modo desarrollo**
+
 ```bash
 npm run dev
 ```
@@ -75,11 +82,13 @@ npm run dev
 ## 🚀 Despliegue
 
 1. **Construir para producción**
+
 ```bash
 npm run build
 ```
 
 2. **Previsualizar build**
+
 ```bash
 npm run preview
 ```
@@ -89,6 +98,7 @@ npm run preview
 ### Herramientas Recomendadas
 
 1. **React Developer Tools**
+
    - Instalar la extensión para Chrome/Firefox
    - Útil para inspeccionar componentes y estado
 
@@ -99,6 +109,7 @@ npm run preview
 ### Logs de Depuración
 
 La aplicación incluye logs detallados para debugging:
+
 - Estado de autenticación
 - Rutas y navegación
 - Llamadas a la API
@@ -107,6 +118,7 @@ La aplicación incluye logs detallados para debugging:
 ### Problemas Comunes
 
 1. **Errores de Autenticación**
+
    - Verificar token en localStorage
    - Revisar permisos de usuario
    - Validar rutas protegidas
@@ -134,10 +146,12 @@ src/
 ## 🔐 Roles y Permisos
 
 1. **Administrador**
+
    - Gestión completa del sistema
    - Acceso a todas las funcionalidades
 
 2. **Propietario**
+
    - Gestión de sus canchas
    - Ver reservas de sus canchas
    - Administrar disponibilidad
@@ -151,17 +165,23 @@ src/
 
 1. Fork el proyecto
 2. Crear una rama para tu feature
+
 ```bash
 git checkout -b feature/AmazingFeature
 ```
+
 3. Commit tus cambios
+
 ```bash
 git commit -m 'Add some AmazingFeature'
 ```
+
 4. Push a la rama
+
 ```bash
 git push origin feature/AmazingFeature
 ```
+
 5. Abrir un Pull Request
 
 ## 📝 Licencia

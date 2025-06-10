@@ -1,104 +1,109 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { footballService } from '../services/football.service';
-import { paymentService } from '../services/payment.service';
-import { useAuth } from './useAuth';
-import { CreateBookingDTO, Booking } from '../types/booking';
-import { toast } from 'react-hot-toast';
+import { useBooking } from './useBooking';
+import { usePayment } from './usePayment';
+import { useNotification } from './useNotification';
+import type { BookingFormData } from '../types/booking';
+
+interface BookingFlowState {
+  step: number;
+  formData: BookingFormData;
+  isLoading: boolean;
+  error: Error | null;
+}
 
 export const useBookingFlow = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { createBooking } = useBooking();
+  const { createPayment } = usePayment();
+  const { showNotification } = useNotification();
 
-  const startBooking = async (bookingData: CreateBookingDTO) => {
+  const [state, setState] = useState<BookingFlowState>({
+    step: 1,
+    formData: {
+      contactName: '',
+      contactPhone: '',
+      contactEmail: '',
+      paymentDetails: {
+        method: 'mercadopago',
+        cardNumber: '',
+        cardHolder: '',
+        expiryDate: '',
+        cvv: '',
+      },
+    },
+    isLoading: false,
+    error: null,
+  });
+
+  const updateFormData = useCallback((data: Partial<BookingFormData>) => {
+    setState((prev) => ({
+      ...prev,
+      formData: { ...prev.formData, ...data },
+    }));
+  }, []);
+
+  const nextStep = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      step: prev.step + 1,
+    }));
+  }, []);
+
+  const prevStep = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      step: prev.step - 1,
+    }));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      // 1. Verificar disponibilidad
-      const availability = await footballService.checkFieldAvailability(
-        bookingData.fieldId,
-        bookingData.date
-      );
+      // Crear la reserva
+      const booking = await createBooking(state.formData);
 
-      const isAvailable = availability.some(slot => 
-        slot.startTime <= bookingData.startTime && slot.endTime >= bookingData.endTime
-      );
-
-      if (!isAvailable) {
-        throw new Error('El horario seleccionado no está disponible');
-      }
-
-      // 2. Crear la reserva
-      const booking = await footballService.createBooking(bookingData);
-      setCurrentBooking(booking);
-
-      // 3. Crear preferencia de pago
-      const paymentPreference = await paymentService.createPreference({
-        items: [{
-          title: `Reserva cancha ${booking.field.name}`,
-          quantity: 1,
-          unit_price: booking.totalPrice,
-          currency_id: 'ARS'
-        }],
-        payer: {
-          email: user?.email || '',
-          name: user?.name || ''
-        },
-        back_urls: {
-          success: `${window.location.origin}/bookings/${booking.id}/success`,
-          failure: `${window.location.origin}/bookings/${booking.id}/failure`
-        }
+      // Procesar el pago
+      const payment = await createPayment({
+        bookingId: booking.id,
+        amount: booking.totalPrice,
+        currency: booking.currency,
+        method: state.formData.paymentDetails.method,
       });
 
-      // 4. Redirigir al checkout
-      window.location.href = paymentPreference.init_point;
+      showNotification({
+        type: 'success',
+        message: 'Reserva creada exitosamente',
+      });
 
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al procesar la reserva';
-      setError(message);
-      toast.error(message);
+      navigate(`/bookings/${booking.id}`);
+    } catch (error) {
+      const errorObj =
+        error instanceof Error
+          ? error
+          : new Error('Error al procesar la reserva');
+      setState((prev) => ({ ...prev, error: errorObj }));
+      showNotification({
+        type: 'error',
+        message: errorObj.message,
+      });
     } finally {
-      setLoading(false);
+      setState((prev) => ({ ...prev, isLoading: false }));
     }
-  };
-
-  const handlePaymentSuccess = async (bookingId: string) => {
-    try {
-      setLoading(true);
-      const booking = await footballService.getBookingById(bookingId);
-      setCurrentBooking(booking);
-      toast.success('Pago procesado correctamente');
-      navigate(`/bookings/${bookingId}`);
-    } catch (err) {
-      toast.error('Error al verificar el estado del pago');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cancelBooking = async (bookingId: string) => {
-    try {
-      setLoading(true);
-      await footballService.cancelBooking(bookingId);
-      toast.success('Reserva cancelada correctamente');
-      navigate('/bookings');
-    } catch (err) {
-      toast.error('Error al cancelar la reserva');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [
+    state.formData,
+    createBooking,
+    createPayment,
+    showNotification,
+    navigate,
+  ]);
 
   return {
-    startBooking,
-    handlePaymentSuccess,
-    cancelBooking,
-    loading,
-    error,
-    currentBooking
+    ...state,
+    updateFormData,
+    nextStep,
+    prevStep,
+    handleSubmit,
   };
-}; 
+};

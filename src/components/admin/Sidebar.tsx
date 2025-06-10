@@ -9,12 +9,12 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Usuarios', href: '/admin/users', icon: Users },
-  { name: 'Canchas', href: '/admin/courts', icon: Calendar },
-  { name: 'Reservas', href: '/admin/bookings', icon: BookOpen },
-  { name: 'Configuración', href: '/admin/settings', icon: Settings },
-  { name: 'Ayuda', href: '/admin/help', icon: HelpCircle },
+  { name: 'Dashboard', href: '/owner/dashboard', icon: LayoutDashboard },
+  { name: 'Usuarios', href: '/owner/users', icon: Users },
+  { name: 'Canchas', href: '/owner/courts', icon: Calendar },
+  { name: 'Reservas', href: '/owner/bookings', icon: BookOpen },
+  { name: 'Configuración', href: '/owner/settings', icon: Settings },
+  { name: 'Ayuda', href: '/owner/help', icon: HelpCircle },
 ];
 
 export function Sidebar() {

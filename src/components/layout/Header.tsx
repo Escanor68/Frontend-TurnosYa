@@ -3,7 +3,7 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import {
   Menu,
   X,
@@ -22,8 +22,7 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
-  const { isAdmin, isOwner, canManageFields, canManageBookings } =
-    useRoleCheck();
+  const { isOwner } = useRoleCheck();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,22 +50,21 @@ const Header: React.FC = () => {
   const getNavigationItems = () => {
     const items = [{ href: '/', label: 'Inicio', icon: Home }];
 
-    if (isAdmin()) {
-      items.push(
-        { href: '/admin/dashboard', label: 'Panel Admin', icon: Settings },
-        { href: '/admin/users', label: 'Usuarios', icon: User },
-        { href: '/admin/courts', label: 'Canchas', icon: Calendar }
-      );
-    }
-
     if (isOwner()) {
       items.push(
-        { href: '/owner/courts', label: 'Mis Canchas', icon: Calendar },
-        { href: '/owner/bookings', label: 'Reservas', icon: Calendar }
+        {
+          href: '/owner/dashboard',
+          label: 'Panel Propietario',
+          icon: Settings,
+        },
+        { href: '/owner/users', label: 'Usuarios', icon: User },
+        { href: '/owner/courts', label: 'Canchas', icon: Calendar },
+        { href: '/owner/bookings', label: 'Reservas', icon: Calendar },
+        { href: '/owner/courts', label: 'Mis Canchas', icon: Calendar }
       );
     }
 
-    if (!isAdmin() && !isOwner()) {
+    if (!isOwner()) {
       items.push(
         { href: '/bookings', label: 'Reservar', icon: Calendar },
         { href: '/my-bookings', label: 'Mis Reservas', icon: Calendar }
@@ -120,9 +118,9 @@ const Header: React.FC = () => {
                     className="flex items-center space-x-2 text-gray-700 hover:text-emerald-600 transition-colors focus:outline-none"
                   >
                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                      {user.avatar ? (
+                      {user.profileImage ? (
                         <img
-                          src={user.avatar || '/placeholder.svg'}
+                          src={user.profileImage || '/placeholder.svg'}
                           alt={user.name}
                           className="w-8 h-8 rounded-full object-cover"
                         />
@@ -146,13 +144,9 @@ const Header: React.FC = () => {
                           {user.email}
                         </p>
                       </div>
-                      {(isAdmin || isOwner) && (
+                      {isOwner() && (
                         <Link
-                          to={
-                            isAdmin
-                              ? '/admin/dashboard'
-                              : '/field-owner/dashboard'
-                          }
+                          to={'/owner/dashboard'}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >

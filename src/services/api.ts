@@ -1,7 +1,13 @@
-import axios from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from 'axios';
 import { toast } from 'react-toastify';
 import { API_URL } from '../config';
 import { AuthTokens } from '../types/auth';
+import { ApiResponse, ErrorResponse } from '../types/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -85,3 +91,139 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+class ApiService {
+  private static instance: ApiService;
+  private api: AxiosInstance;
+  private token: string | null = null;
+
+  private constructor() {
+    this.api = axios.create({
+      baseURL: API_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    this.setupInterceptors();
+  }
+
+  public static getInstance(): ApiService {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
+    }
+    return ApiService.instance;
+  }
+
+  private setupInterceptors(): void {
+    this.api.interceptors.request.use(
+      (config) => {
+        if (this.token) {
+          config.headers.Authorization = `Bearer ${this.token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError<ErrorResponse>) => {
+        if (error.response?.status === 401) {
+          this.clearToken();
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  public setToken(token: string): void {
+    this.token = token;
+    localStorage.setItem('token', token);
+  }
+
+  public clearToken(): void {
+    this.token = null;
+    localStorage.removeItem('token');
+  }
+
+  public async get<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response: AxiosResponse<ApiResponse<T>> = await this.api.get(
+        url,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  public async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response: AxiosResponse<ApiResponse<T>> = await this.api.post(
+        url,
+        data,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  public async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response: AxiosResponse<ApiResponse<T>> = await this.api.put(
+        url,
+        data,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  public async delete<T>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response: AxiosResponse<ApiResponse<T>> = await this.api.delete(
+        url,
+        config
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  private handleError(error: unknown): Error {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<ErrorResponse>;
+      if (axiosError.response?.data?.message) {
+        return new Error(axiosError.response.data.message);
+      }
+      if (axiosError.message) {
+        return new Error(axiosError.message);
+      }
+    }
+    return new Error('Ha ocurrido un error inesperado');
+  }
+}
+
+export const apiService = ApiService.getInstance();

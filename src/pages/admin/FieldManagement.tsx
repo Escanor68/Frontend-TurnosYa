@@ -1,6 +1,5 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,42 +15,9 @@ interface Field {
   active: boolean;
 }
 
-// Datos de ejemplo para desarrollo
-const exampleFields: Field[] = [
-  {
-    id: 1,
-    name: 'Campo Norte',
-    fieldType: 'Fútbol 11',
-    description: 'Campo de césped natural con iluminación nocturna',
-    address: 'Av. Libertador 1234',
-    city: 'Buenos Aires',
-    province: 'Buenos Aires',
-    active: true,
-  },
-  {
-    id: 2,
-    name: 'Campo Sur',
-    fieldType: 'Fútbol 5',
-    description: 'Campo de césped sintético techado',
-    address: 'Calle San Martín 567',
-    city: 'Córdoba',
-    province: 'Córdoba',
-    active: true,
-  },
-  {
-    id: 3,
-    name: 'Campo Este',
-    fieldType: 'Fútbol 7',
-    description: 'Campo al aire libre con vestuarios',
-    address: 'Ruta 8 km 50',
-    city: 'Rosario',
-    province: 'Santa Fe',
-    active: false,
-  },
-];
-
 const FieldManagement: React.FC = () => {
-  const [fields, setFields] = useState<Field[]>(exampleFields);
+  console.log('FieldManagement montado');
+  const [fields, setFields] = useState<Field[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedField, setSelectedField] = useState<Field | null>(null);
@@ -64,11 +30,25 @@ const FieldManagement: React.FC = () => {
     province: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // En una implementación real, aquí se cargarían los datos desde la API
-    // fetchFields();
+    async function fetchFields() {
+      console.log('Cargando canchas...');
+      try {
+        const response = await fetch('/api/fields');
+        const data = await response.json();
+        console.log('Canchas recibidas:', data);
+        setFields(data);
+      } catch (error) {
+        console.log('Error al cargar canchas:', error);
+        toast.error('Error al cargar las canchas');
+      } finally {
+        console.log('Finalizó la carga, setLoading(false)');
+        setLoading(false);
+      }
+    }
+    fetchFields();
   }, []);
 
   const handleInputChange = (
@@ -113,48 +93,64 @@ const FieldManagement: React.FC = () => {
     setSelectedField(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isEditMode && selectedField) {
-      // Actualizar campo existente
-      const updatedFields = fields.map((field) =>
-        field.id === selectedField.id ? { ...field, ...formData } : field
-      );
-      setFields(updatedFields);
-      toast.success('Campo actualizado con éxito');
-    } else {
-      // Crear nuevo campo
-      const newField: Field = {
-        id: Math.max(0, ...fields.map((f) => f.id)) + 1,
-        ...formData,
-        active: true,
-      };
-      setFields([...fields, newField]);
-      toast.success('Campo creado con éxito');
-    }
-
-    closeModal();
-  };
-
-  const toggleFieldStatus = (id: number) => {
-    const updatedFields = fields.map((field) =>
-      field.id === id ? { ...field, active: !field.active } : field
-    );
-    setFields(updatedFields);
-
-    const field = fields.find((f) => f.id === id);
-    if (field) {
-      toast.info(
-        `Campo ${field.active ? 'desactivado' : 'activado'} con éxito`
-      );
+    try {
+      let response;
+      if (isEditMode && selectedField) {
+        response = await fetch(`/api/fields/${selectedField.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        response = await fetch('/api/fields', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      }
+      if (!response.ok) throw new Error('Error en la operación');
+      // Recargar la lista de campos
+      const fieldsRes = await fetch('/api/fields');
+      setFields(await fieldsRes.json());
+      toast.success(isEditMode ? 'Campo actualizado' : 'Campo creado');
+      closeModal();
+    } catch (error) {
+      console.log(error);
+      toast.error('Error al guardar el campo');
     }
   };
 
-  const deleteField = (id: number) => {
+  const deleteField = async (id: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este campo?')) {
-      setFields(fields.filter((field) => field.id !== id));
-      toast.success('Campo eliminado con éxito');
+      try {
+        const response = await fetch(`/api/fields/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Error al eliminar');
+        setFields(fields.filter((field) => field.id !== id));
+        toast.success('Campo eliminado con éxito');
+      } catch (error) {
+        console.log(error);
+        toast.error('Error al eliminar el campo');
+      }
+    }
+  };
+
+  const toggleFieldStatus = async (id: number, active: boolean) => {
+    try {
+      const response = await fetch(`/api/fields/${id}/activate`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !active }),
+      });
+      if (!response.ok) throw new Error('Error al cambiar estado');
+      // Recargar la lista de campos
+      const fieldsRes = await fetch('/api/fields');
+      setFields(await fieldsRes.json());
+      toast.info(`Campo ${active ? 'desactivado' : 'activado'} con éxito`);
+    } catch (error) {
+      console.log(error);
+      toast.error('Error al cambiar el estado del campo');
     }
   };
 
@@ -166,6 +162,8 @@ const FieldManagement: React.FC = () => {
       field.province.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if (loading) return <div>Cargando...</div>;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -175,6 +173,7 @@ const FieldManagement: React.FC = () => {
         <button
           onClick={openCreateModal}
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center"
+          title="Agregar Campo"
         >
           <Plus size={20} className="mr-2" />
           Agregar Campo
@@ -188,6 +187,7 @@ const FieldManagement: React.FC = () => {
           className="w-full p-2 border border-gray-300 rounded-md"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          title="Buscar campos por nombre, tipo, ciudad o provincia"
         />
       </div>
 
@@ -199,11 +199,16 @@ const FieldManagement: React.FC = () => {
               field.active ? 'bg-white' : 'bg-gray-100'
             }`}
           >
-            <div className="p-4">
-              <div className="flex justify-between items-start">
-                <h2 className="text-xl font-semibold">{field.name}</h2>
+            <div className="p-4 flex flex-col h-full">
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold mb-2">{field.name}</h2>
+                <p className="text-gray-600 mb-1">{field.fieldType}</p>
+                <p className="text-gray-500 mb-1">{field.description}</p>
+                <p className="text-gray-500 text-sm mb-1">
+                  {field.address}, {field.city}, {field.province}
+                </p>
                 <span
-                  className={`px-2 py-1 text-xs rounded-full ${
+                  className={`inline-block px-2 py-1 rounded text-xs font-semibold mt-2 ${
                     field.active
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
@@ -212,69 +217,57 @@ const FieldManagement: React.FC = () => {
                   {field.active ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mt-1">{field.fieldType}</p>
-              <p className="mt-2">{field.description}</p>
-              <p className="text-sm text-gray-600 mt-2">
-                {field.address}, {field.city}, {field.province}
-              </p>
-            </div>
-            <div className="bg-gray-50 px-4 py-3 flex justify-end space-x-2">
-              <button
-                onClick={() => toggleFieldStatus(field.id)}
-                className={`px-3 py-1 rounded-md ${
-                  field.active
-                    ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                    : 'bg-green-100 text-green-700 hover:bg-green-200'
-                }`}
-              >
-                {field.active ? 'Desactivar' : 'Activar'}
-              </button>
-              <button
-                onClick={() => openEditModal(field)}
-                className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md flex items-center"
-              >
-                <Pencil size={16} className="mr-1" />
-                Editar
-              </button>
-              <button
-                onClick={() => deleteField(field.id)}
-                className="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md flex items-center"
-              >
-                <Trash2 size={16} className="mr-1" />
-                Eliminar
-              </button>
+              <div className="mt-4 flex space-x-2">
+                <button
+                  onClick={() => openEditModal(field)}
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md flex items-center"
+                  title="Editar campo"
+                >
+                  <Pencil size={16} className="mr-1" />
+                  Editar
+                </button>
+                <button
+                  onClick={() => toggleFieldStatus(field.id, field.active)}
+                  className={`$${
+                    field.active
+                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  } px-3 py-1 rounded-md flex items-center`}
+                  title={field.active ? 'Desactivar campo' : 'Activar campo'}
+                >
+                  {field.active ? 'Desactivar' : 'Activar'}
+                </button>
+                <button
+                  onClick={() => deleteField(field.id)}
+                  className="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md flex items-center"
+                  title="Eliminar campo"
+                >
+                  <Trash2 size={16} className="mr-1" />
+                  Eliminar
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {filteredFields.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          No se encontraron campos que coincidan con la búsqueda.
-        </div>
-      )}
-
-      {/* Modal para crear/editar campos */}
+      {/* Modal para crear/editar campo */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
-                {isEditMode ? 'Editar Campo' : 'Crear Nuevo Campo'}
-              </h2>
-              <button
-                onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              title="Cerrar"
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-xl font-semibold mb-4">
+              {isEditMode ? 'Editar Campo' : 'Agregar Campo'}
+            </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Nombre
-                </label>
+                <label className="block text-gray-700 mb-1">Nombre</label>
                 <input
                   type="text"
                   name="name"
@@ -282,12 +275,12 @@ const FieldManagement: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
+                  title="Nombre del campo"
                 />
               </div>
-
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Tipo de Campo
+                <label className="block text-gray-700 mb-1">
+                  Tipo de campo
                 </label>
                 <input
                   type="text"
@@ -296,13 +289,11 @@ const FieldManagement: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
+                  title="Tipo de campo"
                 />
               </div>
-
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Descripción
-                </label>
+                <label className="block text-gray-700 mb-1">Descripción</label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -310,13 +301,11 @@ const FieldManagement: React.FC = () => {
                   className="w-full p-2 border border-gray-300 rounded-md"
                   rows={3}
                   required
+                  title="Descripción del campo"
                 />
               </div>
-
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Dirección
-                </label>
+                <label className="block text-gray-700 mb-1">Dirección</label>
                 <input
                   type="text"
                   name="address"
@@ -324,52 +313,39 @@ const FieldManagement: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
+                  title="Dirección del campo"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Provincia
-                  </label>
-                  <input
-                    type="text"
-                    name="province"
-                    value={formData.province}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1">Ciudad</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+                  title="Ciudad del campo"
+                />
               </div>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
-                >
-                  Cancelar
-                </button>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1">Provincia</label>
+                <input
+                  type="text"
+                  name="province"
+                  value={formData.province}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+                  title="Provincia del campo"
+                />
+              </div>
+              <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md"
                 >
-                  {isEditMode ? 'Actualizar' : 'Crear'}
+                  {isEditMode ? 'Guardar Cambios' : 'Agregar Campo'}
                 </button>
               </div>
             </form>

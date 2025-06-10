@@ -1,6 +1,9 @@
 // Tipos relacionados con reservas
 
-import { Field } from './field';
+import type { Field } from './field';
+import type { PaymentMethod } from './payment';
+
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
 export interface Booking {
   id: string;
@@ -12,13 +15,19 @@ export interface Booking {
   endTime: string;
   status: BookingStatus;
   totalPrice: number;
-  paymentStatus: PaymentStatus;
+  currency: string;
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentMethod?: PaymentMethod;
+  recurrence?: string;
+  recurrenceCount?: number;
+  additionalServices?: string[];
+  additionalServicesNotes?: string;
+  recurrenceExceptions?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
-export type PaymentStatus = 'pending' | 'partial' | 'completed' | 'refunded';
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly';
 
 export interface CreateBookingDTO {
   fieldId: string;
@@ -32,27 +41,36 @@ export interface CreateBookingDTO {
 }
 
 export interface BookingFilters {
-  userId?: string;
-  fieldId?: string;
-  date?: string;
+  startDate?: string;
+  endDate?: string;
   status?: BookingStatus;
+  fieldId?: string;
+  userId?: string;
 }
 
 export interface BookingFormData {
+  fieldId: string;
+  userId: string;
   date: string;
   time: string;
   players: number;
   contactName: string;
   contactPhone: string;
   contactEmail: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
+  status: BookingStatus;
+  paymentDetails: {
+    cardNumber: string;
+    expiryDate: string;
+    cardholderName: string;
+  };
   termsAccepted: boolean;
   recurrence: string;
-  weekDay: number;
   recurrenceCount: number;
   additionalServices: string[];
   additionalServicesNotes: string;
   recurrenceExceptions: string[];
+  price: number;
 }
 
 export interface RecurrenceOption {
@@ -81,7 +99,7 @@ export interface BookingPayload {
   };
   additionalServices: string[];
   additionalServicesNotes: string;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
   totalPrice: number;
   deposit: number;
 }
@@ -91,4 +109,15 @@ export interface BookingResponse {
   status: string;
   message: string;
   checkoutUrl?: string;
+}
+
+export interface BookingSearchParams {
+  fieldId?: string;
+  userId?: string;
+  date?: string;
+  status?: BookingStatus;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
 }

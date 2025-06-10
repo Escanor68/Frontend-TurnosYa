@@ -19,28 +19,28 @@ const Navbar: React.FC = () => {
             {/* Enlaces de navegación según rol */}
             {isAuthenticated && (
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {user?.role === 'admin' && (
+                {user?.role === 'owner' && (
                   <>
                     <Link
-                      to="/admin"
+                      to="/owner"
                       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
                       Dashboard
                     </Link>
                     <Link
-                      to="/admin/users"
+                      to="/owner/users"
                       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
                       Usuarios
                     </Link>
                     <Link
-                      to="/admin/courts"
+                      to="/owner/courts"
                       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
                       Canchas
                     </Link>
                     <Link
-                      to="/admin/bookings"
+                      to="/owner/bookings"
                       className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
                       Reservas

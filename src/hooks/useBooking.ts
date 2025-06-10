@@ -1,20 +1,48 @@
 'use client';
 
-import type React from 'react';
-
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import type { BookingFormData, SportField } from '../types';
-import {
-  getFieldById,
-  generateTimeSlots,
-  additionalServices,
-  recurrenceOptions,
-} from '../services/mockData';
+import bookingService from '../services/booking.service';
+import fieldService from '../services/FieldService';
+import { paymentService } from '../services/payment.service';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-// Hook personalizado para manejar la lógica de reservas
+const RECURRENCE_OPTIONS = [
+  { id: 'none', name: 'Sin recurrencia', discount: 0 },
+  { id: 'weekly', name: 'Semanal', discount: 10 },
+  { id: 'biweekly', name: 'Quincenal', discount: 15 },
+  { id: 'monthly', name: 'Mensual', discount: 20 },
+] as const;
+
+const INITIAL_BOOKING_DATA: BookingFormData = {
+  fieldId: '',
+  userId: '',
+  date: '',
+  time: '',
+  players: 10,
+  contactName: '',
+  contactPhone: '',
+  contactEmail: '',
+  paymentMethod: 'mercadopago',
+  status: 'pending',
+  paymentDetails: {
+    cardNumber: '',
+    expiryDate: '',
+    cardholderName: '',
+  },
+  termsAccepted: false,
+  recurrence: 'none',
+  recurrenceCount: 4,
+  additionalServices: [],
+  additionalServicesNotes: '',
+  recurrenceExceptions: [],
+  price: 0,
+};
+
 export const useBooking = () => {
   const { fieldId } = useParams<{ fieldId: string }>();
   const navigate = useNavigate();
@@ -25,26 +53,9 @@ export const useBooking = () => {
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
-  const [showRecurrenceOptions, setShowRecurrenceOptions] = useState(false);
-  const [showAdditionalServices, setShowAdditionalServices] = useState(false);
-
-  // Estado inicial para el formulario de reserva
-  const [bookingData, setBookingData] = useState<BookingFormData>({
-    date: '',
-    time: '',
-    players: 10,
-    contactName: '',
-    contactPhone: '',
-    contactEmail: '',
-    paymentMethod: 'mercadopago',
-    termsAccepted: false,
-    recurrence: 'none',
-    recurrenceCount: 4,
-    additionalServices: [],
-    additionalServicesNotes: '',
-    recurrenceExceptions: [],
-    weekDay: 0,
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [bookingData, setBookingData] =
+    useState<BookingFormData>(INITIAL_BOOKING_DATA);
 
   // Actualizar datos de contacto cuando el usuario está autenticado
   useEffect(() => {
@@ -53,7 +64,6 @@ export const useBooking = () => {
         ...prev,
         contactName: user.name || prev.contactName,
         contactEmail: user.email || prev.contactEmail,
-        contactPhone: user.phone || prev.contactPhone,
       }));
     }
   }, [user]);
@@ -66,26 +76,13 @@ export const useBooking = () => {
 
     if (date) {
       setBookingData((prev) => ({ ...prev, date }));
-
-      // Generar franjas horarias basadas en la fecha
-      const slots = generateTimeSlots(date);
+      const slots = generateTimeSlots();
       setTimeSlots(slots);
 
-      // Si se seleccionó una franja horaria, encontrar la hora correspondiente
       if (timeSlotId) {
-        const mockTimeSlots = [
-          { id: '1', time: '18:00' },
-          { id: '2', time: '19:00' },
-          { id: '3', time: '20:00' },
-          { id: '4', time: '21:00' },
-          { id: '5', time: '22:00' },
-        ];
-
-        const selectedSlot = mockTimeSlots.find(
-          (slot) => slot.id === timeSlotId
-        );
+        const selectedSlot = slots.find((slot) => slot === timeSlotId);
         if (selectedSlot) {
-          setBookingData((prev) => ({ ...prev, time: selectedSlot.time }));
+          setBookingData((prev) => ({ ...prev, time: selectedSlot }));
         }
       }
     }
@@ -93,17 +90,42 @@ export const useBooking = () => {
 
   // Obtener datos del campo
   useEffect(() => {
-    if (fieldId) {
-      // Simular llamada a API
-      setTimeout(() => {
-        const fieldData = getFieldById(fieldId);
-        setField(fieldData || null);
+    const fetchField = async () => {
+      if (!fieldId) return;
+
+      try {
+        const fieldData = await fieldService.getFieldById(fieldId);
+        const sportField: SportField = {
+          id: fieldData.id,
+          name: fieldData.name,
+          type: 'fútbol',
+          price: fieldData.pricePerHour,
+          duration: 60,
+          players: fieldData.size,
+          image: fieldData.images[0] || '',
+          hasAdditionalServices: fieldData.hasAdditionalServices,
+          additionalServices: fieldData.additionalServices,
+          location: {
+            address: fieldData.address,
+            city: fieldData.city,
+            province: fieldData.state,
+          },
+          ownerId: fieldData.ownerId,
+          description: fieldData.description,
+        };
+        setField(sportField);
+      } catch (err) {
+        console.error('Error fetching field:', err);
+        setError('Error al cargar los datos del campo');
+      } finally {
         setLoading(false);
-      }, 500);
-    }
+      }
+    };
+
+    fetchField();
   }, [fieldId]);
 
-  // Verificar si el usuario está autenticado
+  // Verificar autenticación
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       toast.info('Debes iniciar sesión para realizar una reserva');
@@ -113,14 +135,20 @@ export const useBooking = () => {
     }
   }, [loading, isAuthenticated, navigate, fieldId, location.search]);
 
-  // Manejadores de eventos
+  const generateTimeSlots = (): string[] => {
+    const slots: string[] = [];
+    for (let hour = 18; hour <= 22; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    return slots;
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value, type } = e.target as HTMLInputElement;
-
     setBookingData((prev) => ({
       ...prev,
       [name]:
@@ -132,21 +160,17 @@ export const useBooking = () => {
     setBookingData((prev) => ({ ...prev, time }));
   };
 
-  // Manejar cambio de recurrencia desde el RecurrenceSelector
   const handleRecurrenceChange = (recurrence: {
     type: string;
-    weekDay: number;
     count: number;
   }) => {
     setBookingData((prev) => ({
       ...prev,
       recurrence: recurrence.type,
-      weekDay: recurrence.weekDay,
       recurrenceCount: recurrence.count,
     }));
   };
 
-  // Manejar cambio en el contador de recurrencia
   const handleRecurrenceCountChange = (increment: boolean) => {
     setBookingData((prev) => ({
       ...prev,
@@ -156,213 +180,156 @@ export const useBooking = () => {
     }));
   };
 
-  // Manejar selección de servicios adicionales
   const handleServiceToggle = (serviceId: string) => {
     setBookingData((prev) => {
-      if (prev.additionalServices.includes(serviceId)) {
-        return {
-          ...prev,
-          additionalServices: prev.additionalServices.filter(
-            (id) => id !== serviceId
-          ),
-        };
-      } else {
-        return {
-          ...prev,
-          additionalServices: [...prev.additionalServices, serviceId],
-        };
-      }
+      const services = prev.additionalServices.includes(serviceId)
+        ? prev.additionalServices.filter((id) => id !== serviceId)
+        : [...prev.additionalServices, serviceId];
+      return { ...prev, additionalServices: services };
     });
   };
 
-  // Obtener fechas recurrentes
-  const getRecurrenceDates = (): string[] => {
-    if (!bookingData.date || bookingData.recurrence === 'none') return [];
+  const calculateTotalPrice = () => {
+    if (!field) return 0;
 
-    const dates: string[] = [];
-    const startDate = new Date(bookingData.date);
+    let total = field.price;
 
-    // Ajustar la fecha inicial al próximo día de la semana seleccionado
-    while (startDate.getDay() !== bookingData.weekDay) {
-      startDate.setDate(startDate.getDate() + 1);
-    }
-
-    for (let i = 0; i < bookingData.recurrenceCount; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(currentDate.getDate() + i * 7);
-
-      // Verificar si la fecha está en las excepciones
-      const dateString = currentDate.toISOString().split('T')[0];
-      if (!bookingData.recurrenceExceptions.includes(dateString)) {
-        dates.push(dateString);
+    if (bookingData.recurrence !== 'none') {
+      const recurrenceOption = RECURRENCE_OPTIONS.find(
+        (o) => o.id === bookingData.recurrence
+      );
+      if (recurrenceOption) {
+        total = total * (1 - recurrenceOption.discount / 100);
       }
     }
 
-    return dates;
+    total = total * bookingData.recurrenceCount;
+
+    bookingData.additionalServices.forEach((serviceId) => {
+      const service = field.additionalServices?.find((s) => s.id === serviceId);
+      if (service) {
+        total += service.price;
+      }
+    });
+
+    return total;
   };
 
-  // Calcular precio total con el 10% de seña
-  const calculateTotalPrice = (): { total: number; deposit: number } => {
-    if (!field) return { total: 0, deposit: 0 };
-
-    // Precio base por reserva
-    const basePrice = field.price;
-
-    // Multiplicar por la cantidad de reservas
-    const totalReservations =
-      bookingData.recurrence === 'none' ? 1 : bookingData.recurrenceCount;
-    const subtotal = basePrice * totalReservations;
-
-    // Calcular precio de servicios adicionales
-    const servicesPrice = bookingData.additionalServices.reduce(
-      (total, serviceId) => {
-        const service = additionalServices.find((s) => s.id === serviceId);
-        return total + (service ? service.price : 0);
-      },
-      0
-    );
-
-    // Precio total
-    const total = subtotal + servicesPrice;
-
-    // Calcular el 10% de seña
-    const deposit = Math.ceil(total * 0.1);
-
-    return { total, deposit };
+  const calculateEndTime = (startTime: string): string => {
+    const [hour, minute] = startTime.split(':');
+    const endHour = parseInt(hour) + 1;
+    return `${endHour.toString().padStart(2, '0')}:${minute}`;
   };
 
-  // Navegación entre pasos
-  const handleNextStep = () => {
-    // Validar paso actual
-    if (currentStep === 1) {
-      if (!bookingData.date || !bookingData.time) {
-        toast.error('Por favor selecciona fecha y hora');
-        return;
-      }
-    } else if (currentStep === 2) {
-      if (
-        !bookingData.contactName ||
-        !bookingData.contactPhone ||
-        !bookingData.contactEmail
-      ) {
-        toast.error('Por favor completa todos los datos de contacto');
-        return;
-      }
-
-      // Validar formato de email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(bookingData.contactEmail)) {
-        toast.error('Por favor ingresa un email válido');
-        return;
-      }
-
-      // Validar formato de teléfono (validación simple)
-      if (bookingData.contactPhone.length < 8) {
-        toast.error('Por favor ingresa un número de teléfono válido');
-        return;
-      }
-    }
-
-    setCurrentStep((prev) => prev + 1);
-  };
-
-  const handlePrevStep = () => {
-    setCurrentStep((prev) => prev - 1);
-  };
-
-  // Enviar formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!field) return;
+    if (!isAuthenticated || !field) {
+      toast.error('Debes iniciar sesión para realizar una reserva');
+      navigate('/login', { state: { from: location } });
+      return;
+    }
 
     try {
       setLoading(true);
+      setError(null);
 
-      // Obtener todas las fechas recurrentes
-      const bookingDates = getRecurrenceDates();
-      const { total, deposit } = calculateTotalPrice();
-
-      // Crear objeto de reserva
-      const bookingPayload = {
+      const booking = await bookingService.createBooking({
         fieldId: field.id,
-        userId: user?.id,
-        dates: bookingDates.map((date) => ({
-          date,
-          time: bookingData.time,
-        })),
-        contactInfo: {
-          name: bookingData.contactName,
-          phone: bookingData.contactPhone,
-          email: bookingData.contactEmail,
+        field: {
+          id: field.id,
+          name: field.name,
+          description: field.description || '',
+          address: field.location.address,
+          city: field.location.city,
+          state: field.location.province,
+          country: 'Argentina',
+          latitude: 0,
+          longitude: 0,
+          pricePerHour: field.price,
+          currency: 'ARS',
+          surfaceType: 'ARTIFICIAL_GRASS',
+          size: field.players as '5' | '7' | '11',
+          hasLighting: true,
+          hasParking: true,
+          hasShowers: true,
+          hasChangingRooms: true,
+          hasEquipment: true,
+          hasAdditionalServices: field.hasAdditionalServices,
+          additionalServices: field.additionalServices,
+          images: [field.image],
+          ownerId: field.ownerId || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
-        recurrence: {
-          type: bookingData.recurrence,
-          weekDay: bookingData.weekDay,
-          count: bookingData.recurrenceCount,
-          exceptions: bookingData.recurrenceExceptions,
-        },
-        additionalServices: bookingData.additionalServices,
-        additionalServicesNotes: bookingData.additionalServicesNotes,
-        paymentMethod: bookingData.paymentMethod,
-        totalPrice: total,
-        deposit,
-      };
-
-      // Llamada al backend
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingPayload),
+        userId: user?.id || '',
+        date: bookingData.date,
+        startTime: bookingData.time,
+        endTime: calculateEndTime(bookingData.time),
+        status: 'PENDING',
+        totalPrice: calculateTotalPrice(),
+        currency: 'ARS',
+        paymentStatus: 'PENDING',
       });
 
-      if (!response.ok) {
-        throw new Error('Error al procesar la reserva');
-      }
-
-      const data = await response.json();
-
-      // Mostrar mensaje de éxito
-      toast.success(
-        bookingData.recurrence === 'none'
-          ? '¡Reserva realizada con éxito!'
-          : `¡Se han programado ${bookingDates.length} reservas con éxito!`
+      const paymentPreference = await paymentService.createPaymentPreference(
+        booking.id
       );
-
-      // Redireccionar al checkout para pagar la seña
-      navigate(`/checkout/${data.bookingId}`);
+      window.location.href = paymentPreference.initPoint;
     } catch (error) {
-      console.error('Error al procesar la reserva:', error);
-      toast.error(
-        'Ocurrió un error al procesar la reserva. Por favor, intenta nuevamente.'
-      );
+      const message =
+        error instanceof Error ? error.message : 'Error al procesar la reserva';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Formatear fecha para mostrar
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  const handleNextStep = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, 3));
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const formatDate = (date: string) => {
+    return format(new Date(date), 'dd/MM/yyyy', { locale: es });
+  };
+
+  const getRecurrenceDates = () => {
+    if (bookingData.recurrence === 'none' || !bookingData.date) {
+      return [bookingData.date];
+    }
+
+    const dates: string[] = [];
+    const startDate = new Date(bookingData.date);
+    const currentDate = new Date(startDate);
+
+    for (let i = 0; i < bookingData.recurrenceCount; i++) {
+      dates.push(currentDate.toISOString().split('T')[0]);
+      switch (bookingData.recurrence) {
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7);
+          break;
+        case 'biweekly':
+          currentDate.setDate(currentDate.getDate() + 14);
+          break;
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          break;
+      }
+    }
+    return dates;
   };
 
   return {
     field,
     loading,
+    error,
     currentStep,
-    bookingData,
     timeSlots,
-    showRecurrenceOptions,
-    showAdditionalServices,
+    bookingData,
     handleInputChange,
     handleTimeSelect,
     handleRecurrenceChange,
@@ -374,8 +341,6 @@ export const useBooking = () => {
     handleSubmit,
     formatDate,
     getRecurrenceDates,
-    setShowRecurrenceOptions,
-    setShowAdditionalServices,
-    navigate,
+    setCurrentStep,
   };
 };

@@ -1,92 +1,44 @@
-//import api from './api';
+import axios from 'axios';
+import type { User, LoginData, RegisterData } from '../types/user';
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  isAdmin: boolean;
-  hasFields: boolean;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+interface AuthResponse {
+  accessToken: string;
+  user: User;
 }
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-// Mock data for development
-const MOCK_USERS = {
-  admin: {
-    id: 'admin1',
-    name: 'Administrador',
-    email: 'admin@example.com',
-    isAdmin: true,
-    hasFields: true,
-  },
-  user: {
-    id: 'user1',
-    name: 'Demo User',
-    email: 'demo@example.com',
-    isAdmin: false,
-    hasFields: true,
-  },
-};
 
 export const authApi = {
-  login: async (credentials: LoginCredentials): Promise<User> => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // Mock authentication logic
-    if (
-      credentials.email === 'admin@example.com' &&
-      credentials.password === 'admin123'
-    ) {
-      return MOCK_USERS.admin;
-    }
-
-    if (
-      credentials.email === 'demo@example.com' &&
-      credentials.password === 'password'
-    ) {
-      return MOCK_USERS.user;
-    }
-
-    throw new Error('Invalid credentials');
+  async login(credentials: LoginData): Promise<AuthResponse> {
+    const response = await axios.post<AuthResponse>(
+      `${API_URL}/auth/login`,
+      credentials
+    );
+    return response.data;
   },
 
-  register: async (data: RegisterData): Promise<User> => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // Mock registration
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: data.name,
-      email: data.email,
-      isAdmin: false,
-      hasFields: false,
-    };
-
-    return newUser;
+  async register(data: RegisterData): Promise<AuthResponse> {
+    const response = await axios.post<AuthResponse>(
+      `${API_URL}/auth/register`,
+      data
+    );
+    return response.data;
   },
 
-  logout: async (): Promise<void> => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  async getCurrentUser(): Promise<User> {
+    const response = await axios.get<User>(`${API_URL}/users/profile`);
+    return response.data;
   },
 
-  getCurrentUser: async (): Promise<User | null> => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  async logout(): Promise<void> {
+    await axios.post(`${API_URL}/auth/logout`);
+  },
 
-    // Check localStorage for existing session
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
+  async forgotPassword(email: string): Promise<void> {
+    await axios.post(`${API_URL}/auth/forgot-password`, { email });
+  },
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    await axios.post(`${API_URL}/auth/reset-password`, { token, password });
   },
 };

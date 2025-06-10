@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 interface PublicRouteProps {
@@ -8,10 +8,8 @@ interface PublicRouteProps {
 
 const getDefaultRoute = (role: string): string => {
   switch (role) {
-    case 'admin':
-      return '/admin/dashboard';
     case 'owner':
-      return '/owner/courts';
+      return '/owner/dashboard';
     case 'player':
       return '/bookings';
     default:

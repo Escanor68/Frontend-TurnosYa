@@ -1,5 +1,5 @@
 src/pages/
-├── admin/
+├── owner/
 │   ├── Dashboard.tsx (antes AdminDashboard.tsx)
 │   └── FieldManagement.tsx (antes AdminFieldManagement.tsx)
 │

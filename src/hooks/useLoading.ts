@@ -1,21 +1,50 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
-export const useLoading = (initialState = false) => {
-  const [isLoading, setIsLoading] = useState(initialState);
-  const [error, setError] = useState<Error | null>(null);
+interface LoadingState {
+  isLoading: boolean;
+  error: Error | null;
+}
 
-  const withLoading = async <T>(fn: () => Promise<T>): Promise<T> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      return await fn();
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+interface LoadingOptions {
+  onError?: (error: Error) => void;
+  onSuccess?: () => void;
+  onComplete?: () => void;
+}
+
+export const useLoading = (options: LoadingOptions = {}) => {
+  const [state, setState] = useState<LoadingState>({
+    isLoading: false,
+    error: null,
+  });
+
+  const withLoading = useCallback(
+    async <T>(promise: Promise<T>): Promise<T> => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+        const result = await promise;
+        setState((prev) => ({ ...prev, isLoading: false }));
+        options.onSuccess?.();
+        return result;
+      } catch (error) {
+        const errorObj =
+          error instanceof Error ? error : new Error('Error inesperado');
+        setState((prev) => ({ ...prev, isLoading: false, error: errorObj }));
+        options.onError?.(errorObj);
+        throw errorObj;
+      } finally {
+        options.onComplete?.();
+      }
+    },
+    [options]
+  );
+
+  const reset = useCallback(() => {
+    setState({ isLoading: false, error: null });
+  }, []);
+
+  return {
+    ...state,
+    withLoading,
+    reset,
   };
-
-  return { isLoading, error, withLoading };
 };
