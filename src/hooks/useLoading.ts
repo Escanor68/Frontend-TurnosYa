@@ -2,49 +2,66 @@ import { useState, useCallback } from 'react';
 
 interface LoadingState {
   isLoading: boolean;
-  error: Error | null;
+  loadingStates: Record<string, boolean>;
 }
 
-interface LoadingOptions {
-  onError?: (error: Error) => void;
-  onSuccess?: () => void;
-  onComplete?: () => void;
-}
-
-export const useLoading = (options: LoadingOptions = {}) => {
+export const useLoading = (initialState = false) => {
   const [state, setState] = useState<LoadingState>({
-    isLoading: false,
-    error: null,
+    isLoading: initialState,
+    loadingStates: {},
   });
 
+  const setLoading = useCallback((loading: boolean) => {
+    setState((prev) => ({ ...prev, isLoading: loading }));
+  }, []);
+
+  const setLoadingState = useCallback((key: string, loading: boolean) => {
+    setState((prev) => ({
+      ...prev,
+      loadingStates: { ...prev.loadingStates, [key]: loading },
+    }));
+  }, []);
+
   const withLoading = useCallback(
-    async <T>(promise: Promise<T>): Promise<T> => {
+    async <T>(asyncFn: () => Promise<T>, loadingKey?: string): Promise<T> => {
       try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-        const result = await promise;
-        setState((prev) => ({ ...prev, isLoading: false }));
-        options.onSuccess?.();
+        if (loadingKey) {
+          setLoadingState(loadingKey, true);
+        } else {
+          setLoading(true);
+        }
+
+        const result = await asyncFn();
         return result;
-      } catch (error) {
-        const errorObj =
-          error instanceof Error ? error : new Error('Error inesperado');
-        setState((prev) => ({ ...prev, isLoading: false, error: errorObj }));
-        options.onError?.(errorObj);
-        throw errorObj;
       } finally {
-        options.onComplete?.();
+        if (loadingKey) {
+          setLoadingState(loadingKey, false);
+        } else {
+          setLoading(false);
+        }
       }
     },
-    [options]
+    [setLoading, setLoadingState]
   );
 
-  const reset = useCallback(() => {
-    setState({ isLoading: false, error: null });
+  const isAnyLoading = useCallback(() => {
+    return state.isLoading || Object.values(state.loadingStates).some(Boolean);
+  }, [state.isLoading, state.loadingStates]);
+
+  const clearLoadingStates = useCallback(() => {
+    setState({
+      isLoading: false,
+      loadingStates: {},
+    });
   }, []);
 
   return {
-    ...state,
+    isLoading: state.isLoading,
+    loadingStates: state.loadingStates,
+    setLoading,
+    setLoadingState,
     withLoading,
-    reset,
+    isAnyLoading,
+    clearLoadingStates,
   };
 };

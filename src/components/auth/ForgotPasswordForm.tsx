@@ -1,7 +1,6 @@
-import { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useFormValidation } from '../../hooks/useFormValidation';
+import { useFormValidation, formSchemas } from '../../hooks/useFormValidation';
 import { useNotification } from '../../hooks/useNotification';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -9,58 +8,37 @@ import { Link } from '../ui/Link';
 
 interface ForgotPasswordFormData {
   email: string;
-  [key: string]: string;
 }
 
 const initialValues: ForgotPasswordFormData = {
   email: '',
 };
 
-const validationRules = {
-  email: [
-    (value: string) => !value && 'El email es requerido',
-    (value: string) =>
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && 'Email inválido',
-  ],
-};
-
 export const ForgotPasswordForm = () => {
   const navigate = useNavigate();
-  const { resetPassword } = useAuth();
-  const { showNotification } = useNotification();
-  const [isLoading, setIsLoading] = useState(false);
+  const { requestPasswordReset } = useAuth();
+  const { showSuccess, handleApiError } = useNotification();
 
-  const { values, errors, touched, handleChange, handleBlur, handleSubmit } =
-    useFormValidation<ForgotPasswordFormData>({
-      initialValues,
-      validationRules,
-      onSubmit: async (formData) => {
-        try {
-          setIsLoading(true);
-          await resetPassword(formData.email);
-          showNotification({
-            type: 'success',
-            message:
-              'Se ha enviado un correo con las instrucciones para restablecer tu contraseña',
-          });
-          navigate('/login');
-        } catch (error) {
-          showNotification({
-            type: 'error',
-            message:
-              error instanceof Error
-                ? error.message
-                : 'Error al enviar el correo',
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-    });
+  const form = useFormValidation({
+    initialValues,
+    validationSchema: formSchemas.forgotPassword,
+    onSubmit: async (values: ForgotPasswordFormData) => {
+      await requestPasswordReset({ email: values.email });
+      showSuccess(
+        'Se ha enviado un correo con las instrucciones para restablecer tu contraseña'
+      );
+      navigate('/login');
+    },
+  });
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    handleChange(name as keyof ForgotPasswordFormData, value);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await form.handleSubmit(e);
+    } catch (error) {
+      handleApiError(error);
+    }
   };
 
   return (
@@ -69,12 +47,12 @@ export const ForgotPasswordForm = () => {
         <Input
           type="email"
           name="email"
-          value={values.email}
-          onChange={handleInputChange}
-          onBlur={() => handleBlur('email')}
+          value={form.values.email}
+          onChange={(e) => form.handleChange('email', e.target.value)}
+          onBlur={() => form.handleBlur('email')}
           placeholder="Email"
-          error={touched.email ? errors.email : undefined}
-          disabled={isLoading}
+          error={form.touched.email ? form.errors.email : undefined}
+          disabled={form.isSubmitting}
         />
       </div>
 
@@ -82,9 +60,9 @@ export const ForgotPasswordForm = () => {
         type="submit"
         variant="primary"
         className="w-full"
-        disabled={isLoading}
+        disabled={form.isSubmitting}
       >
-        {isLoading ? 'Enviando...' : 'Enviar instrucciones'}
+        {form.isSubmitting ? 'Enviando...' : 'Enviar instrucciones'}
       </Button>
 
       <div className="text-center">

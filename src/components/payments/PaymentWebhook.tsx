@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { usePayment } from '../../context/PaymentContext';
-import { PaymentStatus } from '../../types/payment';
+import { usePayment } from '../../hooks/usePayment';
+import type { PaymentStatus } from '../../types/payment';
 import { CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -9,7 +9,7 @@ const PaymentWebhook = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { getPaymentStatus } = usePayment();
-  const [status, setStatus] = useState<PaymentStatus>('PENDING');
+  const [status, setStatus] = useState<PaymentStatus>('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,14 +29,14 @@ const PaymentWebhook = () => {
         setStatus(response.status as PaymentStatus);
 
         // Redirigir según el estado del pago
-        if (response.status === 'PAID') {
+        if (response.status === 'paid') {
           toast.success('¡Pago completado con éxito!');
           setTimeout(() => {
             navigate('/bookings');
           }, 2000);
         } else if (
-          response.status === 'FAILED' ||
-          response.status === 'CANCELLED'
+          response.status === 'failed' ||
+          response.status === 'cancelled'
         ) {
           toast.error('El pago no pudo ser procesado');
           setTimeout(() => {
@@ -60,10 +60,10 @@ const PaymentWebhook = () => {
 
   const getStatusIcon = () => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return <CheckCircle2 className="h-12 w-12 text-green-500" />;
-      case 'FAILED':
-      case 'CANCELLED':
+      case 'failed':
+      case 'cancelled':
         return <XCircle className="h-12 w-12 text-red-500" />;
       default:
         return <Clock className="h-12 w-12 text-blue-500" />;
@@ -72,11 +72,11 @@ const PaymentWebhook = () => {
 
   const getStatusText = () => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return '¡Pago completado con éxito!';
-      case 'FAILED':
+      case 'failed':
         return 'El pago no pudo ser procesado';
-      case 'CANCELLED':
+      case 'cancelled':
         return 'El pago fue cancelado';
       default:
         return 'Verificando estado del pago...';

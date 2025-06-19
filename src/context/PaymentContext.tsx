@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import {
   Payment,
@@ -44,7 +44,16 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const history = await paymentService.getPaymentReports();
+      const invoiceList = await paymentService.getInvoices();
+      const history: PaymentReport[] = invoiceList.map((invoice) => ({
+        id: invoice.id,
+        bookingId: invoice.bookingId,
+        amount: invoice.amount,
+        currency: invoice.currency,
+        status: invoice.status as PaymentStatus,
+        date: invoice.date,
+        method: invoice.paymentMethod,
+      }));
       setPaymentHistory(history);
     } catch (error) {
       const message =
@@ -62,8 +71,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       await paymentService.createPayment(data);
-      const updatedHistory = await paymentService.getPaymentReports();
-      setPaymentHistory(updatedHistory);
+      await fetchPaymentHistory();
       toast.success('Pago creado correctamente');
     } catch (error) {
       const message =
@@ -79,8 +87,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       await paymentService.processPayment(paymentId);
-      const updatedHistory = await paymentService.getPaymentReports();
-      setPaymentHistory(updatedHistory);
+      await fetchPaymentHistory();
       toast.success('Pago procesado correctamente');
     } catch (error) {
       const message =
@@ -111,27 +118,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
   const getInvoices = async () => {
     setIsLoading(true);
     try {
-      const reports = await paymentService.getPaymentReports();
-      // Convertir PaymentReport[] a Invoice[]
-      const invoiceList: Invoice[] = reports.map((report) => ({
-        paymentId: report.id,
-        number: `INV-${report.id}`,
-        date: report.createdAt,
-        items: [
-          {
-            description: `Reserva cancha ${report.fieldName}`,
-            quantity: 1,
-            unitPrice: report.amount,
-            total: report.amount,
-          },
-        ],
-        customer: {
-          name: '',
-          email: '',
-          document: '',
-          documentType: 'DNI',
-        },
-      }));
+      const invoiceList = await paymentService.getInvoices();
       setInvoices(invoiceList);
     } catch (error) {
       const message =
@@ -147,30 +134,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getInvoice = async (invoiceId: string): Promise<Invoice> => {
     try {
-      const report = await paymentService.getPaymentReports();
-      const paymentReport = report.find((r) => r.id === invoiceId);
-      if (!paymentReport) {
-        throw new Error('Factura no encontrada');
-      }
-      return {
-        paymentId: paymentReport.id,
-        number: `INV-${paymentReport.id}`,
-        date: paymentReport.createdAt,
-        items: [
-          {
-            description: `Reserva cancha ${paymentReport.fieldName}`,
-            quantity: 1,
-            unitPrice: paymentReport.amount,
-            total: paymentReport.amount,
-          },
-        ],
-        customer: {
-          name: '',
-          email: '',
-          document: '',
-          documentType: 'DNI',
-        },
-      };
+      return await paymentService.getInvoiceById(invoiceId);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Error al obtener la factura';
@@ -185,8 +149,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       try {
         await paymentService.requestRefund(paymentId, reason);
-        const updatedHistory = await paymentService.getPaymentReports();
-        setPaymentHistory(updatedHistory);
+        await fetchPaymentHistory();
       } catch (error) {
         const message =
           error instanceof Error
@@ -198,7 +161,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(false);
       }
     },
-    []
+    [fetchPaymentHistory]
   );
 
   const downloadInvoice = useCallback(async (paymentId: string) => {
@@ -239,7 +202,17 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      return await paymentService.createPaymentPreference(bookingId);
+      const preference: PaymentPreference = {
+        id: '',
+        bookingId,
+        amount: 0,
+        currency: 'ARS',
+        initPoint: '',
+        sandboxInitPoint: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return await paymentService.createPaymentPreference(preference);
     } catch (error) {
       const message =
         error instanceof Error
@@ -274,12 +247,4 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <PaymentContext.Provider value={value}>{children}</PaymentContext.Provider>
   );
-};
-
-export const usePayment = () => {
-  const context = useContext(PaymentContext);
-  if (context === undefined) {
-    throw new Error('usePayment debe ser usado dentro de un PaymentProvider');
-  }
-  return context;
 };

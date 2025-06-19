@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth.service';
-import {
-  User,
-  LoginCredentials,
-  RegisterData,
-  AuthResponse,
-} from '../types/user';
+import { User, LoginCredentials, RegisterData } from '../types/user';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthState {
@@ -160,6 +155,54 @@ export const useAuth = () => {
     }
   };
 
+  const requestPasswordReset = async (data: { email: string }) => {
+    try {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      await authService.requestPasswordReset(data);
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Error al solicitar el reset de contraseña',
+      }));
+      throw error;
+    }
+  };
+
+  const confirmPasswordReset = async (data: {
+    token: string;
+    password: string;
+    confirmPassword: string;
+  }) => {
+    try {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      await authService.confirmPasswordReset(data);
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Error al confirmar el reset de contraseña',
+      }));
+      throw error;
+    }
+  };
+
   return {
     ...state,
     login,
@@ -167,6 +210,7 @@ export const useAuth = () => {
     logout,
     updateProfile,
     changePassword,
-    refreshUser: loadUser,
+    requestPasswordReset,
+    confirmPasswordReset,
   };
 };

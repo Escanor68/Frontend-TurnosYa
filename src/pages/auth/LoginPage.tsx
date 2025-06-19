@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
+      await login({ email: data.email, password: data.password });
     } catch (error) {
       console.error('Error en login:', error);
     }

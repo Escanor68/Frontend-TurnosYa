@@ -1,11 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Notification } from '../types/user';
+import { Notification as UserNotification } from '../types/notification';
 import { userService } from '../services/user.service';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 interface UserContextType {
-  notifications: Notification[];
+  notifications: UserNotification[];
   favoriteFields: string[];
   isLoading: boolean;
   error: string | null;
@@ -16,12 +16,12 @@ interface UserContextType {
   removeFavoriteField: (fieldId: string) => Promise<void>;
 }
 
-const UserContext = createContext<UserContextType | null>(null);
+export const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [favoriteFields, setFavoriteFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -142,12 +142,4 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </UserContext.Provider>
   );
-};
-
-export const useUser = () => {
-  const context = React.useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser debe ser usado dentro de un UserProvider');
-  }
-  return context;
 };

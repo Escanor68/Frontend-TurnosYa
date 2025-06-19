@@ -1,181 +1,178 @@
-import { useState, useCallback, useEffect } from 'react';
-import { notificationService } from '../services/NotificationService';
-import { Notification, NotificationPreferences } from '../types/notification';
+import { useCallback } from 'react';
+import { toast } from 'react-toastify';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../config';
 
-interface NotificationState {
-  notifications: Notification[];
-  preferences: NotificationPreferences | null;
-  unreadCount: number;
-  isLoading: boolean;
-  error: string | null;
+interface NotificationOptions {
+  type?: 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+  position?:
+    | 'top-right'
+    | 'top-center'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-center'
+    | 'bottom-left';
 }
 
 export const useNotification = () => {
-  const [state, setState] = useState<NotificationState>({
-    notifications: [],
-    preferences: null,
-    unreadCount: 0,
-    isLoading: false,
-    error: null,
-  });
-
-  const loadNotifications = useCallback(async () => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const notifications = await notificationService.getNotifications();
-      const unreadCount = notifications.filter((n) => !n.read).length;
-      setState((prev) => ({
-        ...prev,
-        notifications,
-        unreadCount,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Error al cargar las notificaciones',
-      }));
-    }
-  }, []);
-
-  const loadPreferences = useCallback(async () => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const preferences = await notificationService.getPreferences();
-      setState((prev) => ({
-        ...prev,
-        preferences,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Error al cargar las preferencias',
-      }));
-    }
-  }, []);
-
-  const markAsRead = useCallback(async (id: string) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      const updatedNotification = await notificationService.markAsRead(id);
-      setState((prev) => ({
-        ...prev,
-        notifications: prev.notifications.map((n) =>
-          n.id === id ? updatedNotification : n
-        ),
-        unreadCount: prev.unreadCount - 1,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Error al marcar como leída la notificación',
-      }));
-    }
-  }, []);
-
-  const markAllAsRead = useCallback(async () => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      await notificationService.markAllAsRead();
-      setState((prev) => ({
-        ...prev,
-        notifications: prev.notifications.map((n) => ({ ...n, read: true })),
-        unreadCount: 0,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Error al marcar todas como leídas',
-      }));
-    }
-  }, []);
-
-  const deleteNotification = useCallback(async (id: string) => {
-    try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-      await notificationService.deleteNotification(id);
-      setState((prev) => ({
-        ...prev,
-        notifications: prev.notifications.filter((n) => n.id !== id),
-        unreadCount: prev.notifications.find((n) => n.id === id)?.read
-          ? prev.unreadCount
-          : prev.unreadCount - 1,
-        isLoading: false,
-        error: null,
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Error al eliminar la notificación',
-      }));
-    }
-  }, []);
-
-  const updatePreferences = useCallback(
-    async (preferences: Partial<NotificationPreferences>) => {
-      try {
-        setState((prev) => ({ ...prev, isLoading: true, error: null }));
-        const updatedPreferences = await notificationService.updatePreferences(
-          preferences
-        );
-        setState((prev) => ({
-          ...prev,
-          preferences: updatedPreferences,
-          isLoading: false,
-          error: null,
-        }));
-      } catch (error) {
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : 'Error al actualizar las preferencias',
-        }));
-      }
+  const showSuccess = useCallback(
+    (message: string, options?: NotificationOptions) => {
+      toast.success(message, {
+        autoClose: options?.duration || 3000,
+        position: options?.position || 'top-right',
+      });
     },
     []
   );
 
-  useEffect(() => {
-    loadNotifications();
-    loadPreferences();
-  }, [loadNotifications, loadPreferences]);
+  const showError = useCallback(
+    (message: string, options?: NotificationOptions) => {
+      toast.error(message, {
+        autoClose: options?.duration || 5000,
+        position: options?.position || 'top-right',
+      });
+    },
+    []
+  );
+
+  const showWarning = useCallback(
+    (message: string, options?: NotificationOptions) => {
+      toast.warning(message, {
+        autoClose: options?.duration || 4000,
+        position: options?.position || 'top-right',
+      });
+    },
+    []
+  );
+
+  const showInfo = useCallback(
+    (message: string, options?: NotificationOptions) => {
+      toast.info(message, {
+        autoClose: options?.duration || 3000,
+        position: options?.position || 'top-right',
+      });
+    },
+    []
+  );
+
+  // Predefined success messages
+  const showBookingCreated = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.BOOKING_CREATED);
+  }, [showSuccess]);
+
+  const showBookingUpdated = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.BOOKING_UPDATED);
+  }, [showSuccess]);
+
+  const showBookingCancelled = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.BOOKING_CANCELLED);
+  }, [showSuccess]);
+
+  const showPaymentSuccess = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.PAYMENT_SUCCESS);
+  }, [showSuccess]);
+
+  const showProfileUpdated = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.PROFILE_UPDATED);
+  }, [showSuccess]);
+
+  const showPasswordChanged = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.PASSWORD_CHANGED);
+  }, [showSuccess]);
+
+  const showEmailSent = useCallback(() => {
+    showSuccess(SUCCESS_MESSAGES.EMAIL_SENT);
+  }, [showSuccess]);
+
+  // Predefined error messages
+  const showNetworkError = useCallback(() => {
+    showError(ERROR_MESSAGES.NETWORK_ERROR);
+  }, [showError]);
+
+  const showUnauthorizedError = useCallback(() => {
+    showError(ERROR_MESSAGES.UNAUTHORIZED);
+  }, [showError]);
+
+  const showForbiddenError = useCallback(() => {
+    showError(ERROR_MESSAGES.FORBIDDEN);
+  }, [showError]);
+
+  const showNotFoundError = useCallback(() => {
+    showError(ERROR_MESSAGES.NOT_FOUND);
+  }, [showError]);
+
+  const showValidationError = useCallback(() => {
+    showError(ERROR_MESSAGES.VALIDATION_ERROR);
+  }, [showError]);
+
+  const showServerError = useCallback(() => {
+    showError(ERROR_MESSAGES.SERVER_ERROR);
+  }, [showError]);
+
+  const showUnknownError = useCallback(() => {
+    showError(ERROR_MESSAGES.UNKNOWN_ERROR);
+  }, [showError]);
+
+  // Error handler for API calls
+  const handleApiError = useCallback(
+    (error: unknown) => {
+      if (error instanceof Error) {
+        if (
+          error.message.includes('Network Error') ||
+          error.message.includes('fetch')
+        ) {
+          showNetworkError();
+        } else if (error.message.includes('401')) {
+          showUnauthorizedError();
+        } else if (error.message.includes('403')) {
+          showForbiddenError();
+        } else if (error.message.includes('404')) {
+          showNotFoundError();
+        } else if (
+          error.message.includes('422') ||
+          error.message.includes('400')
+        ) {
+          showValidationError();
+        } else if (error.message.includes('500')) {
+          showServerError();
+        } else {
+          showError(error.message);
+        }
+      } else {
+        showUnknownError();
+      }
+    },
+    [
+      showNetworkError,
+      showUnauthorizedError,
+      showForbiddenError,
+      showNotFoundError,
+      showValidationError,
+      showServerError,
+      showError,
+      showUnknownError,
+    ]
+  );
 
   return {
-    ...state,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    updatePreferences,
-    refreshNotifications: loadNotifications,
+    showSuccess,
+    showError,
+    showWarning,
+    showInfo,
+    showBookingCreated,
+    showBookingUpdated,
+    showBookingCancelled,
+    showPaymentSuccess,
+    showProfileUpdated,
+    showPasswordChanged,
+    showEmailSent,
+    showNetworkError,
+    showUnauthorizedError,
+    showForbiddenError,
+    showNotFoundError,
+    showValidationError,
+    showServerError,
+    showUnknownError,
+    handleApiError,
   };
 };

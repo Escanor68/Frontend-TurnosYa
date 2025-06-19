@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from './useBooking';
-import { usePayment } from './usePayment';
 import { useNotification } from './useNotification';
 import type { BookingFormData } from '../types/booking';
 
@@ -14,23 +13,34 @@ interface BookingFlowState {
 
 export const useBookingFlow = () => {
   const navigate = useNavigate();
-  const { createBooking } = useBooking();
-  const { createPayment } = usePayment();
-  const { showNotification } = useNotification();
+  const { handleSubmit: submitBooking } = useBooking();
+  const { showSuccess, showError } = useNotification();
 
   const [state, setState] = useState<BookingFlowState>({
     step: 1,
     formData: {
+      fieldId: '',
+      userId: '',
+      date: '',
+      time: '',
+      players: 10,
       contactName: '',
       contactPhone: '',
       contactEmail: '',
+      paymentMethod: 'mercadopago',
+      status: 'pending',
       paymentDetails: {
-        method: 'mercadopago',
         cardNumber: '',
-        cardHolder: '',
         expiryDate: '',
-        cvv: '',
+        cardholderName: '',
       },
+      termsAccepted: false,
+      recurrence: 'none',
+      recurrenceCount: 4,
+      additionalServices: [],
+      additionalServicesNotes: '',
+      recurrenceExceptions: [],
+      price: 0,
     },
     isLoading: false,
     error: null,
@@ -61,43 +71,29 @@ export const useBookingFlow = () => {
     try {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      // Crear la reserva
-      const booking = await createBooking(state.formData);
+      // Crear la reserva usando el método handleSubmit del useBooking
+      // Crear un evento sintético para simular el submit del formulario
+      const syntheticEvent = {
+        preventDefault: () => {},
+      } as React.FormEvent;
 
-      // Procesar el pago
-      const payment = await createPayment({
-        bookingId: booking.id,
-        amount: booking.totalPrice,
-        currency: booking.currency,
-        method: state.formData.paymentDetails.method,
-      });
+      await submitBooking(syntheticEvent);
 
-      showNotification({
-        type: 'success',
-        message: 'Reserva creada exitosamente',
-      });
+      showSuccess('Reserva creada exitosamente');
 
-      navigate(`/bookings/${booking.id}`);
+      // Navegar a la página de reservas
+      navigate('/bookings');
     } catch (error) {
       const errorObj =
         error instanceof Error
           ? error
           : new Error('Error al procesar la reserva');
       setState((prev) => ({ ...prev, error: errorObj }));
-      showNotification({
-        type: 'error',
-        message: errorObj.message,
-      });
+      showError(errorObj.message);
     } finally {
       setState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, [
-    state.formData,
-    createBooking,
-    createPayment,
-    showNotification,
-    navigate,
-  ]);
+  }, [submitBooking, showSuccess, showError, navigate]);
 
   return {
     ...state,

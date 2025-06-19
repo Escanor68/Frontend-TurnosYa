@@ -57,7 +57,7 @@ export const useMediaQuery = (query: string | Breakpoint): MediaQueryState => {
     return () => {
       mediaQueryList.removeEventListener('change', handleChange);
     };
-  }, [mediaQuery, handleChange]);
+  }, [mediaQuery, handleChange, query]);
 
   return state;
 };

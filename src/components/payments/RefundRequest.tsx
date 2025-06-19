@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePayment } from '../../context/PaymentContext';
+import { usePayment } from '../../hooks/usePayment';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 

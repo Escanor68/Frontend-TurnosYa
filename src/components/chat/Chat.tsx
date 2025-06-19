@@ -1,14 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Send, Paperclip } from 'lucide-react';
-import { User } from '../../types/auth';
-
-interface Message {
-  id: string;
-  senderId: string;
-  content: string;
-  timestamp: Date;
-  read: boolean;
-}
+import { User } from '../../types/user';
 
 interface ChatProps {
   currentUser: User;
@@ -16,22 +8,9 @@ interface ChatProps {
   onSendMessage: (message: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({
-  currentUser,
-  recipient,
-  onSendMessage,
-}) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+const Chat: React.FC<ChatProps> = ({ recipient, onSendMessage }) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,29 +37,6 @@ const Chat: React.FC<ChatProps> = ({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.senderId === currentUser.id
-                ? 'justify-end'
-                : 'justify-start'
-            }`}
-          >
-            <div
-              className={`max-w-[70%] rounded-lg p-3 ${
-                message.senderId === currentUser.id
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-gray-100'
-              }`}
-            >
-              <p>{message.content}</p>
-              <p className="text-xs mt-1 opacity-70">
-                {new Date(message.timestamp).toLocaleTimeString()}
-              </p>
-            </div>
-          </div>
-        ))}
         <div ref={messagesEndRef} />
       </div>
 

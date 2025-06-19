@@ -1,5 +1,4 @@
 import axios from 'axios';
-import toast from 'react-hot-toast';
 
 const createAxiosInstance = (baseURL: string) => {
   const instance = axios.create({

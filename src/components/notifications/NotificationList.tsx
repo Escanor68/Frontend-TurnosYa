@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../hooks/useUser';
 import { Bell, Check } from 'lucide-react';
 
 export const NotificationList: React.FC = () => {

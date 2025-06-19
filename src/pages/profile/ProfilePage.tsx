@@ -9,8 +9,8 @@ import { Card } from '../../components/ui/card';
 import { NotificationList } from '../../components/notifications/NotificationList';
 import PaymentHistory from '../../components/payments/PaymentHistory';
 import { FavoriteFields } from '../../components/favorites/FavoriteFields';
-import { useAuth } from '../../context/AuthContext';
-import { useUser } from '../../context/UserContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useUser } from '../../hooks/useUser';
 import { User, Bell, CreditCard, Star, Settings } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {

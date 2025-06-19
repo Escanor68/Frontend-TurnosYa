@@ -1,15 +1,17 @@
 import axios from 'axios';
-import {
+import type {
   User,
-  UserProfile,
   RegisterData,
-  LoginData,
+  LoginCredentials,
+  PasswordResetData,
+  PasswordResetConfirmData,
+} from '../types/user';
+import {
+  UserProfile,
   UpdateProfileData,
   ChangePasswordData,
-  ForgotPasswordData,
-  ResetPasswordData,
-  Notification,
 } from '../types/user';
+import { Notification as UserNotification } from '../types/notification';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -20,7 +22,9 @@ export const userService = {
     return response.data;
   },
 
-  login: async (data: LoginData): Promise<{ user: User; token: string }> => {
+  login: async (
+    data: LoginCredentials
+  ): Promise<{ user: User; token: string }> => {
     const response = await axios.post(`${API_URL}/users/login`, data);
     return response.data;
   },
@@ -41,11 +45,11 @@ export const userService = {
     await axios.put(`${API_URL}/users/change-password`, data);
   },
 
-  forgotPassword: async (data: ForgotPasswordData): Promise<void> => {
+  forgotPassword: async (data: PasswordResetData): Promise<void> => {
     await axios.post(`${API_URL}/users/forgot-password`, data);
   },
 
-  resetPassword: async (data: ResetPasswordData): Promise<void> => {
+  resetPassword: async (data: PasswordResetConfirmData): Promise<void> => {
     await axios.post(`${API_URL}/users/reset-password`, data);
   },
 
@@ -64,7 +68,7 @@ export const userService = {
   },
 
   // Notificaciones
-  getNotifications: async (): Promise<Notification[]> => {
+  getNotifications: async (): Promise<UserNotification[]> => {
     const response = await axios.get(`${API_URL}/users/notifications`);
     return response.data;
   },

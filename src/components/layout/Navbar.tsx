@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { LanguageSelector } from '../common/LanguageSelector';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -84,7 +85,10 @@ const Navbar: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* Selector de idioma */}
+            <LanguageSelector variant="dropdown" />
+
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <button

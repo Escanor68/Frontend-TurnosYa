@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 interface ErrorMetadata {
   componentStack?: string;
   timestamp?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const logErrorToService = (

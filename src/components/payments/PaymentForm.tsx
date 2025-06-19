@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PaymentSummary from './PaymentSummary';
 import PaymentButton from './PaymentButton';
-import { usePayment } from '../../context/PaymentContext';
+import { usePayment } from '../../hooks/usePayment';
 
 interface PaymentFormProps {
   bookingId: string;

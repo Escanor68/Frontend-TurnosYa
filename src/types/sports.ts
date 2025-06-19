@@ -1,3 +1,6 @@
+// Re-exportar desde la nueva estructura organizada
+export * from './sports/index';
+
 export type Sport = {
   id: string;
   name: string;

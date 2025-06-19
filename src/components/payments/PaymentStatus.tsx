@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { usePayment } from '../../context/PaymentContext';
+import { usePayment } from '../../hooks/usePayment';
 import type { PaymentStatus } from '../../types/payment';
 import { CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
 
@@ -14,7 +14,7 @@ interface PaymentStatusResponse {
 
 const PaymentStatus = ({ paymentId, onStatusChange }: PaymentStatusProps) => {
   const { getPaymentStatus } = usePayment();
-  const [status, setStatus] = useState<PaymentStatus>('PENDING');
+  const [status, setStatus] = useState<PaymentStatus>('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,13 +46,13 @@ const PaymentStatus = ({ paymentId, onStatusChange }: PaymentStatusProps) => {
 
   const getStatusIcon = () => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return <CheckCircle2 className="h-6 w-6 text-green-500" />;
-      case 'FAILED':
+      case 'failed':
         return <XCircle className="h-6 w-6 text-red-500" />;
-      case 'CANCELLED':
+      case 'cancelled':
         return <XCircle className="h-6 w-6 text-red-500" />;
-      case 'REFUNDED':
+      case 'refunded':
         return <AlertCircle className="h-6 w-6 text-yellow-500" />;
       default:
         return <Clock className="h-6 w-6 text-blue-500" />;
@@ -61,13 +61,13 @@ const PaymentStatus = ({ paymentId, onStatusChange }: PaymentStatusProps) => {
 
   const getStatusText = () => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return 'Pago completado';
-      case 'FAILED':
+      case 'failed':
         return 'Pago fallido';
-      case 'CANCELLED':
+      case 'cancelled':
         return 'Pago cancelado';
-      case 'REFUNDED':
+      case 'refunded':
         return 'Pago reembolsado';
       default:
         return 'Pago pendiente';

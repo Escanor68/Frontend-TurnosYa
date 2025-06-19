@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { usePayment } from '../../context/PaymentContext';
+import { usePayment } from '../../hooks/usePayment';
 import { PaymentReport } from '../../types/payment';
 import { Download, Mail, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -52,15 +52,15 @@ const PaymentHistory = () => {
 
   const getStatusStyles = (status: PaymentReport['status']) => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return 'bg-green-100 text-green-800';
-      case 'PENDING':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'REFUNDED':
+      case 'refunded':
         return 'bg-gray-100 text-gray-800';
-      case 'CANCELLED':
+      case 'cancelled':
         return 'bg-red-100 text-red-800';
-      case 'FAILED':
+      case 'failed':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -69,15 +69,15 @@ const PaymentHistory = () => {
 
   const getStatusText = (status: PaymentReport['status']) => {
     switch (status) {
-      case 'PAID':
+      case 'paid':
         return 'Pagado';
-      case 'PENDING':
+      case 'pending':
         return 'Pendiente';
-      case 'REFUNDED':
+      case 'refunded':
         return 'Reembolsado';
-      case 'CANCELLED':
+      case 'cancelled':
         return 'Cancelado';
-      case 'FAILED':
+      case 'failed':
         return 'Fallido';
       default:
         return status;
@@ -147,7 +147,7 @@ const PaymentHistory = () => {
               {paymentHistory.map((payment) => (
                 <tr key={payment.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(payment.createdAt).toLocaleDateString()}
+                    {new Date(payment.date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${payment.amount}

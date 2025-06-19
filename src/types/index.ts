@@ -1,45 +1,14 @@
 // Archivo de exportación central para todos los tipos
 // Esto facilita las importaciones en otros archivos
 
-export * from './routes';
-export * from './common';
-export * from './booking';
-export * from './sports';
-export * from './location';
-export * from './payment';
-export * from './user';
-export * from './notification';
-export * from './api';
-export * from './field';
-
-import type React from 'react';
-import type { PaymentMethod } from './payment';
-
 // Definición de tipos centralizados para toda la aplicación
 
 // Tipos para autenticación
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: 'owner' | 'user';
-  avatar?: string;
-}
-
 export interface AuthState {
-  user: User | null;
+  user: { id: string; email: string; name: string; role: string } | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-  role?: 'owner' | 'user';
 }
 
 export interface LoginData {
@@ -48,18 +17,8 @@ export interface LoginData {
 }
 
 export interface AuthResponse {
-  user: User;
+  user: { id: string; email: string; name: string; role: string };
   token: string;
-}
-
-export interface PasswordResetData {
-  email: string;
-}
-
-export interface PasswordResetConfirmData {
-  token: string;
-  password: string;
-  confirmPassword: string;
 }
 
 // Tipos para campos deportivos
@@ -100,53 +59,6 @@ export interface Review {
   date: string;
 }
 
-// Tipos para reservas
-export interface Booking {
-  id: string;
-  fieldId: string;
-  userId: string;
-  date: string;
-  time: string;
-  players: number;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  paymentMethod: PaymentMethod;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  totalPrice: number;
-  recurrence: string;
-  recurrenceCount: number;
-  additionalServices: string[];
-  additionalServicesNotes?: string;
-  recurrenceExceptions: string[];
-  createdAt: string;
-}
-
-export interface BookingFormData {
-  fieldId: string;
-  userId: string;
-  date: string;
-  time: string;
-  players: number;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  paymentMethod: PaymentMethod;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentDetails: {
-    cardNumber: string;
-    expiryDate: string;
-    cardholderName: string;
-  };
-  termsAccepted: boolean;
-  recurrence: string;
-  recurrenceCount: number;
-  additionalServices: string[];
-  additionalServicesNotes: string;
-  recurrenceExceptions: string[];
-  price: number;
-}
-
 // Tipos para servicios adicionales
 export interface AdditionalService {
   id: string;
@@ -154,13 +66,6 @@ export interface AdditionalService {
   description: string;
   price: number;
   icon: string;
-}
-
-// Tipos para opciones de recurrencia
-export interface RecurrenceOption {
-  id: string;
-  name: string;
-  discount: number;
 }
 
 // Tipos para validación de formularios
@@ -173,3 +78,101 @@ export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
 }
+
+// Exportar tipos de rutas
+export type { RouteConfig, BreadcrumbItem, NavigationItem } from './routes';
+
+// Exportar tipos comunes (solo los que no tienen conflictos)
+export type {
+  ID,
+  Timestamp,
+  Status,
+  SortOrder,
+  PaginationParams,
+  PaginatedResponse,
+  FilterOperator,
+  FilterCondition,
+  FilterGroup,
+  Filter,
+  SearchParams,
+  ApiError,
+  FormField,
+  FormConfig,
+  ModalConfig,
+  TableColumn,
+  TableConfig,
+  ChartData,
+  ChartConfig,
+  FileInfo,
+  FileUploadConfig,
+  Address,
+  TimeSlot,
+  Schedule,
+  Statistic,
+  AppConfig,
+  AuditLog,
+  Permission,
+  Role,
+  CacheConfig,
+  CacheEntry,
+  WebSocketMessage,
+  WebSocketConfig,
+} from './common';
+
+// Exportar tipos de user
+export type { User, LoginCredentials, RegisterData } from './user';
+
+// Exportar tipos de booking
+export type {
+  BookingStatus,
+  Booking,
+  RecurrenceType,
+  CreateBookingDTO,
+  BookingFilters,
+  BookingFormData,
+  RecurrenceOption,
+  BookingPayload,
+  BookingResponse,
+  BookingSearchParams,
+} from './booking';
+
+// Exportar tipos de sports
+export type { Sport } from './sports';
+
+// Exportar tipos de location
+export type { Location as LocationType } from './location';
+
+// Exportar tipos de payment
+export type {
+  PaymentMethod,
+  PaymentStatus,
+  Transaction,
+  Payment,
+  PaymentDetails,
+  PaymentPreference,
+  PaymentReport,
+  Invoice,
+  InvoiceItem,
+  RefundRequest,
+  Customer,
+  PaymentResponse,
+} from './payment';
+
+// Exportar tipos de notification
+export type { Notification as NotificationType } from './notification';
+
+// Exportar tipos de api
+export type { ApiResponse, ErrorResponse } from './api';
+
+// Exportar tipos de field
+export type {
+  Field,
+  FieldAvailability,
+  FieldReview,
+  FieldStatistics,
+  FieldSearchParams,
+  SpecialHours,
+} from './field';
+
+// Exportar tipos de team
+export type { Team, TeamMember, Match } from './team';

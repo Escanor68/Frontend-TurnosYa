@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../hooks/useUser';
 import { Star, StarOff } from 'lucide-react';
 
 interface Field {

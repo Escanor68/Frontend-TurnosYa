@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, LoginData, RegisterData } from '../types/user';
+import type { User, LoginCredentials, RegisterData } from '../types/user';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -9,7 +9,7 @@ interface AuthResponse {
 }
 
 export const authApi = {
-  async login(credentials: LoginData): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await axios.post<AuthResponse>(
       `${API_URL}/auth/login`,
       credentials

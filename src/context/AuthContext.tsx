@@ -127,7 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetPassword = async (token: string, password: string) => {
     setIsLoading(true);
     try {
-      await userService.resetPassword({ token, newPassword: password });
+      await userService.resetPassword({
+        token,
+        password,
+        confirmPassword: password,
+      });
       toast.success('Contraseña actualizada correctamente');
     } catch (error) {
       const message =
@@ -181,12 +185,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = React.useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
-  return context;
 };

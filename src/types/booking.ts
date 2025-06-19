@@ -1,7 +1,7 @@
 // Tipos relacionados con reservas
 
 import type { Field } from './field';
-import type { PaymentMethod } from './payment';
+import type { PaymentMethod, PaymentStatus } from './payment';
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 
@@ -16,7 +16,7 @@ export interface Booking {
   status: BookingStatus;
   totalPrice: number;
   currency: string;
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentStatus: PaymentStatus;
   paymentMethod?: PaymentMethod;
   recurrence?: string;
   recurrenceCount?: number;

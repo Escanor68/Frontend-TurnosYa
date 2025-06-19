@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Users, Star, Calendar } from 'lucide-react';
+import { Clock, Users, Star } from 'lucide-react';
 import type { SportField } from '../../types';
 import FieldLocation from './FieldLocation';
 
@@ -45,12 +45,7 @@ const FieldDetails: React.FC<FieldDetailsProps> = ({
 
               <div className="flex items-center text-gray-600">
                 <Star className="h-5 w-5 mr-3 text-emerald-600" />
-                <span>Calificación: {field.rating}/5</span>
-              </div>
-
-              <div className="flex items-center text-gray-600">
-                <Calendar className="h-5 w-5 mr-3 text-emerald-600" />
-                <span>Horario: {field.schedule}</span>
+                <span>Calificación: {field.rating || 'Sin calificar'}/5</span>
               </div>
 
               <div className="border-t pt-4 mt-4">
@@ -96,29 +91,10 @@ const FieldDetails: React.FC<FieldDetailsProps> = ({
                 Servicios
               </h2>
               <ul className="grid grid-cols-2 gap-3">
-                {field.amenities.map((amenity) => (
-                  <li
-                    key={amenity.id}
-                    className="flex items-center text-gray-600"
-                  >
-                    <span className="mr-2">{amenity.icon}</span>
-                    {amenity.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {field.rules && field.rules.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Reglas
-              </h2>
-              <ul className="space-y-2">
-                {field.rules.map((rule, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-emerald-600 mr-2">•</span>
-                    <span className="text-gray-600">{rule}</span>
+                {field.amenities.map((amenity: string, index: number) => (
+                  <li key={index} className="flex items-center text-gray-600">
+                    <span className="mr-2">•</span>
+                    {amenity}
                   </li>
                 ))}
               </ul>

@@ -2,22 +2,13 @@ import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Navigate, Link } from 'react-router-dom';
 import { RegisterForm } from '../../components/auth/RegisterForm';
-import type { RegisterData } from '../../types/auth';
 
 const RegisterPage: React.FC = () => {
-  const { register: registerUser, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-
-  const onSubmit = async (data: RegisterData) => {
-    try {
-      await registerUser(data);
-    } catch (error) {
-      console.error('Error en registro:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -36,7 +27,7 @@ const RegisterPage: React.FC = () => {
             </Link>
           </p>
         </div>
-        <RegisterForm onSubmit={onSubmit} isLoading={isLoading} />
+        <RegisterForm />
       </div>
     </div>
   );

@@ -1,5 +1,8 @@
 import React from 'react';
-import { LocationMarkerIcon, CurrencyDollarIcon, UserGroupIcon } from '@heroicons/react/outline';
+import {
+  LocationMarkerIcon,
+  CurrencyDollarIcon,
+} from '@heroicons/react/outline';
 
 const CourtsPage: React.FC = () => {
   return (
@@ -27,19 +30,34 @@ const CourtsPage: React.FC = () => {
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    <th
+                      scope="col"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    >
                       Nombre
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Ubicación
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Precio
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Estado
                     </th>
-                    <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                    <th
+                      scope="col"
+                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                    >
                       <span className="sr-only">Acciones</span>
                     </th>
                   </tr>
@@ -57,7 +75,9 @@ const CourtsPage: React.FC = () => {
                           />
                         </div>
                         <div className="ml-4">
-                          <div className="font-medium text-gray-900">Cancha de ejemplo</div>
+                          <div className="font-medium text-gray-900">
+                            Cancha de ejemplo
+                          </div>
                           <div className="text-gray-500">Fútbol 5</div>
                         </div>
                       </div>
@@ -98,4 +118,4 @@ const CourtsPage: React.FC = () => {
   );
 };
 
-export default CourtsPage; 
+export default CourtsPage;

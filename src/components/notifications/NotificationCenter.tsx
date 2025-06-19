@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Calendar, Users, MessageSquare, Star } from 'lucide-react';
-import type { Notification } from '../../types/auth';
+import type { Notification } from '../../types/notification';
 
 interface NotificationCenterProps {
   notifications: Notification[];
@@ -85,7 +85,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         {notification.message}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {new Date(notification.date).toLocaleDateString()}
+                        {new Date(notification.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     {!notification.read && (

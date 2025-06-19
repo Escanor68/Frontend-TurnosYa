@@ -1,11 +1,68 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card } from '../ui/card';
-import { UserProfile } from '../../types/auth';
-import { MapPin, Calendar, Star, Users, Bell, Award } from 'lucide-react';
+import { Calendar, Star, Users, Bell, Award } from 'lucide-react';
+
+// Tipos para el perfil extendido
+interface BookingHistory {
+  id: string;
+  fieldName: string;
+  date: string;
+  status: 'completed' | 'upcoming' | 'cancelled';
+  price: number;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  profileImage?: string;
+}
+
+interface Match {
+  id: string;
+  date: string;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  members: TeamMember[];
+  upcomingMatches: Match[];
+}
+
+interface Notification {
+  id: string;
+  message: string;
+  date: string;
+  read: boolean;
+}
+
+interface UserProfileData {
+  id: string;
+  email: string;
+  name: string;
+  surname: string;
+  phone: string;
+  role: string;
+  points: number;
+  createdAt: string;
+  updatedAt: string;
+  profileImage?: string;
+  bookingHistory: BookingHistory[];
+  reviews: Review[];
+  teams: Team[];
+  notifications: Notification[];
+}
 
 interface UserProfileProps {
-  profile: UserProfile;
+  profile: UserProfileData;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ profile }) => {

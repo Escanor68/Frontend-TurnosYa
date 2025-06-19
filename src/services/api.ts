@@ -6,8 +6,13 @@ import axios, {
 } from 'axios';
 import { toast } from 'react-toastify';
 import { API_URL } from '../config';
-import { AuthTokens } from '../types/auth';
 import { ApiResponse, ErrorResponse } from '../types/api';
+
+// Definir el tipo AuthTokens localmente ya que no existe en types/auth
+interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
 
 const api = axios.create({
   baseURL: API_URL,
@@ -165,7 +170,7 @@ class ApiService {
 
   public async post<T>(
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
@@ -182,7 +187,7 @@ class ApiService {
 
   public async put<T>(
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {

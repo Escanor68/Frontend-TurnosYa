@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Map from '../common/Map';
+import GoogleMap from '../common/GoogleMap';
 import type { SportField } from '../../types';
 
 const Home: React.FC = () => {
@@ -149,16 +149,15 @@ const Home: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-4 h-[600px]">
               {userLocation ? (
-                <Map
+                <GoogleMap
                   center={userLocation}
-                  markers={filteredFields.map((field) => ({
-                    id: field.id,
-                    position: field.location.coordinates,
-                    title: field.name,
-                    address: field.location.address,
-                  }))}
+                  markers={filteredFields
+                    .filter((field) => field.location.coordinates)
+                    .map((field) => ({
+                      position: field.location.coordinates!,
+                      title: field.name,
+                    }))}
                   zoom={13}
-                  height="100%"
                 />
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-500">

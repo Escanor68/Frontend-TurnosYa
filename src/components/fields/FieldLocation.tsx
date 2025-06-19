@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin, Navigation } from 'lucide-react';
-import Map from '../common/Map';
+import GoogleMap from '../common/GoogleMap';
 import type { SportField } from '../../types';
 
 interface FieldLocationProps {
@@ -37,11 +37,13 @@ const FieldLocation: React.FC<FieldLocationProps> = ({ field }) => {
       const calculateDistance = () => {
         const R = 6371; // Radio de la Tierra en kilómetros
         const lat1 = (userLocation.lat * Math.PI) / 180;
-        const lat2 = (field.location.coordinates.lat * Math.PI) / 180;
+        const lat2 = (field.location.coordinates!.lat * Math.PI) / 180;
         const deltaLat =
-          ((field.location.coordinates.lat - userLocation.lat) * Math.PI) / 180;
+          ((field.location.coordinates!.lat - userLocation.lat) * Math.PI) /
+          180;
         const deltaLng =
-          ((field.location.coordinates.lng - userLocation.lng) * Math.PI) / 180;
+          ((field.location.coordinates!.lng - userLocation.lng) * Math.PI) /
+          180;
 
         const a =
           Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
@@ -75,7 +77,7 @@ const FieldLocation: React.FC<FieldLocationProps> = ({ field }) => {
       <div className="flex items-start space-x-2">
         <MapPin className="h-5 w-5 text-emerald-600 mt-1" />
         <div>
-          <h3 className="font-medium text-gray-900">{field.location.name}</h3>
+          <h3 className="font-medium text-gray-900">{field.name}</h3>
           <p className="text-gray-600">{field.location.address}</p>
           <p className="text-gray-600">
             {field.location.city}, {field.location.province}
@@ -89,21 +91,20 @@ const FieldLocation: React.FC<FieldLocationProps> = ({ field }) => {
         </div>
       </div>
 
-      <div className="rounded-lg overflow-hidden shadow-md">
-        <Map
-          center={field.location.coordinates}
-          markers={[
-            {
-              id: field.id,
-              position: field.location.coordinates,
-              title: field.name,
-              address: field.location.address,
-            },
-          ]}
-          zoom={15}
-          height="300px"
-        />
-      </div>
+      {field.location.coordinates && (
+        <div className="rounded-lg overflow-hidden shadow-md">
+          <GoogleMap
+            center={field.location.coordinates}
+            markers={[
+              {
+                position: field.location.coordinates,
+                title: field.name,
+              },
+            ]}
+            zoom={15}
+          />
+        </div>
+      )}
 
       <button
         onClick={openGoogleMaps}

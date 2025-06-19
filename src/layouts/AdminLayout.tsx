@@ -1,12 +1,12 @@
 import { Outlet } from 'react-router-dom';
 import { useAuthRedirect } from '../hooks/useAuthRedirect';
-import { Sidebar } from '../components/owner/Sidebar';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Sidebar } from '../components/admin/Sidebar';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 export default function AdminLayout() {
   const { isLoading } = useAuthRedirect({
     requireAuth: true,
-    allowedRoles: ['owner'],
+    redirectTo: '/login',
   });
 
   if (isLoading) {

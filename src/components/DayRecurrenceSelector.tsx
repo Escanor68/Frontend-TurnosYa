@@ -35,6 +35,7 @@ const DayRecurrenceSelector: React.FC<DayRecurrenceSelectorProps> = ({
           value={value}
           onChange={handleValueChange}
           className="w-full p-2 border border-gray-300 rounded-md"
+          aria-label="Seleccionar día de la semana para repetición de reserva"
         >
           <option value="none">Sin repetición</option>
           <option value="monday">Todos los lunes</option>
@@ -58,6 +59,7 @@ const DayRecurrenceSelector: React.FC<DayRecurrenceSelectorProps> = ({
               onClick={() => handleCountChange(false)}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
               disabled={count <= 2}
+              aria-label="Reducir número de semanas"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -69,6 +71,7 @@ const DayRecurrenceSelector: React.FC<DayRecurrenceSelectorProps> = ({
               onClick={() => handleCountChange(true)}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
               disabled={count >= 12}
+              aria-label="Aumentar número de semanas"
             >
               <Plus className="h-4 w-4" />
             </button>

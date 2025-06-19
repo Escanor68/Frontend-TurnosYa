@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
-import { Plus, Users, Calendar, MapPin, Trophy } from 'lucide-react';
-import type { Team, Match, User } from '../../types/auth';
+import { Plus, Users, Calendar, MapPin } from 'lucide-react';
+import type { Team, TeamMember, Match } from '../../types/team';
 
 interface TeamManagerProps {
   userTeams: Team[];
   onCreateTeam: (teamName: string) => void;
-  onJoinTeam: (teamId: string) => void;
-  onCreateMatch: (match: Omit<Match, 'id'>) => void;
 }
 
 const TeamManager: React.FC<TeamManagerProps> = ({
   userTeams,
   onCreateTeam,
-  onJoinTeam,
-  onCreateMatch,
 }) => {
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
@@ -39,6 +35,7 @@ const TeamManager: React.FC<TeamManagerProps> = ({
               <button
                 onClick={() => setShowCreateTeam(true)}
                 className="p-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600"
+                title="Crear nuevo equipo"
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -107,7 +104,7 @@ const TeamManager: React.FC<TeamManagerProps> = ({
                   Miembros del Equipo
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {selectedTeam.members.map((member) => (
+                  {selectedTeam.members.map((member: TeamMember) => (
                     <div
                       key={member.id}
                       className="flex items-center space-x-3 p-3 border rounded-lg"
@@ -130,7 +127,7 @@ const TeamManager: React.FC<TeamManagerProps> = ({
               <div>
                 <h3 className="text-lg font-medium mb-4">Próximos Partidos</h3>
                 <div className="space-y-4">
-                  {selectedTeam.upcomingMatches.map((match) => (
+                  {selectedTeam.upcomingMatches.map((match: Match) => (
                     <div key={match.id} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <div>

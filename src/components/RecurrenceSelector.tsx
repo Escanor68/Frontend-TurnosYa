@@ -104,6 +104,7 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
             value={weekDay}
             onChange={handleWeekDayChange}
             className="w-full p-2 border border-gray-300 rounded-md"
+            aria-label="Seleccionar día de la semana para repetición"
           >
             <option value={-1}>Sin repetición</option>
             {weekDays.map((day) => (
@@ -126,6 +127,7 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
                   onClick={() => handleCountChange(count - 1)}
                   className="px-3 py-1 border border-gray-300 rounded-l text-gray-700 hover:bg-gray-50"
                   disabled={count <= 1}
+                  aria-label="Reducir número de semanas"
                 >
                   -
                 </button>
@@ -137,6 +139,7 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
                   onClick={() => handleCountChange(count + 1)}
                   className="px-3 py-1 border border-gray-300 rounded-r text-gray-700 hover:bg-gray-50"
                   disabled={count >= 12}
+                  aria-label="Aumentar número de semanas"
                 >
                   +
                 </button>

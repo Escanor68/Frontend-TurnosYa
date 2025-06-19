@@ -1,99 +1,103 @@
-import { useState, ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useFormValidation } from '../../hooks/useFormValidation';
+import { useFormValidation, formSchemas } from '../../hooks/useFormValidation';
 import { useNotification } from '../../hooks/useNotification';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Link } from '../ui/Link';
 
 interface RegisterFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
-  [key: string]: string;
+  phone: string;
 }
 
 const initialValues: RegisterFormData = {
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
   password: '',
   confirmPassword: '',
-};
-
-const validationRules = {
-  name: [
-    (value: string) => !value && 'El nombre es requerido',
-    (value: string) =>
-      value.length < 2 && 'El nombre debe tener al menos 2 caracteres',
-  ],
-  email: [
-    (value: string) => !value && 'El email es requerido',
-    (value: string) =>
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && 'Email inválido',
-  ],
-  password: [
-    (value: string) => !value && 'La contraseña es requerida',
-    (value: string) =>
-      value.length < 6 && 'La contraseña debe tener al menos 6 caracteres',
-  ],
-  confirmPassword: [
-    (value: string) => !value && 'La confirmación de contraseña es requerida',
-    (value: string, formData: RegisterFormData) =>
-      value !== formData.password && 'Las contraseñas no coinciden',
-  ],
+  phone: '',
 };
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { showNotification } = useNotification();
-  const [isLoading, setIsLoading] = useState(false);
+  const { showSuccess, handleApiError } = useNotification();
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+  } = useFormValidation({
+    initialValues,
+    validationSchema: formSchemas.register,
+    onSubmit: async (values: RegisterFormData) => {
+      try {
+        await register({
+          name: values.firstName,
+          surname: values.lastName,
+          email: values.email,
+          password: values.password,
+          phone: values.phone,
+        });
+        showSuccess('Registro exitoso');
+        navigate('/dashboard');
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
 
-  const { values, errors, touched, handleChange, handleBlur, handleSubmit } =
-    useFormValidation<RegisterFormData>({
-      initialValues,
-      validationRules,
-      onSubmit: async (formData) => {
-        try {
-          setIsLoading(true);
-          await register(formData.name, formData.email, formData.password);
-          showNotification({
-            type: 'success',
-            message: 'Registro exitoso',
-          });
-          navigate('/dashboard');
-        } catch (error) {
-          showNotification({
-            type: 'error',
-            message:
-              error instanceof Error ? error.message : 'Error al registrarse',
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-    });
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    handleChange(name as keyof RegisterFormData, value);
+    await handleChange(name as keyof RegisterFormData, value);
+  };
+
+  const handleInputBlur = async (name: keyof RegisterFormData) => {
+    await handleBlur(name as keyof typeof values);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleSubmit();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Input
-          type="text"
-          name="name"
-          value={values.name}
-          onChange={handleInputChange}
-          onBlur={() => handleBlur('name')}
-          placeholder="Nombre completo"
-          error={touched.name ? errors.name : undefined}
-          disabled={isLoading}
-        />
+    <form onSubmit={handleFormSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Input
+            type="text"
+            name="firstName"
+            value={values.firstName}
+            onChange={handleInputChange}
+            onBlur={() => handleInputBlur('firstName')}
+            placeholder="Nombre"
+            error={touched.firstName ? errors.firstName : undefined}
+            disabled={isSubmitting}
+          />
+        </div>
+        <div>
+          <Input
+            type="text"
+            name="lastName"
+            value={values.lastName}
+            onChange={handleInputChange}
+            onBlur={() => handleInputBlur('lastName')}
+            placeholder="Apellido"
+            error={touched.lastName ? errors.lastName : undefined}
+            disabled={isSubmitting}
+          />
+        </div>
       </div>
 
       <div>
@@ -102,10 +106,23 @@ export const RegisterForm = () => {
           name="email"
           value={values.email}
           onChange={handleInputChange}
-          onBlur={() => handleBlur('email')}
+          onBlur={() => handleInputBlur('email')}
           placeholder="Email"
           error={touched.email ? errors.email : undefined}
-          disabled={isLoading}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div>
+        <Input
+          type="tel"
+          name="phone"
+          value={values.phone}
+          onChange={handleInputChange}
+          onBlur={() => handleInputBlur('phone')}
+          placeholder="Teléfono (opcional)"
+          error={touched.phone ? errors.phone : undefined}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -115,10 +132,10 @@ export const RegisterForm = () => {
           name="password"
           value={values.password}
           onChange={handleInputChange}
-          onBlur={() => handleBlur('password')}
+          onBlur={() => handleInputBlur('password')}
           placeholder="Contraseña"
           error={touched.password ? errors.password : undefined}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -128,10 +145,10 @@ export const RegisterForm = () => {
           name="confirmPassword"
           value={values.confirmPassword}
           onChange={handleInputChange}
-          onBlur={() => handleBlur('confirmPassword')}
+          onBlur={() => handleInputBlur('confirmPassword')}
           placeholder="Confirmar contraseña"
           error={touched.confirmPassword ? errors.confirmPassword : undefined}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -139,9 +156,9 @@ export const RegisterForm = () => {
         type="submit"
         variant="primary"
         className="w-full"
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? 'Registrando...' : 'Registrarse'}
+        {isSubmitting ? 'Registrando...' : 'Registrarse'}
       </Button>
 
       <div className="text-center">

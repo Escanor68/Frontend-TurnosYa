@@ -5,7 +5,12 @@ export type PaymentMethod =
   | 'credit_card'
   | 'debit_card'
   | 'cash';
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+export type PaymentStatus =
+  | 'pending'
+  | 'paid'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded';
 
 export interface Transaction {
   id: string;

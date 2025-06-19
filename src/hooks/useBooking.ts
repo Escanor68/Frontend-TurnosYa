@@ -5,8 +5,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import type { BookingFormData, SportField } from '../types';
-import bookingService from '../services/booking.service';
-import fieldService from '../services/FieldService';
+import { bookingService } from '../services/booking.service';
+import { fieldService } from '../services/field.service';
 import { paymentService } from '../services/payment.service';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -215,12 +215,6 @@ export const useBooking = () => {
     return total;
   };
 
-  const calculateEndTime = (startTime: string): string => {
-    const [hour, minute] = startTime.split(':');
-    const endHour = parseInt(hour) + 1;
-    return `${endHour.toString().padStart(2, '0')}:${minute}`;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated || !field) {
@@ -235,45 +229,36 @@ export const useBooking = () => {
 
       const booking = await bookingService.createBooking({
         fieldId: field.id,
-        field: {
-          id: field.id,
-          name: field.name,
-          description: field.description || '',
-          address: field.location.address,
-          city: field.location.city,
-          state: field.location.province,
-          country: 'Argentina',
-          latitude: 0,
-          longitude: 0,
-          pricePerHour: field.price,
-          currency: 'ARS',
-          surfaceType: 'ARTIFICIAL_GRASS',
-          size: field.players as '5' | '7' | '11',
-          hasLighting: true,
-          hasParking: true,
-          hasShowers: true,
-          hasChangingRooms: true,
-          hasEquipment: true,
-          hasAdditionalServices: field.hasAdditionalServices,
-          additionalServices: field.additionalServices,
-          images: [field.image],
-          ownerId: field.ownerId || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
         userId: user?.id || '',
         date: bookingData.date,
-        startTime: bookingData.time,
-        endTime: calculateEndTime(bookingData.time),
-        status: 'PENDING',
-        totalPrice: calculateTotalPrice(),
-        currency: 'ARS',
-        paymentStatus: 'PENDING',
+        time: bookingData.time,
+        players: bookingData.players,
+        contactName: bookingData.contactName,
+        contactPhone: bookingData.contactPhone,
+        contactEmail: bookingData.contactEmail,
+        paymentMethod: bookingData.paymentMethod,
+        status: bookingData.status,
+        paymentDetails: bookingData.paymentDetails,
+        termsAccepted: bookingData.termsAccepted,
+        recurrence: bookingData.recurrence,
+        recurrenceCount: bookingData.recurrenceCount,
+        additionalServices: bookingData.additionalServices,
+        additionalServicesNotes: bookingData.additionalServicesNotes,
+        recurrenceExceptions: bookingData.recurrenceExceptions,
+        price: calculateTotalPrice(),
       });
 
-      const paymentPreference = await paymentService.createPaymentPreference(
-        booking.id
-      );
+      const paymentPreference = await paymentService.createPaymentPreference({
+        id: '',
+        bookingId: booking.id,
+        amount: calculateTotalPrice(),
+        currency: 'ARS',
+        initPoint: '',
+        sandboxInitPoint: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
       window.location.href = paymentPreference.initPoint;
     } catch (error) {
       const message =
