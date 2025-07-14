@@ -1,6 +1,6 @@
 'use client';
 
-import type React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Plus, Minus, Calendar } from 'lucide-react';
 
 interface DayRecurrenceSelectorProps {
@@ -9,102 +9,132 @@ interface DayRecurrenceSelectorProps {
   onChange: (value: string, count: number) => void;
 }
 
-const DayRecurrenceSelector: React.FC<DayRecurrenceSelectorProps> = ({
-  value,
-  count,
-  onChange,
-}) => {
-  const handleValueChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange(e.target.value, count);
-  };
+const DayRecurrenceSelector: React.FC<DayRecurrenceSelectorProps> = React.memo(
+  ({ value, count, onChange }) => {
+    const handleValueChange = useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onChange(e.target.value, count);
+      },
+      [onChange, count]
+    );
 
-  const handleCountChange = (increment: boolean) => {
-    const newCount = increment
-      ? Math.min(count + 1, 12)
-      : Math.max(count - 1, 2);
-    onChange(value, newCount);
-  };
+    const handleCountChange = useCallback(
+      (increment: boolean) => {
+        const newCount = increment
+          ? Math.min(count + 1, 12)
+          : Math.max(count - 1, 2);
+        onChange(value, newCount);
+      },
+      [count, value, onChange]
+    );
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Repetir reserva
-        </label>
-        <select
-          value={value}
-          onChange={handleValueChange}
-          className="w-full p-2 border border-gray-300 rounded-md"
-          aria-label="Seleccionar día de la semana para repetición de reserva"
-        >
-          <option value="none">Sin repetición</option>
-          <option value="monday">Todos los lunes</option>
-          <option value="tuesday">Todos los martes</option>
-          <option value="wednesday">Todos los miércoles</option>
-          <option value="thursday">Todos los jueves</option>
-          <option value="friday">Todos los viernes</option>
-          <option value="saturday">Todos los sábados</option>
-          <option value="sunday">Todos los domingos</option>
-        </select>
-      </div>
+    const isMinCount = useMemo(() => count <= 2, [count]);
+    const isMaxCount = useMemo(() => count >= 12, [count]);
 
-      {value && value !== 'none' && (
+    const dayLabel = useMemo(() => {
+      const dayMap: Record<string, string> = {
+        monday: 'lunes',
+        tuesday: 'martes',
+        wednesday: 'miércoles',
+        thursday: 'jueves',
+        friday: 'viernes',
+        saturday: 'sábados',
+        sunday: 'domingos',
+      };
+      return dayMap[value] || '';
+    }, [value]);
+
+    // Memoizar las opciones del select para evitar re-renders
+    const selectOptions = useMemo(
+      () => [
+        { value: 'none', label: 'Sin repetición' },
+        { value: 'monday', label: 'Todos los lunes' },
+        { value: 'tuesday', label: 'Todos los martes' },
+        { value: 'wednesday', label: 'Todos los miércoles' },
+        { value: 'thursday', label: 'Todos los jueves' },
+        { value: 'friday', label: 'Todos los viernes' },
+        { value: 'saturday', label: 'Todos los sábados' },
+        { value: 'sunday', label: 'Todos los domingos' },
+      ],
+      []
+    );
+
+    const showRecurrenceInfo = useMemo(
+      () => value && value !== 'none',
+      [value]
+    );
+
+    return (
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Número de semanas
+          <label className="block text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+            Repetir reserva
           </label>
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={() => handleCountChange(false)}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-l-lg flex items-center justify-center"
-              disabled={count <= 2}
-              aria-label="Reducir número de semanas"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <div className="h-8 px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white">
-              {count}
-            </div>
-            <button
-              type="button"
-              onClick={() => handleCountChange(true)}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-8 w-8 rounded-r-lg flex items-center justify-center"
-              disabled={count >= 12}
-              aria-label="Aumentar número de semanas"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-            <span className="ml-3 text-sm text-gray-600">semanas</span>
-          </div>
+          <select
+            value={value}
+            onChange={handleValueChange}
+            className="w-full p-3 sm:p-2 border border-gray-300 rounded-md text-base sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            aria-label="Seleccionar día de la semana para repetición de reserva"
+          >
+            {selectOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {value && value !== 'none' && (
-        <div className="bg-blue-50 p-3 rounded-lg">
-          <div className="flex items-center text-sm text-blue-700">
-            <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-            <span>
-              Se crearán reservas para los próximos {count}{' '}
-              {value === 'monday'
-                ? 'lunes'
-                : value === 'tuesday'
-                ? 'martes'
-                : value === 'wednesday'
-                ? 'miércoles'
-                : value === 'thursday'
-                ? 'jueves'
-                : value === 'friday'
-                ? 'viernes'
-                : value === 'saturday'
-                ? 'sábados'
-                : 'domingos'}
-            </span>
+        {showRecurrenceInfo && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 sm:mb-3">
+              Número de semanas
+            </label>
+            <div className="flex items-center flex-wrap gap-2 sm:gap-0">
+              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => handleCountChange(false)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 sm:h-8 sm:w-8 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isMinCount}
+                  aria-label="Reducir número de semanas"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <div className="h-10 px-4 sm:h-8 sm:px-4 flex items-center justify-center border-t border-b border-gray-300 bg-white min-w-[60px] sm:min-w-[50px] text-base sm:text-sm font-medium">
+                  {count}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCountChange(true)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 sm:h-8 sm:w-8 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isMaxCount}
+                  aria-label="Aumentar número de semanas"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+              <span className="text-sm text-gray-600 ml-0 sm:ml-3">
+                semanas
+              </span>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-};
+        )}
+
+        {showRecurrenceInfo && (
+          <div className="bg-blue-50 p-4 sm:p-3 rounded-lg border border-blue-100">
+            <div className="flex items-start sm:items-center text-sm text-blue-700">
+              <Calendar className="h-4 w-4 mr-2 text-blue-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+              <span className="leading-relaxed">
+                Se crearán reservas para los próximos {count} {dayLabel}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+DayRecurrenceSelector.displayName = 'DayRecurrenceSelector';
 
 export default DayRecurrenceSelector;

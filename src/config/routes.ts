@@ -1,29 +1,36 @@
+import { lazy } from 'react';
 import type { RouteConfig } from '../types';
 
-// Importar los componentes de página
-import HomePage from '../pages/HomePage';
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
-import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
-import { ProfilePage } from '../pages/profile/ProfilePage';
-import BookingsPage from '../pages/BookingsPage';
-import NotFoundPage from '../pages/404';
-import ForbiddenPage from '../pages/403';
-import FootballTest from '../components/FootballTest';
-import FootballAuthTest from '../components/FootballAuthTest';
+// Importar los componentes de página con lazy loading
+const HomePage = lazy(() => import('../pages/HomePage'));
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(
+  () => import('../pages/auth/ForgotPasswordPage')
+);
+const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage'));
+const ProfilePage = lazy(() =>
+  import('../pages/profile/ProfilePage').then((module) => ({
+    default: module.ProfilePage,
+  }))
+);
+const BookingsPage = lazy(() => import('../pages/BookingsPage'));
+const NotFoundPage = lazy(() => import('../pages/404'));
+const ForbiddenPage = lazy(() => import('../pages/403'));
+const FootballTest = lazy(() => import('../components/FootballTest'));
+const FootballAuthTest = lazy(() => import('../components/FootballAuthTest'));
 
-// Admin Pages
-import AdminDashboardPage from '../pages/owner/DashboardPage';
-import AdminUsersPage from '../pages/owner/UsersPage';
-import AdminCourtsPage from '../pages/owner/CourtsPage';
-import AdminBookingsPage from '../pages/owner/BookingsPage';
-import AdminSettingsPage from '../pages/owner/SettingsPage';
-import AdminHelpPage from '../pages/owner/HelpPage';
+// Admin Pages - Lazy loading para páginas pesadas
+const AdminDashboardPage = lazy(() => import('../pages/owner/DashboardPage'));
+const AdminUsersPage = lazy(() => import('../pages/owner/UsersPage'));
+const AdminCourtsPage = lazy(() => import('../pages/owner/CourtsPage'));
+const AdminBookingsPage = lazy(() => import('../pages/owner/BookingsPage'));
+const AdminSettingsPage = lazy(() => import('../pages/owner/SettingsPage'));
+const AdminHelpPage = lazy(() => import('../pages/owner/HelpPage'));
 
-// Owner Pages
-import OwnerCourtsPage from '../pages/owner/CourtsPage';
-import OwnerBookingsPage from '../pages/owner/BookingsPage';
+// Owner Pages - Lazy loading para páginas pesadas
+const OwnerCourtsPage = lazy(() => import('../pages/owner/CourtsPage'));
+const OwnerBookingsPage = lazy(() => import('../pages/owner/BookingsPage'));
 
 export const publicRoutes: RouteConfig[] = [
   {

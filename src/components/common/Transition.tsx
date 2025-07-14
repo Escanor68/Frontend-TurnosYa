@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-// import { useEnterAnimation } from '../../hooks/useEnterAnimation';
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TransitionProps {
   show: boolean;
@@ -16,70 +16,84 @@ const Transition: React.FC<TransitionProps> = ({
   show,
   children,
   type = 'fade',
-  duration = 300,
+  duration = 0.3,
   delay = 0,
   className = '',
   onEnter,
   onExit,
 }) => {
-  const [isVisible, setIsVisible] = useState(show);
-
-  useEffect(() => {
-    if (show) {
-      setIsVisible(true);
-      const timer = setTimeout(() => {
-        onEnter?.();
-      }, delay);
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        onExit?.();
-      }, duration + delay);
-      return () => clearTimeout(timer);
-    }
-  }, [show, duration, delay, onEnter, onExit]);
-
-  if (!isVisible) return null;
-
-  const getTransitionClasses = () => {
-    const baseClasses = 'transition-all duration-300 ease-in-out';
+  const getAnimationProps = () => {
+    const baseTransition = {
+      duration,
+      delay,
+      ease: [0.4, 0, 0.2, 1] as const,
+    };
 
     switch (type) {
       case 'fade':
-        return `${baseClasses} ${show ? 'opacity-100' : 'opacity-0'}`;
+        return {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: baseTransition,
+        };
 
       case 'slide':
-        return `${baseClasses} ${show ? 'translate-x-0' : '-translate-x-full'}`;
+        return {
+          initial: { opacity: 0, x: -20 },
+          animate: { opacity: 1, x: 0 },
+          exit: { opacity: 0, x: 20 },
+          transition: baseTransition,
+        };
 
       case 'scale':
-        return `${baseClasses} ${show ? 'scale-100' : 'scale-95 opacity-0'}`;
+        return {
+          initial: { opacity: 0, scale: 0.95 },
+          animate: { opacity: 1, scale: 1 },
+          exit: { opacity: 0, scale: 0.95 },
+          transition: baseTransition,
+        };
 
       case 'slide-up':
-        return `${baseClasses} ${
-          show ? 'translate-y-0' : 'translate-y-4 opacity-0'
-        }`;
+        return {
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          exit: { opacity: 0, y: -20 },
+          transition: baseTransition,
+        };
 
       case 'slide-down':
-        return `${baseClasses} ${
-          show ? 'translate-y-0' : '-translate-y-4 opacity-0'
-        }`;
+        return {
+          initial: { opacity: 0, y: -20 },
+          animate: { opacity: 1, y: 0 },
+          exit: { opacity: 0, y: 20 },
+          transition: baseTransition,
+        };
 
       default:
-        return baseClasses;
+        return {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: baseTransition,
+        };
     }
   };
 
+  const animationProps = getAnimationProps();
+
   return (
-    <div
-      className={`${getTransitionClasses()} ${className}`}
-      style={{
-        transitionDuration: `${duration}ms`,
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
+    <AnimatePresence mode="wait" onExitComplete={onExit}>
+      {show && (
+        <motion.div
+          className={className}
+          {...animationProps}
+          onAnimationStart={onEnter}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -103,5 +117,48 @@ export const SlideUpTransition: React.FC<Omit<TransitionProps, 'type'>> = (
 export const SlideDownTransition: React.FC<Omit<TransitionProps, 'type'>> = (
   props
 ) => <Transition {...props} type="slide-down" />;
+
+// Componente para animaciones de lista
+export const ListTransition: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = '' }) => (
+  <motion.div
+    className={className}
+    initial="hidden"
+    animate="visible"
+    variants={{
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.1,
+          delayChildren: 0.2,
+        },
+      },
+    }}
+  >
+    {children}
+  </motion.div>
+);
+
+// Componente para animaciones de página
+export const PageTransition: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = '' }) => (
+  <motion.div
+    className={className}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{
+      duration: 0.5,
+      ease: [0.4, 0, 0.2, 1],
+    }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default Transition;

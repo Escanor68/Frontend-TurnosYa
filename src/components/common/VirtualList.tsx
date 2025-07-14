@@ -1,37 +1,41 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useVirtualization } from '../../hooks/useVirtualization';
 
 interface VirtualListProps<T> {
   items: T[];
   itemHeight: number;
   containerHeight: number;
-  renderItem: (item: T, index: number) => React.ReactNode;
   overscan?: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
   className?: string;
+  onScroll?: (scrollTop: number) => void;
 }
 
-const VirtualList = <T,>({
+function VirtualList<T>({
   items,
   itemHeight,
   containerHeight,
+  overscan = 5,
   renderItem,
-  overscan = 3,
   className = '',
-}: VirtualListProps<T>) => {
+  onScroll,
+}: VirtualListProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { virtualItems, totalHeight, setScrollTop } = useVirtualization(
-    items.length,
-    {
-      itemHeight,
-      containerHeight,
-      overscan,
-    }
-  );
+  const { virtualItems, totalHeight, setScrollTop } = useVirtualization(items, {
+    itemHeight,
+    containerHeight,
+    overscan,
+  });
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(event.currentTarget.scrollTop);
-  };
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLDivElement;
+      setScrollTop(target.scrollTop);
+      onScroll?.(target.scrollTop);
+    },
+    [setScrollTop, onScroll]
+  );
 
   return (
     <div
@@ -41,22 +45,29 @@ const VirtualList = <T,>({
       onScroll={handleScroll}
     >
       <div style={{ height: totalHeight, position: 'relative' }}>
-        {virtualItems.map((virtualItem) => (
-          <div
-            key={virtualItem.index}
-            style={{
-              position: 'absolute',
-              top: virtualItem.offsetTop,
-              height: virtualItem.height,
-              width: '100%',
-            }}
-          >
-            {renderItem(items[virtualItem.index], virtualItem.index)}
-          </div>
-        ))}
+        {virtualItems.map((virtualItem) => {
+          const item = items[virtualItem.index];
+          if (!item) return null;
+
+          return (
+            <div
+              key={virtualItem.index}
+              style={{
+                position: 'absolute',
+                top: virtualItem.offsetTop,
+                height: virtualItem.height,
+                width: '100%',
+              }}
+            >
+              {renderItem(item, virtualItem.index)}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
-};
+}
 
-export default VirtualList;
+export default React.memo(VirtualList) as <T>(
+  props: VirtualListProps<T>
+) => React.ReactElement;

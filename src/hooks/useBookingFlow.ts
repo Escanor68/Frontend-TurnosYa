@@ -11,6 +11,45 @@ interface BookingFlowState {
   error: Error | null;
 }
 
+// Estado inicial del formulario
+const getInitialFormData = (): BookingFormData => ({
+  fieldId: '',
+  userId: '',
+  date: '',
+  time: '',
+  players: 10,
+  contactName: '',
+  contactPhone: '',
+  contactEmail: '',
+  paymentMethod: 'mercadopago',
+  status: 'pending',
+  paymentDetails: {
+    cardNumber: '',
+    expiryDate: '',
+    cardholderName: '',
+  },
+  termsAccepted: false,
+  recurrence: 'none',
+  recurrenceCount: 4,
+  additionalServices: [],
+  additionalServicesNotes: '',
+  recurrenceExceptions: [],
+  price: 0,
+});
+
+// Función auxiliar para crear evento sintético
+const createSyntheticEvent = (): React.FormEvent =>
+  ({
+    preventDefault: () => {},
+  } as React.FormEvent);
+
+// Función auxiliar para manejo de errores
+const handleBookingError = (error: unknown): Error => {
+  return error instanceof Error
+    ? error
+    : new Error('Error al procesar la reserva');
+};
+
 export const useBookingFlow = () => {
   const navigate = useNavigate();
   const { handleSubmit: submitBooking } = useBooking();
@@ -18,82 +57,66 @@ export const useBookingFlow = () => {
 
   const [state, setState] = useState<BookingFlowState>({
     step: 1,
-    formData: {
-      fieldId: '',
-      userId: '',
-      date: '',
-      time: '',
-      players: 10,
-      contactName: '',
-      contactPhone: '',
-      contactEmail: '',
-      paymentMethod: 'mercadopago',
-      status: 'pending',
-      paymentDetails: {
-        cardNumber: '',
-        expiryDate: '',
-        cardholderName: '',
-      },
-      termsAccepted: false,
-      recurrence: 'none',
-      recurrenceCount: 4,
-      additionalServices: [],
-      additionalServicesNotes: '',
-      recurrenceExceptions: [],
-      price: 0,
-    },
+    formData: getInitialFormData(),
     isLoading: false,
     error: null,
   });
 
-  const updateFormData = useCallback((data: Partial<BookingFormData>) => {
-    setState((prev) => ({
-      ...prev,
-      formData: { ...prev.formData, ...data },
-    }));
+  // Función auxiliar para actualizar el estado
+  const updateState = useCallback((updates: Partial<BookingFlowState>) => {
+    setState((prev) => ({ ...prev, ...updates }));
   }, []);
+
+  // Función auxiliar para actualizar solo los datos del formulario
+  const updateFormData = useCallback(
+    (data: Partial<BookingFormData>) => {
+      updateState({
+        formData: { ...state.formData, ...data },
+      });
+    },
+    [state.formData, updateState]
+  );
+
+  // Función auxiliar para manejar la navegación entre pasos
+  const navigateStep = useCallback(
+    (direction: 'next' | 'prev') => {
+      updateState({
+        step: direction === 'next' ? state.step + 1 : state.step - 1,
+      });
+    },
+    [state.step, updateState]
+  );
 
   const nextStep = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      step: prev.step + 1,
-    }));
-  }, []);
+    navigateStep('next');
+  }, [navigateStep]);
 
   const prevStep = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      step: prev.step - 1,
-    }));
-  }, []);
+    navigateStep('prev');
+  }, [navigateStep]);
 
-  const handleSubmit = useCallback(async () => {
+  // Función auxiliar para procesar la reserva
+  const processBooking = useCallback(async () => {
     try {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      updateState({ isLoading: true, error: null });
 
-      // Crear la reserva usando el método handleSubmit del useBooking
-      // Crear un evento sintético para simular el submit del formulario
-      const syntheticEvent = {
-        preventDefault: () => {},
-      } as React.FormEvent;
-
+      const syntheticEvent = createSyntheticEvent();
       await submitBooking(syntheticEvent);
 
       showSuccess('Reserva creada exitosamente');
-
-      // Navegar a la página de reservas
       navigate('/bookings');
     } catch (error) {
-      const errorObj =
-        error instanceof Error
-          ? error
-          : new Error('Error al procesar la reserva');
-      setState((prev) => ({ ...prev, error: errorObj }));
+      const errorObj = handleBookingError(error);
+      updateState({ error: errorObj });
       showError(errorObj.message);
     } finally {
-      setState((prev) => ({ ...prev, isLoading: false }));
+      updateState({ isLoading: false });
     }
-  }, [submitBooking, showSuccess, showError, navigate]);
+  }, [submitBooking, showSuccess, showError, navigate, updateState]);
+
+  const handleSubmit = useCallback(async () => {
+    await processBooking();
+  }, [processBooking]);
 
   return {
     ...state,

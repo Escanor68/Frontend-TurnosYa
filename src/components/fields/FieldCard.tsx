@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { MapPin, Star, Clock, Users, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Skeleton from '../common/Skeleton';
 import { FadeTransition } from '../common/Transition';
+import OptimizedImage from '../common/OptimizedImage';
 
 interface FieldCardProps {
   id: string | number;
@@ -32,8 +33,21 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
     amenities,
     loading = false,
   }) => {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [imageError, setImageError] = useState(false);
+    const visibleAmenities = useMemo(() => {
+      return amenities.slice(0, 3);
+    }, [amenities]);
+
+    const hasMoreAmenities = useMemo(() => {
+      return amenities.length > 3;
+    }, [amenities]);
+
+    const amenitiesCount = useMemo(() => {
+      return amenities.length - 3;
+    }, [amenities]);
+
+    const formattedPrice = useMemo(() => {
+      return price.toLocaleString();
+    }, [price]);
 
     const handleLinkClick = useCallback(() => {
       // Analytics tracking could go here
@@ -41,13 +55,14 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
     }, [id]);
 
     const handleImageLoad = useCallback(() => {
-      setImageLoaded(true);
-    }, []);
+      // Analytics tracking could go here
+      console.log(`Image loaded for field ${id}`);
+    }, [id]);
 
     const handleImageError = useCallback(() => {
-      setImageError(true);
-      setImageLoaded(true);
-    }, []);
+      // Analytics tracking could go here
+      console.log(`Image error for field ${id}`);
+    }, [id]);
 
     if (loading) {
       return <Skeleton variant="card" className="h-96" />;
@@ -57,18 +72,18 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
       <FadeTransition show={true} delay={100}>
         <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
           <div className="relative h-48">
-            {!imageLoaded && !imageError && (
-              <Skeleton variant="rectangular" height={192} className="w-full" />
-            )}
-            <img
-              src={
-                imageError ? '/placeholder.svg' : image || '/placeholder.svg'
-              }
+            <OptimizedImage
+              src={image}
               alt={name}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              loading="lazy"
+              className="w-full h-full object-cover"
+              fallbackSrc="/placeholder.svg"
+              placeholder={
+                <Skeleton
+                  variant="rectangular"
+                  height={192}
+                  className="w-full"
+                />
+              }
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
@@ -89,7 +104,7 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
               <span>{location}</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
-              {amenities.slice(0, 3).map((amenity, index) => (
+              {visibleAmenities.map((amenity, index) => (
                 <span
                   key={index}
                   className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm"
@@ -97,9 +112,9 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
                   {amenity}
                 </span>
               ))}
-              {amenities.length > 3 && (
+              {hasMoreAmenities && (
                 <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                  +{amenities.length - 3}
+                  +{amenitiesCount}
                 </span>
               )}
             </div>
@@ -114,7 +129,7 @@ const FieldCard: React.FC<FieldCardProps> = React.memo(
               </div>
               <div className="flex items-center text-emerald-600 font-bold text-xl">
                 <DollarSign className="h-5 w-5 mr-1" />
-                <span>{price.toLocaleString()}</span>
+                <span>{formattedPrice}</span>
               </div>
             </div>
             <Link
