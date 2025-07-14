@@ -121,7 +121,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = React.memo(
         onError={handleError}
         // Optimizaciones adicionales
         decoding="async"
-        fetchPriority={priority ? 'high' : 'auto'}
+        {...(priority && { fetchpriority: 'high' })}
       />
     );
   }
