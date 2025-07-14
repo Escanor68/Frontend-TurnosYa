@@ -2,11 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import FieldCard from './FieldCard';
 import { SkeletonFieldCard } from '../common/Skeleton';
 import { FadeTransition } from '../common/Transition';
-import VirtualList from '../common/VirtualList';
 import {
   Grid3X3,
   List,
-  Filter,
   SortAsc,
   SortDesc,
   Search,
@@ -35,7 +33,6 @@ interface FieldListProps {
   error?: string | null;
   onRetry?: () => void;
   className?: string;
-  useVirtualization?: boolean;
 }
 
 type ViewMode = 'grid' | 'list';
@@ -48,7 +45,6 @@ const FieldList: React.FC<FieldListProps> = ({
   error = null,
   onRetry,
   className = '',
-  useVirtualization = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -71,7 +67,7 @@ const FieldList: React.FC<FieldListProps> = ({
 
   // Filter and sort fields
   const filteredAndSortedFields = useMemo(() => {
-    let filtered = fields.filter((field) => {
+    const filtered = fields.filter((field) => {
       const matchesSearch =
         field.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         field.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -207,6 +203,7 @@ const FieldList: React.FC<FieldListProps> = ({
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+              aria-label="Filtrar por tipo de cancha"
             >
               {fieldTypes.map((type) => (
                 <option key={type} value={type}>

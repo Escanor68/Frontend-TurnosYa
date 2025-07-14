@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useBooking } from '../../hooks/useBooking';
 import {
   ChevronLeft,
@@ -11,8 +12,9 @@ import {
   AlertCircle,
   CheckCircle,
   Loader2,
+  ArrowRight,
+  Info,
 } from 'lucide-react';
-import { cn } from '../../lib/utils';
 
 export const BookingForm: React.FC = React.memo(() => {
   const navigate = useNavigate();
@@ -96,195 +98,253 @@ export const BookingForm: React.FC = React.memo(() => {
   );
 
   const isFirstStep = currentStep === 1;
+  const isFormValid =
+    bookingData.date &&
+    bookingData.time &&
+    bookingData.players >= 2 &&
+    bookingData.players <= 22;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Detalles de la Reserva
-          </h2>
-          <span className="text-sm text-gray-500">Paso {currentStep} de 3</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / 3) * 100}%` }}
-          ></div>
-        </div>
-      </div>
-
-      {/* Error Message */}
-      {errors.submit && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
-          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <h3 className="text-sm font-medium text-red-800">Error</h3>
-            <p className="text-sm text-red-700 mt-1">{errors.submit}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-100"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Progress Indicator */}
+        <div className="card shadow-sm border-0 mb-4">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h2 className="h4 fw-bold text-dark mb-0">
+                Detalles de la Reserva
+              </h2>
+              <span className="badge bg-primary px-3 py-2">
+                Paso {currentStep} de 3
+              </span>
+            </div>
+            <div className="progress" style={{ height: '8px' }}>
+              <div
+                className="progress-bar bg-success"
+                style={{ width: `${(currentStep / 3) * 100}%` }}
+              ></div>
+            </div>
           </div>
         </div>
-      )}
 
-      <div className="space-y-6">
-        {/* Date Field */}
-        <div className="relative">
-          <label
-            htmlFor="date"
-            className="block text-sm font-semibold text-gray-700 mb-3"
+        {/* Error Message */}
+        {errors.submit && (
+          <motion.div
+            className="alert alert-danger d-flex align-items-start"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
           >
-            <Calendar className="w-4 h-4 inline mr-2" />
-            Fecha de la reserva
-          </label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={bookingData.date}
-            onChange={handleInputChangeLocal}
-            className={cn(
-              'w-full px-4 py-3 border rounded-xl text-base transition-all duration-200',
-              'focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500',
-              'placeholder-gray-400',
-              errors.date
-                ? 'border-red-300 bg-red-50 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 bg-white hover:border-gray-400'
-            )}
-            aria-label="Fecha de la reserva"
-            aria-describedby={errors.date ? 'date-error' : undefined}
-          />
-          {errors.date && (
-            <div
-              id="date-error"
-              className="mt-2 flex items-center space-x-2 text-red-600 text-sm"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>{errors.date}</span>
+            <AlertCircle className="me-2 mt-1" size={20} />
+            <div>
+              <h6 className="alert-heading fw-bold">Error</h6>
+              <p className="mb-0">{errors.submit}</p>
             </div>
-          )}
+          </motion.div>
+        )}
+
+        {/* Form Fields */}
+        <div className="card shadow-sm border-0">
+          <div className="card-body">
+            <div className="row g-4">
+              {/* Date Field */}
+              <div className="col-12">
+                <label htmlFor="date" className="form-label fw-bold">
+                  <Calendar className="me-2" size={16} />
+                  Fecha de la reserva
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={bookingData.date}
+                  onChange={handleInputChangeLocal}
+                  className={`form-control form-control-lg ${
+                    errors.date ? 'is-invalid' : ''
+                  }`}
+                  aria-label="Fecha de la reserva"
+                  aria-describedby={errors.date ? 'date-error' : undefined}
+                />
+                {errors.date && (
+                  <motion.div
+                    id="date-error"
+                    className="invalid-feedback d-block"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                  >
+                    <AlertCircle className="me-1" size={14} />
+                    {errors.date}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Time Field */}
+              <div className="col-12">
+                <label htmlFor="time" className="form-label fw-bold">
+                  <Clock className="me-2" size={16} />
+                  Hora de inicio
+                </label>
+                <input
+                  type="time"
+                  id="time"
+                  name="time"
+                  value={bookingData.time}
+                  onChange={handleInputChangeLocal}
+                  className={`form-control form-control-lg ${
+                    errors.time ? 'is-invalid' : ''
+                  }`}
+                  aria-label="Hora de inicio"
+                  aria-describedby={errors.time ? 'time-error' : undefined}
+                />
+                {errors.time && (
+                  <motion.div
+                    id="time-error"
+                    className="invalid-feedback d-block"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                  >
+                    <AlertCircle className="me-1" size={14} />
+                    {errors.time}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Players Field */}
+              <div className="col-12">
+                <label htmlFor="players" className="form-label fw-bold">
+                  <Users className="me-2" size={16} />
+                  Número de jugadores
+                </label>
+                <div className="input-group input-group-lg">
+                  <input
+                    type="number"
+                    id="players"
+                    name="players"
+                    min="2"
+                    max="22"
+                    value={bookingData.players}
+                    onChange={handleInputChangeLocal}
+                    className={`form-control ${
+                      errors.players ? 'is-invalid' : ''
+                    }`}
+                    aria-label="Número de jugadores"
+                    aria-describedby={
+                      errors.players ? 'players-error' : undefined
+                    }
+                  />
+                  <span className="input-group-text">jugadores</span>
+                </div>
+                {errors.players && (
+                  <motion.div
+                    id="players-error"
+                    className="invalid-feedback d-block"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                  >
+                    <AlertCircle className="me-1" size={14} />
+                    {errors.players}
+                  </motion.div>
+                )}
+                <div className="form-text d-flex align-items-center mt-2">
+                  <Info className="me-1" size={14} />
+                  Mínimo 2, máximo 22 jugadores
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Time Field */}
-        <div className="relative">
-          <label
-            htmlFor="time"
-            className="block text-sm font-semibold text-gray-700 mb-3"
-          >
-            <Clock className="w-4 h-4 inline mr-2" />
-            Hora de inicio
-          </label>
-          <input
-            type="time"
-            id="time"
-            name="time"
-            value={bookingData.time}
-            onChange={handleInputChangeLocal}
-            className={cn(
-              'w-full px-4 py-3 border rounded-xl text-base transition-all duration-200',
-              'focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500',
-              'placeholder-gray-400',
-              errors.time
-                ? 'border-red-300 bg-red-50 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 bg-white hover:border-gray-400'
-            )}
-            aria-label="Hora de inicio"
-            aria-describedby={errors.time ? 'time-error' : undefined}
-          />
-          {errors.time && (
-            <div
-              id="time-error"
-              className="mt-2 flex items-center space-x-2 text-red-600 text-sm"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>{errors.time}</span>
+        {/* Summary Card */}
+        <div className="card bg-light border-0">
+          <div className="card-body">
+            <h6 className="card-title fw-bold mb-3">
+              <CheckCircle className="me-2 text-success" size={16} />
+              Resumen de la Reserva
+            </h6>
+            <div className="row g-3">
+              <div className="col-md-4">
+                <div className="d-flex align-items-center">
+                  <Calendar className="me-2 text-muted" size={16} />
+                  <div>
+                    <small className="text-muted d-block">Fecha</small>
+                    <span className="fw-medium">
+                      {bookingData.date
+                        ? new Date(bookingData.date).toLocaleDateString('es-AR')
+                        : 'No seleccionada'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="d-flex align-items-center">
+                  <Clock className="me-2 text-muted" size={16} />
+                  <div>
+                    <small className="text-muted d-block">Hora</small>
+                    <span className="fw-medium">
+                      {bookingData.time || 'No seleccionada'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="d-flex align-items-center">
+                  <Users className="me-2 text-muted" size={16} />
+                  <div>
+                    <small className="text-muted d-block">Jugadores</small>
+                    <span className="fw-medium">
+                      {bookingData.players || 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Players Field */}
-        <div className="relative">
-          <label
-            htmlFor="players"
-            className="block text-sm font-semibold text-gray-700 mb-3"
+        {/* Action Buttons */}
+        <div className="d-flex flex-column flex-sm-row gap-3 pt-4 border-top">
+          <motion.button
+            type="button"
+            onClick={handlePrevStepClick}
+            disabled={isFirstStep || isSubmitting}
+            className={`btn btn-outline-secondary btn-lg flex-fill ${
+              isFirstStep ? 'opacity-50' : ''
+            }`}
+            whileHover={!isFirstStep ? { scale: 1.02 } : {}}
+            whileTap={!isFirstStep ? { scale: 0.98 } : {}}
           >
-            <Users className="w-4 h-4 inline mr-2" />
-            Número de jugadores
-          </label>
-          <input
-            type="number"
-            id="players"
-            name="players"
-            min="2"
-            max="22"
-            value={bookingData.players}
-            onChange={handleInputChangeLocal}
-            className={cn(
-              'w-full px-4 py-3 border rounded-xl text-base transition-all duration-200',
-              'focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500',
-              'placeholder-gray-400',
-              errors.players
-                ? 'border-red-300 bg-red-50 focus:ring-red-500 focus:border-red-500'
-                : 'border-gray-300 bg-white hover:border-gray-400'
+            <ChevronLeft className="me-2" size={20} />
+            Anterior
+          </motion.button>
+
+          <motion.button
+            type="submit"
+            disabled={isSubmitting || !isFormValid}
+            className={`btn btn-success btn-lg flex-fill ${
+              !isFormValid ? 'opacity-50' : ''
+            }`}
+            whileHover={isFormValid ? { scale: 1.02 } : {}}
+            whileTap={isFormValid ? { scale: 0.98 } : {}}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="me-2" size={20} />
+                Procesando...
+              </>
+            ) : (
+              <>
+                Continuar
+                <ArrowRight className="ms-2" size={20} />
+              </>
             )}
-            aria-label="Número de jugadores"
-            aria-describedby={errors.players ? 'players-error' : undefined}
-          />
-          {errors.players && (
-            <div
-              id="players-error"
-              className="mt-2 flex items-center space-x-2 text-red-600 text-sm"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>{errors.players}</span>
-            </div>
-          )}
-          <p className="mt-2 text-sm text-gray-500">
-            Mínimo 2, máximo 22 jugadores
-          </p>
+          </motion.button>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={handlePrevStepClick}
-          disabled={isFirstStep || isSubmitting}
-          className={cn(
-            'flex items-center justify-center px-6 py-3 border rounded-xl text-base font-medium transition-all duration-200',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            isFirstStep
-              ? 'border-gray-200 text-gray-400 bg-gray-50'
-              : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400'
-          )}
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Anterior
-        </button>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={cn(
-            'flex items-center justify-center px-6 py-3 border border-transparent rounded-xl text-base font-medium transition-all duration-200',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            'bg-emerald-600 text-white hover:bg-emerald-700 transform hover:scale-105 shadow-md hover:shadow-lg'
-          )}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Procesando...
-            </>
-          ) : (
-            <>
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Continuar
-            </>
-          )}
-        </button>
-      </div>
-    </form>
+      </form>
+    </motion.div>
   );
 });
 

@@ -3,13 +3,6 @@ import { Suspense } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Providers
-import { AuthProvider } from './context/AuthContext';
-import { UserProvider } from './context/UserContext';
-import { PaymentProvider } from './context/PaymentContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { AccessibilityProvider } from './components/common/AccessibilityProvider';
-
 // Layouts
 import Layout from './components/layout/Layout';
 import AdminLayout from './layouts/AdminLayout';
@@ -20,7 +13,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import RequireAuth from './components/auth/RequireAuth';
 import { PublicRoute } from './components/auth/PublicRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
-import ResourcePreloader from './components/common/ResourcePreloader';
+import { ScrollToTop } from './components/common/ScrollToTop';
 
 // Routes configuration
 import {
@@ -35,7 +28,7 @@ import { TOAST_CONFIG } from './config';
 
 // Componente de fallback para lazy loading
 const LazyFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
+  <div className="d-flex align-items-center justify-content-center min-vh-100">
     <LoadingSpinner size="lg" />
   </div>
 );
@@ -43,132 +36,88 @@ const LazyFallback = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <AccessibilityProvider>
-          <AuthProvider>
-            <UserProvider>
-              <PaymentProvider>
-                {/* Preload critical resources */}
-                <ResourcePreloader
-                  fonts={[
-                    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-                  ]}
-                  images={['/logo.svg', '/hero-image.jpg', '/placeholder.svg']}
-                  stylesheets={[
-                    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-                  ]}
-                />
+      {/* Scroll to top on route change */}
+      <ScrollToTop />
 
-                <ToastContainer {...TOAST_CONFIG} />
+      <Suspense fallback={<LazyFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          {publicRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.element ? (
+                  <PublicRoute>
+                    <Layout />
+                  </PublicRoute>
+                ) : null
+              }
+            >
+              {route.element && <Route index element={<route.element />} />}
+            </Route>
+          ))}
 
-                <Suspense fallback={<LazyFallback />}>
-                  <Routes>
-                    {/* Public Routes */}
-                    {publicRoutes.map((route) => (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          route.element ? (
-                            <PublicRoute>
-                              <Layout />
-                            </PublicRoute>
-                          ) : null
-                        }
-                      >
-                        {route.element && (
-                          <Route index element={<route.element />} />
-                        )}
-                      </Route>
-                    ))}
+          {/* Admin Routes */}
+          {adminRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<RequireAuth allowedRoles={route.allowedRoles || []} />}
+            >
+              <Route element={<AdminLayout />}>
+                {route.children?.map((childRoute) => (
+                  <Route
+                    key={childRoute.path}
+                    path={childRoute.path}
+                    element={childRoute.element ? <childRoute.element /> : null}
+                  />
+                ))}
+              </Route>
+            </Route>
+          ))}
 
-                    {/* Admin Routes */}
-                    {adminRoutes.map((route) => (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          <RequireAuth
-                            allowedRoles={route.allowedRoles || []}
-                          />
-                        }
-                      >
-                        <Route element={<AdminLayout />}>
-                          {route.children?.map((childRoute) => (
-                            <Route
-                              key={childRoute.path}
-                              path={childRoute.path}
-                              element={
-                                childRoute.element ? (
-                                  <childRoute.element />
-                                ) : null
-                              }
-                            />
-                          ))}
-                        </Route>
-                      </Route>
-                    ))}
+          {/* Owner Routes */}
+          {ownerRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<RequireAuth allowedRoles={route.allowedRoles || []} />}
+            >
+              <Route element={<MainLayout />}>
+                {route.children?.map((childRoute) => (
+                  <Route
+                    key={childRoute.path}
+                    path={childRoute.path}
+                    element={childRoute.element ? <childRoute.element /> : null}
+                  />
+                ))}
+              </Route>
+            </Route>
+          ))}
 
-                    {/* Owner Routes */}
-                    {ownerRoutes.map((route) => (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          <RequireAuth
-                            allowedRoles={route.allowedRoles || []}
-                          />
-                        }
-                      >
-                        <Route element={<MainLayout />}>
-                          {route.children?.map((childRoute) => (
-                            <Route
-                              key={childRoute.path}
-                              path={childRoute.path}
-                              element={
-                                childRoute.element ? (
-                                  <childRoute.element />
-                                ) : null
-                              }
-                            />
-                          ))}
-                        </Route>
-                      </Route>
-                    ))}
+          {/* Player Routes */}
+          {playerRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<RequireAuth allowedRoles={route.allowedRoles || []} />}
+            >
+              <Route element={<MainLayout />}>
+                {route.children?.map((childRoute) => (
+                  <Route
+                    key={childRoute.path}
+                    path={childRoute.path}
+                    element={childRoute.element ? <childRoute.element /> : null}
+                  />
+                ))}
+              </Route>
+            </Route>
+          ))}
+        </Routes>
+      </Suspense>
 
-                    {/* Player Routes */}
-                    {playerRoutes.map((route) => (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          <RequireAuth
-                            allowedRoles={route.allowedRoles || []}
-                          />
-                        }
-                      >
-                        <Route element={<MainLayout />}>
-                          {route.children?.map((childRoute) => (
-                            <Route
-                              key={childRoute.path}
-                              path={childRoute.path}
-                              element={
-                                childRoute.element ? (
-                                  <childRoute.element />
-                                ) : null
-                              }
-                            />
-                          ))}
-                        </Route>
-                      </Route>
-                    ))}
-                  </Routes>
-                </Suspense>
-              </PaymentProvider>
-            </UserProvider>
-          </AuthProvider>
-        </AccessibilityProvider>
-      </ThemeProvider>
+      <ToastContainer {...TOAST_CONFIG} />
     </ErrorBoundary>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   MapPin,
   Phone,
@@ -12,81 +13,92 @@ import {
   Shield,
   Clock,
   Users,
+  ArrowUp,
 } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-dark text-white mt-auto">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container py-5">
+        <div className="row g-4">
           {/* Company Info */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">TY</span>
+          <div className="col-lg-4 col-md-6">
+            <div className="d-flex align-items-center mb-4">
+              <div
+                className="bg-success text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                style={{ width: '40px', height: '40px' }}
+              >
+                <span className="fw-bold">TY</span>
               </div>
-              <span className="text-2xl font-bold text-white">TurnosYa</span>
+              <span className="h4 mb-0 fw-bold">TurnosYa</span>
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <p className="text-light mb-4">
               La forma más fácil y rápida de reservar tu cancha deportiva. Sin
               llamadas, sin esperas, todo desde tu dispositivo.
             </p>
 
             {/* Contact Info */}
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-300">
-                <MapPin className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm">Buenos Aires, Argentina</span>
+              <div className="d-flex align-items-center text-light">
+                <MapPin className="me-3 text-success" size={16} />
+                <span className="small">Buenos Aires, Argentina</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-300">
-                <Phone className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm">+54 11 1234-5678</span>
+              <div className="d-flex align-items-center text-light">
+                <Phone className="me-3 text-success" size={16} />
+                <span className="small">+54 11 1234-5678</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-300">
-                <Mail className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm">info@turnosya.com</span>
+              <div className="d-flex align-items-center text-light">
+                <Mail className="me-3 text-success" size={16} />
+                <span className="small">info@turnosya.com</span>
               </div>
             </div>
           </div>
 
           {/* Services */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Users className="w-5 h-5 mr-2 text-emerald-400" />
+          <div className="col-lg-2 col-md-6">
+            <h5 className="fw-bold mb-4 d-flex align-items-center">
+              <Users className="me-2 text-success" size={18} />
               Servicios
-            </h3>
-            <ul className="space-y-3">
-              <li>
+            </h5>
+            <ul className="list-unstyled">
+              <li className="mb-2">
                 <Link
                   to="/fields"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Buscar Canchas
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/register"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Registrar Cancha
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/booking"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Hacer Reserva
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/favorites"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Mis Favoritos
                 </Link>
@@ -95,40 +107,40 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Shield className="w-5 h-5 mr-2 text-emerald-400" />
+          <div className="col-lg-2 col-md-6">
+            <h5 className="fw-bold mb-4 d-flex align-items-center">
+              <Shield className="me-2 text-success" size={18} />
               Soporte
-            </h3>
-            <ul className="space-y-3">
-              <li>
+            </h5>
+            <ul className="list-unstyled">
+              <li className="mb-2">
                 <Link
                   to="/help"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Centro de Ayuda
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/contact"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Contacto
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/faq"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Preguntas Frecuentes
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/terms"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Términos y Condiciones
                 </Link>
@@ -137,136 +149,168 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Company */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-emerald-400" />
+          <div className="col-lg-2 col-md-6">
+            <h5 className="fw-bold mb-4 d-flex align-items-center">
+              <Clock className="me-2 text-success" size={18} />
               Empresa
-            </h3>
-            <ul className="space-y-3">
-              <li>
+            </h5>
+            <ul className="list-unstyled">
+              <li className="mb-2">
                 <Link
                   to="/about"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Sobre Nosotros
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/careers"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Carreras
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/press"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Prensa
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   to="/partners"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors duration-200 text-sm"
+                  className="text-light text-decoration-none hover:text-success transition-colors"
                 >
                   Socios
                 </Link>
               </li>
             </ul>
           </div>
+
+          {/* Newsletter */}
+          <div className="col-lg-2 col-md-6">
+            <h5 className="fw-bold mb-4">Newsletter</h5>
+            <p className="text-light small mb-3">
+              Suscríbete para recibir novedades y ofertas especiales.
+            </p>
+            <div className="input-group mb-3">
+              <input
+                type="email"
+                className="form-control form-control-sm"
+                placeholder="tu@email.com"
+                aria-label="Email para newsletter"
+              />
+              <button
+                className="btn btn-success btn-sm"
+                aria-label="Suscribirse al newsletter"
+              >
+                <Mail size={14} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Social Media & Newsletter */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            {/* Social Media */}
-            <div className="flex space-x-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors duration-200"
-                aria-label="Síguenos en Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors duration-200"
-                aria-label="Síguenos en Twitter"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors duration-200"
-                aria-label="Síguenos en Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors duration-200"
-                aria-label="Síguenos en LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
-
-            {/* Newsletter */}
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-300">
-                Suscríbete a nuestro newsletter:
-              </span>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="tu@email.com"
-                  className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-                  aria-label="Email para newsletter"
-                />
-                <button className="px-4 py-2 bg-emerald-600 text-white rounded-r-lg hover:bg-emerald-700 transition-colors duration-200 text-sm">
-                  Suscribir
-                </button>
+        {/* Social Media */}
+        <div className="border-top border-secondary pt-4 mt-4">
+          <div className="row align-items-center">
+            <div className="col-md-6">
+              <div className="d-flex gap-3">
+                <motion.a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-light btn-sm rounded-circle"
+                  aria-label="Síguenos en Facebook"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Facebook size={16} />
+                </motion.a>
+                <motion.a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-light btn-sm rounded-circle"
+                  aria-label="Síguenos en Twitter"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Twitter size={16} />
+                </motion.a>
+                <motion.a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-light btn-sm rounded-circle"
+                  aria-label="Síguenos en Instagram"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Instagram size={16} />
+                </motion.a>
+                <motion.a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-light btn-sm rounded-circle"
+                  aria-label="Síguenos en LinkedIn"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Linkedin size={16} />
+                </motion.a>
               </div>
+            </div>
+            <div className="col-md-6 text-md-end mt-3 mt-md-0">
+              <motion.button
+                onClick={scrollToTop}
+                className="btn btn-outline-light btn-sm d-flex align-items-center gap-1 ms-auto"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ArrowUp size={16} />
+                Volver arriba
+              </motion.button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="bg-gray-950 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-sm">
-              &copy; {currentYear} TurnosYa. Todos los derechos reservados.
-            </p>
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <Link
-                to="/privacy"
-                className="hover:text-emerald-400 transition-colors duration-200"
-              >
-                Política de Privacidad
-              </Link>
-              <Link
-                to="/cookies"
-                className="hover:text-emerald-400 transition-colors duration-200"
-              >
-                Política de Cookies
-              </Link>
-              <div className="flex items-center space-x-1">
-                <span>Hecho con</span>
-                <Heart className="w-4 h-4 text-red-500 fill-current" />
-                <span>en Argentina</span>
+      <div className="bg-black py-3">
+        <div className="container">
+          <div className="row align-items-center">
+            <div className="col-md-6">
+              <p className="text-muted small mb-0">
+                &copy; {currentYear} TurnosYa. Todos los derechos reservados.
+              </p>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex justify-content-md-end gap-4 text-muted small">
+                <Link
+                  to="/privacy"
+                  className="text-decoration-none hover:text-success transition-colors"
+                >
+                  Política de Privacidad
+                </Link>
+                <Link
+                  to="/cookies"
+                  className="text-decoration-none hover:text-success transition-colors"
+                >
+                  Política de Cookies
+                </Link>
+                <div className="d-flex align-items-center gap-1">
+                  <span>Hecho con</span>
+                  <Heart
+                    className="text-danger"
+                    size={14}
+                    fill="currentColor"
+                  />
+                  <span>en Argentina</span>
+                </div>
               </div>
             </div>
           </div>

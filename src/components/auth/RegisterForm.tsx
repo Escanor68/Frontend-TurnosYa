@@ -1,11 +1,21 @@
 import { ChangeEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Building,
+  MapPin,
+  AlertCircle,
+  Shield,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useFormValidation, formSchemas } from '../../hooks/useFormValidation';
 import { useNotification } from '../../hooks/useNotification';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Link } from '../ui/Link';
 import { UserRole } from '../../types/user';
 import { RoleSelector } from './RoleSelector';
 
@@ -43,6 +53,9 @@ export const RegisterForm = () => {
   const { register } = useAuth();
   const { showSuccess, handleApiError } = useNotification();
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
 
   const {
     values,
@@ -58,11 +71,12 @@ export const RegisterForm = () => {
     validationSchema: formSchemas.register,
     onSubmit: async (values: RegisterFormData) => {
       try {
+        setIsValidating(true);
         const registerData = {
           name: values.firstName.trim(),
           surname: values.lastName.trim(),
           email: values.email.trim(),
-          password: values.password, // No se trimea la contraseña
+          password: values.password,
           phone: values.phone.trim(),
           role: values.role,
           // Incluir datos específicos del negocio si es dueño
@@ -75,10 +89,12 @@ export const RegisterForm = () => {
         };
 
         await register(registerData);
-        showSuccess('Registro exitoso');
+        showSuccess('¡Registro exitoso! Bienvenido a TurnosYa.');
         navigate('/dashboard');
       } catch (error) {
         handleApiError(error);
+      } finally {
+        setIsValidating(false);
       }
     },
   });
@@ -91,10 +107,6 @@ export const RegisterForm = () => {
   const handleTextareaChange = async (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     await handleChange(name as keyof RegisterFormData, value);
-  };
-
-  const handleInputBlur = async (name: keyof RegisterFormData) => {
-    await handleBlur(name as keyof typeof values);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -111,209 +123,400 @@ export const RegisterForm = () => {
     (error) => error !== undefined && error !== ''
   );
 
+  const isFormValid =
+    values.firstName &&
+    values.lastName &&
+    values.email &&
+    values.password &&
+    values.confirmPassword &&
+    values.phone &&
+    !hasRealErrors;
+
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
-      {/* Selector de tipo de usuario */}
-      <RoleSelector
-        selectedRole={selectedRole}
-        onRoleChange={handleRoleChange}
-        disabled={isSubmitting}
-      />
-
-      {/* Información personal */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">
-          Información Personal
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Input
-              type="text"
-              name="firstName"
-              value={values.firstName}
-              onChange={handleInputChange}
-              onBlur={() => handleInputBlur('firstName')}
-              placeholder="Nombre"
-              error={touched.firstName ? errors.firstName : undefined}
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <Input
-              type="text"
-              name="lastName"
-              value={values.lastName}
-              onChange={handleInputChange}
-              onBlur={() => handleInputBlur('lastName')}
-              placeholder="Apellido"
-              error={touched.lastName ? errors.lastName : undefined}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-2xl mx-auto"
+    >
+      <form onSubmit={handleFormSubmit} className="space-y-4">
+        {/* Selector de tipo de usuario */}
+        <div className="card shadow-sm border-0">
+          <div className="card-body">
+            <RoleSelector
+              selectedRole={selectedRole}
+              onRoleChange={handleRoleChange}
               disabled={isSubmitting}
             />
           </div>
         </div>
 
-        <div>
-          <Input
-            type="email"
-            name="email"
-            value={values.email}
-            onChange={handleInputChange}
-            onBlur={() => handleInputBlur('email')}
-            placeholder="Email"
-            error={touched.email ? errors.email : undefined}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div>
-          <Input
-            type="tel"
-            name="phone"
-            value={values.phone}
-            onChange={handleInputChange}
-            onBlur={() => handleInputBlur('phone')}
-            placeholder="Teléfono"
-            error={touched.phone ? errors.phone : undefined}
-            disabled={isSubmitting}
-          />
-        </div>
-      </div>
-
-      {/* Información del negocio (solo para dueños) */}
-      {selectedRole === 'owner' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">
-            Información del Negocio
-          </h3>
-          <div>
-            <Input
-              type="text"
-              name="businessName"
-              value={values.businessName || ''}
-              onChange={handleInputChange}
-              onBlur={() => handleInputBlur('businessName')}
-              placeholder="Nombre del negocio"
-              error={touched.businessName ? errors.businessName : undefined}
-              disabled={isSubmitting}
-            />
+        {/* Información personal */}
+        <motion.div
+          className="card shadow-sm border-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="card-header bg-primary text-white">
+            <h3 className="card-title mb-0">
+              <User className="me-2" size={20} />
+              Información Personal
+            </h3>
           </div>
-          <div>
-            <Input
-              type="text"
-              name="businessAddress"
-              value={values.businessAddress || ''}
-              onChange={handleInputChange}
-              onBlur={() => handleInputBlur('businessAddress')}
-              placeholder="Dirección del negocio"
-              error={
-                touched.businessAddress ? errors.businessAddress : undefined
-              }
-              disabled={isSubmitting}
-            />
+          <div className="card-body">
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label htmlFor="firstName" className="form-label fw-bold">
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={values.firstName}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('firstName')}
+                  className={`form-control ${
+                    touched.firstName && errors.firstName
+                      ? 'is-invalid'
+                      : touched.firstName && !errors.firstName
+                      ? 'is-valid'
+                      : ''
+                  }`}
+                  placeholder="Tu nombre"
+                  disabled={isSubmitting}
+                />
+                {touched.firstName && errors.firstName && (
+                  <div className="invalid-feedback d-block">
+                    <AlertCircle className="me-1" size={14} />
+                    {errors.firstName}
+                  </div>
+                )}
+              </div>
+              <div className="col-md-6 mb-3">
+                <label htmlFor="lastName" className="form-label fw-bold">
+                  Apellido
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={values.lastName}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('lastName')}
+                  className={`form-control ${
+                    touched.lastName && errors.lastName
+                      ? 'is-invalid'
+                      : touched.lastName && !errors.lastName
+                      ? 'is-valid'
+                      : ''
+                  }`}
+                  placeholder="Tu apellido"
+                  disabled={isSubmitting}
+                />
+                {touched.lastName && errors.lastName && (
+                  <div className="invalid-feedback d-block">
+                    <AlertCircle className="me-1" size={14} />
+                    {errors.lastName}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label fw-bold">
+                <Mail className="me-2" size={16} />
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={values.email}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur('email')}
+                className={`form-control ${
+                  touched.email && errors.email
+                    ? 'is-invalid'
+                    : touched.email && !errors.email
+                    ? 'is-valid'
+                    : ''
+                }`}
+                placeholder="tu@email.com"
+                disabled={isSubmitting}
+              />
+              {touched.email && errors.email && (
+                <div className="invalid-feedback d-block">
+                  <AlertCircle className="me-1" size={14} />
+                  {errors.email}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="phone" className="form-label fw-bold">
+                <Phone className="me-2" size={16} />
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={values.phone}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur('phone')}
+                className={`form-control ${
+                  touched.phone && errors.phone
+                    ? 'is-invalid'
+                    : touched.phone && !errors.phone
+                    ? 'is-valid'
+                    : ''
+                }`}
+                placeholder="+54 9 11 1234-5678"
+                disabled={isSubmitting}
+              />
+              {touched.phone && errors.phone && (
+                <div className="invalid-feedback d-block">
+                  <AlertCircle className="me-1" size={14} />
+                  {errors.phone}
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <Input
-              type="tel"
-              name="businessPhone"
-              value={values.businessPhone || ''}
-              onChange={handleInputChange}
-              onBlur={() => handleInputBlur('businessPhone')}
-              placeholder="Teléfono del negocio"
-              error={touched.businessPhone ? errors.businessPhone : undefined}
-              disabled={isSubmitting}
-            />
+        </motion.div>
+
+        {/* Información del negocio (solo para dueños) */}
+        <AnimatePresence>
+          {selectedRole === 'owner' && (
+            <motion.div
+              className="card shadow-sm border-0"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="card-header bg-success text-white">
+                <h3 className="card-title mb-0">
+                  <Building className="me-2" size={20} />
+                  Información del Negocio
+                </h3>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label htmlFor="businessName" className="form-label fw-bold">
+                    Nombre del Negocio
+                  </label>
+                  <input
+                    type="text"
+                    id="businessName"
+                    name="businessName"
+                    value={values.businessName || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('businessName')}
+                    className="form-control"
+                    placeholder="Nombre de tu cancha o complejo"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label
+                    htmlFor="businessAddress"
+                    className="form-label fw-bold"
+                  >
+                    <MapPin className="me-2" size={16} />
+                    Dirección del Negocio
+                  </label>
+                  <input
+                    type="text"
+                    id="businessAddress"
+                    name="businessAddress"
+                    value={values.businessAddress || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('businessAddress')}
+                    className="form-control"
+                    placeholder="Dirección completa"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="businessPhone" className="form-label fw-bold">
+                    <Phone className="me-2" size={16} />
+                    Teléfono del Negocio
+                  </label>
+                  <input
+                    type="tel"
+                    id="businessPhone"
+                    name="businessPhone"
+                    value={values.businessPhone || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('businessPhone')}
+                    className="form-control"
+                    placeholder="Teléfono del negocio"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label
+                    htmlFor="businessDescription"
+                    className="form-label fw-bold"
+                  >
+                    Descripción del Negocio
+                  </label>
+                  <textarea
+                    id="businessDescription"
+                    name="businessDescription"
+                    value={values.businessDescription || ''}
+                    onChange={handleTextareaChange}
+                    onBlur={() => handleBlur('businessDescription')}
+                    className="form-control"
+                    placeholder="Describe tu negocio, servicios, horarios, etc. (opcional)"
+                    rows={3}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Contraseñas */}
+        <motion.div
+          className="card shadow-sm border-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="card-header bg-warning text-dark">
+            <h3 className="card-title mb-0">
+              <Shield className="me-2" size={20} />
+              Seguridad
+            </h3>
           </div>
-          <div>
-            <textarea
-              name="businessDescription"
-              value={values.businessDescription || ''}
-              onChange={handleTextareaChange}
-              onBlur={() => handleInputBlur('businessDescription')}
-              placeholder="Descripción del negocio (opcional)"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                touched.businessDescription && errors.businessDescription
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              }`}
-              rows={3}
-              disabled={isSubmitting}
-            />
-            {touched.businessDescription && errors.businessDescription && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.businessDescription}
-              </p>
-            )}
+          <div className="card-body">
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label fw-bold">
+                <Lock className="me-2" size={16} />
+                Contraseña
+              </label>
+              <div className="input-group">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={values.password}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('password')}
+                  className={`form-control ${
+                    touched.password && errors.password
+                      ? 'is-invalid'
+                      : touched.password && !errors.password
+                      ? 'is-valid'
+                      : ''
+                  }`}
+                  placeholder="Mínimo 8 caracteres"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isSubmitting}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {touched.password && errors.password && (
+                <div className="invalid-feedback d-block">
+                  <AlertCircle className="me-1" size={14} />
+                  {errors.password}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label fw-bold">
+                <Lock className="me-2" size={16} />
+                Confirmar Contraseña
+              </label>
+              <div className="input-group">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={values.confirmPassword}
+                  onChange={handleInputChange}
+                  onBlur={() => handleBlur('confirmPassword')}
+                  className={`form-control ${
+                    touched.confirmPassword && errors.confirmPassword
+                      ? 'is-invalid'
+                      : touched.confirmPassword && !errors.confirmPassword
+                      ? 'is-valid'
+                      : ''
+                  }`}
+                  placeholder="Repite tu contraseña"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isSubmitting}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
+                </button>
+              </div>
+              {touched.confirmPassword && errors.confirmPassword && (
+                <div className="invalid-feedback d-block">
+                  <AlertCircle className="me-1" size={14} />
+                  {errors.confirmPassword}
+                </div>
+              )}
+            </div>
           </div>
+        </motion.div>
+
+        {/* Submit Button */}
+        <motion.button
+          type="submit"
+          className={`btn btn-primary w-100 py-3 fw-bold ${
+            !isFormValid ? 'opacity-50' : ''
+          }`}
+          disabled={isSubmitting || !isFormValid}
+          whileHover={isFormValid ? { scale: 1.02 } : {}}
+          whileTap={isFormValid ? { scale: 0.98 } : {}}
+        >
+          {isSubmitting || isValidating ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Registrando...
+            </>
+          ) : (
+            'Crear Cuenta'
+          )}
+        </motion.button>
+
+        {/* Login Link */}
+        <div className="text-center mt-4">
+          <span className="text-muted">
+            ¿Ya tienes una cuenta?{' '}
+            <a
+              href="/login"
+              className="text-decoration-none fw-bold text-primary"
+            >
+              Inicia sesión aquí
+            </a>
+          </span>
         </div>
-      )}
-
-      {/* Contraseñas */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Seguridad</h3>
-        <div>
-          <Input
-            type="password"
-            name="password"
-            value={values.password}
-            onChange={handleInputChange}
-            onBlur={() => handleInputBlur('password')}
-            placeholder="Contraseña"
-            error={touched.password ? errors.password : undefined}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div>
-          <Input
-            type="password"
-            name="confirmPassword"
-            value={values.confirmPassword}
-            onChange={handleInputChange}
-            onBlur={() => handleInputBlur('confirmPassword')}
-            placeholder="Confirmar contraseña"
-            error={touched.confirmPassword ? errors.confirmPassword : undefined}
-            disabled={isSubmitting}
-          />
-        </div>
-      </div>
-
-      <Button
-        type="submit"
-        variant="primary"
-        className={`w-full ${
-          isSubmitting ||
-          !values.firstName ||
-          !values.lastName ||
-          !values.email ||
-          !values.password ||
-          !values.confirmPassword ||
-          !values.phone ||
-          hasRealErrors
-            ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400 focus-visible:ring-gray-400'
-            : ''
-        }`}
-        disabled={
-          isSubmitting ||
-          !values.firstName ||
-          !values.lastName ||
-          !values.email ||
-          !values.password ||
-          !values.confirmPassword ||
-          !values.phone ||
-          hasRealErrors
-        }
-      >
-        {isSubmitting ? 'Registrando...' : 'Registrarse'}
-      </Button>
-
-      <div className="text-center">
-        <span className="text-sm text-gray-600">
-          ¿Ya tienes una cuenta?{' '}
-          <Link to="/login" className="text-primary-600 hover:text-primary-700">
-            Inicia sesión
-          </Link>
-        </span>
-      </div>
-    </form>
+      </form>
+    </motion.div>
   );
 };
