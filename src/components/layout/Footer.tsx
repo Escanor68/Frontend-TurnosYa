@@ -50,15 +50,15 @@ const Footer: React.FC = () => {
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="d-flex align-items-center text-light">
-                <MapPin className="me-3 text-success" size={16} />
+                <MapPin className="me-3 text-success" size={18} />
                 <span className="small">Buenos Aires, Argentina</span>
               </div>
               <div className="d-flex align-items-center text-light">
-                <Phone className="me-3 text-success" size={16} />
+                <Phone className="me-3 text-success" size={18} />
                 <span className="small">+54 11 1234-5678</span>
               </div>
               <div className="d-flex align-items-center text-light">
-                <Mail className="me-3 text-success" size={16} />
+                <Mail className="me-3 text-success" size={18} />
                 <span className="small">info@turnosya.com</span>
               </div>
             </div>
@@ -207,7 +207,7 @@ const Footer: React.FC = () => {
                 className="btn btn-success btn-sm"
                 aria-label="Suscribirse al newsletter"
               >
-                <Mail size={14} />
+                <Mail size={16} />
               </button>
             </div>
           </div>
@@ -222,56 +222,60 @@ const Footer: React.FC = () => {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline-light btn-sm rounded-circle"
+                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '40px' }}
                   aria-label="Síguenos en Facebook"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Facebook size={16} />
+                  <Facebook size={18} />
                 </motion.a>
                 <motion.a
                   href="https://twitter.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline-light btn-sm rounded-circle"
+                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '40px' }}
                   aria-label="Síguenos en Twitter"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Twitter size={16} />
+                  <Twitter size={18} />
                 </motion.a>
                 <motion.a
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline-light btn-sm rounded-circle"
+                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '40px' }}
                   aria-label="Síguenos en Instagram"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Instagram size={16} />
+                  <Instagram size={18} />
                 </motion.a>
                 <motion.a
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-outline-light btn-sm rounded-circle"
+                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '40px' }}
                   aria-label="Síguenos en LinkedIn"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Linkedin size={16} />
+                  <Linkedin size={18} />
                 </motion.a>
               </div>
             </div>
             <div className="col-md-6 text-md-end mt-3 mt-md-0">
               <motion.button
                 onClick={scrollToTop}
-                className="btn btn-outline-light btn-sm d-flex align-items-center gap-1 ms-auto"
+                className="btn btn-outline-light d-flex align-items-center gap-2 ms-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <ArrowUp size={16} />
+                <ArrowUp size={18} />
                 Volver arriba
               </motion.button>
             </div>
@@ -306,7 +310,7 @@ const Footer: React.FC = () => {
                   <span>Hecho con</span>
                   <Heart
                     className="text-danger"
-                    size={14}
+                    size={16}
                     fill="currentColor"
                   />
                   <span>en Argentina</span>
