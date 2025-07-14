@@ -35,7 +35,7 @@ export const LoginForm = () => {
     onSubmit: async (values: LoginFormData) => {
       try {
         await login({
-          email: values.email,
+          email: values.email.trim(),
           password: values.password,
         });
         showSuccess('Inicio de sesión exitoso');
@@ -100,8 +100,18 @@ export const LoginForm = () => {
       <Button
         type="submit"
         variant="primary"
-        className="w-full"
-        disabled={isSubmitting}
+        className={`w-full ${
+          !values.email || !values.password || errors.email || errors.password
+            ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400 focus-visible:ring-gray-400'
+            : ''
+        }`}
+        disabled={
+          isSubmitting ||
+          !values.email ||
+          !values.password ||
+          !!errors.email ||
+          !!errors.password
+        }
       >
         {isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </Button>

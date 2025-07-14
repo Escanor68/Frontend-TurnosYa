@@ -36,7 +36,7 @@ const PaymentForm = ({
   const handlePayment = async () => {
     try {
       setLoading(true);
-      const { initPoint } = await createPaymentPreference(bookingId);
+      const { initPoint } = await createPaymentPreference(bookingId, amount);
       window.location.href = initPoint;
     } catch (error) {
       const message =

@@ -3,11 +3,16 @@ import { toast } from 'react-toastify';
 import {
   Payment,
   PaymentStatus,
+  PaymentMethod,
   Invoice,
   PaymentReport,
   PaymentPreference,
 } from '../types/payment';
-import { paymentService } from '../services/payment.service';
+import {
+  backMPService,
+  BackMPPaymentPreference,
+  BackMPRefundStatus,
+} from '../services/backmp.service';
 
 interface PaymentContextType {
   paymentHistory: PaymentReport[];
@@ -23,7 +28,10 @@ interface PaymentContextType {
   sendInvoiceEmail: (paymentId: string) => Promise<void>;
   requestRefund: (paymentId: string, reason: string) => Promise<void>;
   downloadInvoice: (paymentId: string) => Promise<void>;
-  createPaymentPreference: (bookingId: string) => Promise<PaymentPreference>;
+  createPaymentPreference: (
+    bookingId: string,
+    amount: number
+  ) => Promise<PaymentPreference>;
   loading: boolean;
   fetchPaymentHistory: () => Promise<void>;
 }
@@ -44,15 +52,16 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const invoiceList = await paymentService.getInvoices();
-      const history: PaymentReport[] = invoiceList.map((invoice) => ({
-        id: invoice.id,
-        bookingId: invoice.bookingId,
-        amount: invoice.amount,
-        currency: invoice.currency,
-        status: invoice.status as PaymentStatus,
-        date: invoice.date,
-        method: invoice.paymentMethod,
+      // BackMP no tiene getInvoices, usamos getUserRefunds como alternativa
+      const refunds = await backMPService.getUserRefunds();
+      const history: PaymentReport[] = refunds.map((refund) => ({
+        id: refund.id,
+        bookingId: refund.paymentId,
+        amount: refund.amount,
+        currency: 'ARS',
+        status: 'refunded' as PaymentStatus,
+        date: refund.createdAt,
+        method: 'mercadopago' as PaymentMethod,
       }));
       setPaymentHistory(history);
     } catch (error) {
@@ -70,9 +79,9 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
   const createPayment = async (data: Payment) => {
     setIsLoading(true);
     try {
-      await paymentService.createPayment(data);
+      // BackMP maneja pagos a través de preferencias, no creación directa
+      toast.info('Los pagos se procesan a través de MercadoPago');
       await fetchPaymentHistory();
-      toast.success('Pago creado correctamente');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Error al crear el pago';
@@ -86,9 +95,10 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
   const processPayment = async (paymentId: string) => {
     setIsLoading(true);
     try {
-      await paymentService.processPayment(paymentId);
+      // BackMP no tiene processPayment, verificamos el estado
+      await backMPService.getPaymentStatus(paymentId);
       await fetchPaymentHistory();
-      toast.success('Pago procesado correctamente');
+      toast.success('Estado del pago verificado correctamente');
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Error al procesar el pago';
@@ -102,7 +112,7 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      return await paymentService.getPaymentStatus(paymentId);
+      return await backMPService.getPaymentStatus(paymentId);
     } catch (error) {
       const message =
         error instanceof Error
@@ -118,7 +128,31 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
   const getInvoices = async () => {
     setIsLoading(true);
     try {
-      const invoiceList = await paymentService.getInvoices();
+      // BackMP no tiene getInvoices, usamos getUserRefunds
+      const refunds = await backMPService.getUserRefunds();
+      // Convertir refunds a formato de invoices para compatibilidad
+      const invoiceList: Invoice[] = refunds.map((refund) => ({
+        id: refund.id,
+        bookingId: refund.paymentId,
+        number: `REF-${refund.id}`,
+        date: refund.createdAt,
+        amount: refund.amount,
+        currency: 'ARS',
+        status: 'paid' as const,
+        paymentMethod: 'mercadopago' as PaymentMethod,
+        items: [
+          {
+            description: 'Reembolso',
+            quantity: 1,
+            unitPrice: refund.amount,
+            total: refund.amount,
+          },
+        ],
+        customer: {
+          name: 'Usuario',
+          email: 'usuario@example.com',
+        },
+      }));
       setInvoices(invoiceList);
     } catch (error) {
       const message =
@@ -134,7 +168,30 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getInvoice = async (invoiceId: string): Promise<Invoice> => {
     try {
-      return await paymentService.getInvoiceById(invoiceId);
+      // BackMP no tiene getInvoiceById, usamos getRefundStatus
+      const refund = await backMPService.getRefundStatus(invoiceId);
+      return {
+        id: refund.id,
+        bookingId: refund.paymentId,
+        number: `REF-${refund.id}`,
+        date: refund.createdAt,
+        amount: refund.amount,
+        currency: 'ARS',
+        status: 'paid' as const,
+        paymentMethod: 'mercadopago' as PaymentMethod,
+        items: [
+          {
+            description: 'Reembolso',
+            quantity: 1,
+            unitPrice: refund.amount,
+            total: refund.amount,
+          },
+        ],
+        customer: {
+          name: 'Usuario',
+          email: 'usuario@example.com',
+        },
+      };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Error al obtener la factura';
@@ -148,8 +205,9 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
       setError(null);
       try {
-        await paymentService.requestRefund(paymentId, reason);
+        await backMPService.requestRefund({ paymentId, reason });
         await fetchPaymentHistory();
+        toast.success('Reembolso solicitado correctamente');
       } catch (error) {
         const message =
           error instanceof Error
@@ -168,7 +226,17 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      await paymentService.getInvoice(paymentId);
+      const blob = await backMPService.generateInvoice(paymentId);
+      // Crear URL para descarga
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${paymentId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Factura descargada correctamente');
     } catch (error) {
       const message =
         error instanceof Error
@@ -185,7 +253,8 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     setError(null);
     try {
-      await paymentService.sendInvoiceEmail(paymentId);
+      await backMPService.sendInvoiceEmail(paymentId);
+      toast.success('Factura enviada por email correctamente');
     } catch (error) {
       const message =
         error instanceof Error
@@ -198,32 +267,25 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const createPaymentPreference = useCallback(async (bookingId: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const preference: PaymentPreference = {
-        id: '',
-        bookingId,
-        amount: 0,
-        currency: 'ARS',
-        initPoint: '',
-        sandboxInitPoint: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return await paymentService.createPaymentPreference(preference);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Error al crear la preferencia de pago';
-      setError(message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const createPaymentPreference = useCallback(
+    async (bookingId: string, amount: number) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        return await backMPService.createPaymentPreference(bookingId, amount);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Error al crear la preferencia de pago';
+        setError(message);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   const value = {
     paymentHistory,

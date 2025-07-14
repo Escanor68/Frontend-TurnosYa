@@ -78,6 +78,11 @@ export const formSchemas = {
       password: validationSchemas.password,
       confirmPassword: validationSchemas.confirmPassword,
       phone: validationSchemas.phone,
+      role: z.enum(['player', 'owner', 'admin'] as const),
+      businessName: z.string().optional(),
+      businessAddress: z.string().optional(),
+      businessPhone: z.string().optional(),
+      businessDescription: z.string().optional(),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: 'Las contraseñas deben coincidir',

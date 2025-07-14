@@ -2,9 +2,15 @@
 export const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 export const FOOTBALL_API_URL =
-  import.meta.env.VITE_FOOTBALL_API_URL || 'http://localhost:3001';
+  import.meta.env.VITE_FOOTBALL_API_URL || '/api/v1';
 export const MERCADOPAGO_API_URL =
   import.meta.env.VITE_MERCADOPAGO_API_URL || 'https://api.mercadopago.com';
+
+// BackMP Configuration - Microservicio de pagos
+export const BACKMP_API_URL =
+  import.meta.env.VITE_BACKMP_API_URL || 'http://localhost:3003/api';
+export const BACKMP_SOCKET_URL =
+  import.meta.env.VITE_BACKMP_SOCKET_URL || 'http://localhost:3003';
 
 // App Configuration
 export const APP_NAME = 'TurnosYa';

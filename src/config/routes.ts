@@ -10,6 +10,8 @@ import { ProfilePage } from '../pages/profile/ProfilePage';
 import BookingsPage from '../pages/BookingsPage';
 import NotFoundPage from '../pages/404';
 import ForbiddenPage from '../pages/403';
+import FootballTest from '../components/FootballTest';
+import FootballAuthTest from '../components/FootballAuthTest';
 
 // Admin Pages
 import AdminDashboardPage from '../pages/owner/DashboardPage';
@@ -43,6 +45,14 @@ export const publicRoutes: RouteConfig[] = [
   {
     path: '/reset-password',
     element: ResetPasswordPage,
+  },
+  {
+    path: '/football-test',
+    element: FootballTest,
+  },
+  {
+    path: '/football-auth-test',
+    element: FootballAuthTest,
   },
   {
     path: '/403',

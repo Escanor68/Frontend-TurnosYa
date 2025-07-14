@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
+        // Ahora que tenemos el backend de usuarios configurado, podemos hacer la llamada
         const userData = await userService.getProfile();
         setUser(userData);
       } catch (error) {

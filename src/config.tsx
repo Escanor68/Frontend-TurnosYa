@@ -2,7 +2,7 @@
 export const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 export const FOOTBALL_API_URL =
-  import.meta.env.VITE_FOOTBALL_API_URL || 'http://localhost:3001';
+  import.meta.env.VITE_FOOTBALL_API_URL || '/api/v1';
 export const MERCADOPAGO_API_URL =
   import.meta.env.VITE_MERCADOPAGO_API_URL || 'https://api.mercadopago.com';
 
