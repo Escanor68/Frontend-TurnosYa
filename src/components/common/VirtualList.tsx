@@ -40,11 +40,11 @@ function VirtualList<T>({
   return (
     <div
       ref={containerRef}
-      className={`overflow-auto ${className}`}
+      className={`overflow-auto w-full ${className}`}
       style={{ height: containerHeight }}
       onScroll={handleScroll}
     >
-      <div style={{ height: totalHeight, position: 'relative' }}>
+      <div className="relative w-full" style={{ height: totalHeight }}>
         {virtualItems.map((virtualItem) => {
           const item = items[virtualItem.index];
           if (!item) return null;
@@ -52,11 +52,11 @@ function VirtualList<T>({
           return (
             <div
               key={virtualItem.index}
+              // Nota: top y height deben ser dinámicos para la virtualización eficiente
+              className="absolute left-0 w-full"
               style={{
-                position: 'absolute',
                 top: virtualItem.offsetTop,
                 height: virtualItem.height,
-                width: '100%',
               }}
             >
               {renderItem(item, virtualItem.index)}
