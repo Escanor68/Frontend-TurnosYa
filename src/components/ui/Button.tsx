@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../utils/cn';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'accent';
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -16,6 +16,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500',
       secondary:
         'bg-secondary-600 text-white hover:bg-secondary-700 focus-visible:ring-secondary-500',
+      accent:
+        'bg-accent text-white hover:bg-accent-dark focus-visible:ring-accent-dark',
       outline:
         'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
       ghost: 'hover:bg-accent hover:text-accent-foreground',

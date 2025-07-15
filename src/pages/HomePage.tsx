@@ -1,5 +1,4 @@
 import React from 'react';
-import ThemeToggle from '../components/common/ThemeToggle';
 import HeroSection from '../components/home/HeroSection';
 import StatsSection from '../components/home/StatsSection';
 import AboutSection from '../components/home/AboutSection';
@@ -10,7 +9,6 @@ import FeaturedCourts from '../components/home/FeaturedCourts';
 const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <ThemeToggle />
       <HeroSection />
       <StatsSection />
       <AboutSection />

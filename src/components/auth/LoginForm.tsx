@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Eye,
@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { useFormValidation, formSchemas } from '../../hooks/useFormValidation';
 import { useNotification } from '../../hooks/useNotification';
+import { Button } from '../ui/Button';
 
 interface LoginFormData {
   email: string;
@@ -90,11 +91,11 @@ export const LoginForm = () => {
               value={values.email}
               onChange={handleInputChange}
               onBlur={() => handleBlur('email')}
-              className={`form-control ${
+              className={`input-accessible ${
                 touched.email && errors.email
-                  ? 'is-invalid'
+                  ? 'border-red-500 focus:ring-red-500'
                   : touched.email && !errors.email
-                  ? 'is-valid'
+                  ? 'border-accent-600 focus:ring-accent-600'
                   : ''
               }`}
               placeholder="tu@email.com"
@@ -105,7 +106,7 @@ export const LoginForm = () => {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="input-group-text bg-success text-white border-success"
+                className="input-group-text bg-accent text-white border-accent-600"
               >
                 <CheckCircle size={16} />
               </motion.div>
@@ -115,7 +116,7 @@ export const LoginForm = () => {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="invalid-feedback d-block"
+              className="invalid-feedback d-block text-red-600"
             >
               <AlertCircle className="me-1" size={14} />
               {errors.email}
@@ -143,11 +144,11 @@ export const LoginForm = () => {
               value={values.password}
               onChange={handleInputChange}
               onBlur={() => handleBlur('password')}
-              className={`form-control ${
+              className={`input-accessible ${
                 touched.password && errors.password
-                  ? 'is-invalid'
+                  ? 'border-red-500 focus:ring-red-500'
                   : touched.password && !errors.password
-                  ? 'is-valid'
+                  ? 'border-accent-600 focus:ring-accent-600'
                   : ''
               }`}
               placeholder="Tu contraseña"
@@ -170,7 +171,7 @@ export const LoginForm = () => {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="invalid-feedback d-block"
+              className="invalid-feedback d-block text-red-600"
             >
               <AlertCircle className="me-1" size={14} />
               {errors.password}
@@ -183,23 +184,20 @@ export const LoginForm = () => {
 
         {/* Forgot Password Link */}
         <div className="d-flex justify-content-between align-items-center">
-          <a
-            href="/forgot-password"
-            className="text-decoration-none text-primary fw-medium"
+          <Link
+            to="/forgot-password"
+            className="link-accessible text-accent-700 hover:text-accent-dark fw-medium"
           >
             ¿Olvidaste tu contraseña?
-          </a>
+          </Link>
         </div>
 
         {/* Submit Button */}
-        <motion.button
+        <Button
           type="submit"
-          className={`btn btn-primary w-100 py-3 fw-bold ${
-            !isFormValid ? 'opacity-50' : ''
-          }`}
+          variant="accent"
+          className={`w-full py-3 fw-bold ${!isFormValid ? 'opacity-50' : ''}`}
           disabled={isSubmitting || !isFormValid}
-          whileHover={isFormValid ? { scale: 1.02 } : {}}
-          whileTap={isFormValid ? { scale: 0.98 } : {}}
         >
           {isSubmitting || isValidating ? (
             <>
@@ -213,18 +211,18 @@ export const LoginForm = () => {
           ) : (
             'Iniciar Sesión'
           )}
-        </motion.button>
+        </Button>
 
         {/* Register Link */}
         <div className="text-center mt-4">
           <span className="text-muted">
             ¿No tienes una cuenta?{' '}
-            <a
-              href="/register"
-              className="text-decoration-none fw-bold text-primary"
+            <Link
+              to="/register"
+              className="link-accessible fw-bold text-accent-700 hover:text-accent-dark"
             >
               Regístrate aquí
-            </a>
+            </Link>
           </span>
         </div>
       </form>
