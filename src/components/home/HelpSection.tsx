@@ -2,78 +2,74 @@ import React from 'react';
 
 const HelpSection: React.FC = () => {
   return (
-    <div id="ayuda" className="bg-white dark:bg-gray-800">
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+    <div id="ayuda" className="bg-white py-5">
+      <div className="container">
+        <h2 className="display-5 fw-bold text-success text-center mb-5">
           Centro de Ayuda
         </h2>
-
-        <div className="mt-12">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Para Jugadores */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Para Jugadores
-              </h3>
-              <dl className="mt-4 space-y-6">
-                <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
+        <div className="row justify-content-center g-4">
+          {/* Para Jugadores */}
+          <div className="col-md-6">
+            <div className="card h-100 shadow-sm border-0">
+              <div className="card-body">
+                <h3 className="h5 fw-bold text-primary mb-4">
+                  <i className="bi bi-person-fill me-2"></i>Para Jugadores
+                </h3>
+                <div className="mb-4">
+                  <h4 className="fw-semibold mb-1">
                     ¿Cómo reservo una cancha?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
+                  </h4>
+                  <p className="text-secondary mb-0">
                     Inicia sesión, selecciona la cancha y el horario deseado, y
                     confirma tu reserva. El proceso es simple y rápido.
-                  </dd>
+                  </p>
                 </div>
-                <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
+                <div className="mb-4">
+                  <h4 className="fw-semibold mb-1">
                     ¿Puedo cancelar mi reserva?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
+                  </h4>
+                  <p className="text-secondary mb-0">
                     Sí, puedes cancelar hasta 24 horas antes de tu turno sin
                     cargo alguno. Después de ese plazo, aplican políticas
                     específicas de cada establecimiento.
-                  </dd>
+                  </p>
                 </div>
                 <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
-                    ¿Cómo pago mi reserva?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
+                  <h4 className="fw-semibold mb-1">¿Cómo pago mi reserva?</h4>
+                  <p className="text-secondary mb-0">
                     Aceptamos múltiples métodos de pago seguros. Puedes pagar en
                     línea o en el establecimiento según la política de cada
                     cancha.
-                  </dd>
+                  </p>
                 </div>
-              </dl>
+              </div>
             </div>
-
-            {/* Para Dueños */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Para Dueños de Canchas
-              </h3>
-              <dl className="mt-4 space-y-6">
-                <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
-                    ¿Cómo agrego mi cancha?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
+          </div>
+          {/* Para Dueños */}
+          <div className="col-md-6">
+            <div className="card h-100 shadow-sm border-0">
+              <div className="card-body">
+                <h3 className="h5 fw-bold text-primary mb-4">
+                  <i className="bi bi-people-fill me-2"></i>Para Dueños de
+                  Canchas
+                </h3>
+                <div className="mb-4">
+                  <h4 className="fw-semibold mb-1">¿Cómo agrego mi cancha?</h4>
+                  <p className="text-secondary mb-0">
                     Regístrate como dueño, verifica tu cuenta y sigue el proceso
                     de alta de canchas. Nuestro equipo te guiará en cada paso.
-                  </dd>
+                  </p>
                 </div>
                 <div>
-                  <dt className="text-lg font-medium text-gray-900 dark:text-white">
+                  <h4 className="fw-semibold mb-1">
                     ¿Cómo gestiono las reservas?
-                  </dt>
-                  <dd className="mt-2 text-base text-gray-500 dark:text-gray-300">
+                  </h4>
+                  <p className="text-secondary mb-0">
                     Desde tu dashboard podrás ver y gestionar todas las
                     reservas, horarios, precios y disponibilidad en tiempo real.
-                  </dd>
+                  </p>
                 </div>
-                <div></div>
-              </dl>
+              </div>
             </div>
           </div>
         </div>

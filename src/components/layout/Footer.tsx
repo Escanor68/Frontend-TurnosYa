@@ -1,30 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Heart,
-  Shield,
-  Clock,
-  Users,
-  ArrowUp,
-} from 'lucide-react';
+import { Mail, Heart, Shield, Clock, Users } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
 
   return (
     <footer className="bg-dark text-white mt-auto">
@@ -50,15 +29,12 @@ const Footer: React.FC = () => {
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="d-flex align-items-center text-light">
-                <MapPin className="me-3 text-success" size={18} />
                 <span className="small">Buenos Aires, Argentina</span>
               </div>
               <div className="d-flex align-items-center text-light">
-                <Phone className="me-3 text-success" size={18} />
                 <span className="small">+54 11 1234-5678</span>
               </div>
               <div className="d-flex align-items-center text-light">
-                <Mail className="me-3 text-success" size={18} />
                 <span className="small">info@turnosya.com</span>
               </div>
             </div>
@@ -209,75 +185,6 @@ const Footer: React.FC = () => {
               >
                 <Mail size={16} />
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Media */}
-        <div className="border-top border-secondary pt-4 mt-4">
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <div className="d-flex gap-3">
-                <motion.a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                  style={{ width: '40px', height: '40px' }}
-                  aria-label="Síguenos en Facebook"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Facebook size={18} />
-                </motion.a>
-                <motion.a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                  style={{ width: '40px', height: '40px' }}
-                  aria-label="Síguenos en Twitter"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Twitter size={18} />
-                </motion.a>
-                <motion.a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                  style={{ width: '40px', height: '40px' }}
-                  aria-label="Síguenos en Instagram"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Instagram size={18} />
-                </motion.a>
-                <motion.a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                  style={{ width: '40px', height: '40px' }}
-                  aria-label="Síguenos en LinkedIn"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Linkedin size={18} />
-                </motion.a>
-              </div>
-            </div>
-            <div className="col-md-6 text-md-end mt-3 mt-md-0">
-              <motion.button
-                onClick={scrollToTop}
-                className="btn btn-outline-light d-flex align-items-center gap-2 ms-auto"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowUp size={18} />
-                Volver arriba
-              </motion.button>
             </div>
           </div>
         </div>
